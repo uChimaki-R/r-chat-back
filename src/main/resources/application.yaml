@@ -1,0 +1,9 @@
+server:
+  port: 8888
+  servlet:
+    context-path: /api
+project:
+  folder: D:/Code/JavaCode/r-chat/
+log:
+  root:
+    level: info
