@@ -1,5 +1,9 @@
 server:
   port: 8080
+  servlet:
+    context-path: /api
+    session:
+      timeout: PT60M
 spring:
   profiles:
     active: dev
@@ -9,6 +13,16 @@ spring:
       url: jdbc:mysql://${r.chat.datasource.host}:${r.chat.datasource.port}/${r.chat.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: ${r.chat.datasource.username}
       password: ${r.chat.datasource.password}
+  redis:
+    host: ${r.chat.redis.host}
+    port: ${r.chat.redis.port}
+    password: ${r.chat.redis.password}
+    database: ${r.chat.redis.database}
+  servlet:
+    multipart:
+      max-request-size: 15MB
+      max-file-size: 15MB
+
 logging:
   level:
     com:
