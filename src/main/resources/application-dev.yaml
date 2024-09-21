@@ -1,0 +1,9 @@
+r:
+  chat:
+    datasource:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      host: localhost
+      port: 3306
+      database: r_chat
+      username: root
+      password: 123456
