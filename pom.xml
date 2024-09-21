@@ -27,10 +27,10 @@
         <skipTests>true</skipTests>
 
         <springboot.version>2.6.1</springboot.version>
-        <swagger.version>1.5.22</swagger.version>
         <mybatisplus.version>3.5.1</mybatisplus.version>
-        <logback.version>1.2.10</logback.version>
         <mysql.version>8.0.23</mysql.version>
+        <lombok.version>1.18.32</lombok.version>
+        <druid.version>1.2.1</druid.version>
         <aspectjweaver.version>1.9.4</aspectjweaver.version>
         <okhttp3.version>3.2.0</okhttp3.version>
         <fastjson.version>1.2.66</fastjson.version>
@@ -46,16 +46,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -65,12 +55,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-        <!--swagger -->
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-core</artifactId>
-            <version>${swagger.version}</version>
+            <version>${lombok.version}</version>
         </dependency>
         <!--redis -->
         <dependency>
@@ -90,16 +75,10 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql.version}</version>
         </dependency>
-        <!-- 日志版本 -->
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>${druid.version}</version>
         </dependency>
         <!--切面-->
         <dependency>
