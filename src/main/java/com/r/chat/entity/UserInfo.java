@@ -1,13 +1,10 @@
 package com.r.chat.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -24,61 +21,74 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("user_info")
-@ApiModel(value="UserInfo对象", description="用户信息")
 public class UserInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "用户id")
+    /**
+     * 用户id
+     */
     @TableId(value = "user_id", type = IdType.AUTO)
     private String userId;
 
-    @ApiModelProperty(value = "邮箱")
-    @TableField("email")
+    /**
+     * 邮箱
+     */
     private String email;
 
-    @ApiModelProperty(value = "用户名")
-    @TableField("nick_name")
+    /**
+     * 用户名
+     */
     private String nickName;
 
-    @ApiModelProperty(value = "好友添加模式 0: 可以直接添加好友 1: 同意后添加好友")
-    @TableField("join_type")
+    /**
+     * 好友添加模式 0: 可以直接添加好友 1: 同意后添加好友
+     */
     private Integer joinType;
 
-    @ApiModelProperty(value = "性别 0：女 1：男")
-    @TableField("gender")
+    /**
+     * 性别 0：女 1：男
+     */
     private Integer gender;
 
-    @ApiModelProperty(value = "密码")
-    @TableField("password")
+    /**
+     * 密码
+     */
     private String password;
 
-    @ApiModelProperty(value = "个性签名")
-    @TableField("personal_signature")
+    /**
+     * 个性签名
+     */
     private String personalSignature;
 
-    @ApiModelProperty(value = "账号状态")
-    @TableField("status")
+    /**
+     * 账号状态
+     */
     private Integer status;
 
-    @ApiModelProperty(value = "创建时间")
-    @TableField("create_time")
+    /**
+     * 创建时间
+     */
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "最后登录时间")
-    @TableField("last_login_time")
+    /**
+     * 最后登录时间
+     */
     private LocalDateTime lastLoginTime;
 
-    @ApiModelProperty(value = "最后下线时间（使用bigint记录到毫秒时间）")
-    @TableField("last_off_time")
+    /**
+     * 最后下线时间（使用bigint记录到毫秒时间）
+     */
     private Long lastOffTime;
 
-    @ApiModelProperty(value = "地区名")
-    @TableField("area_name")
+    /**
+     * 地区名
+     */
     private String areaName;
 
-    @ApiModelProperty(value = "地区编号")
-    @TableField("area_code")
+    /**
+     * 地区编号
+     */
     private String areaCode;
 
 
