@@ -1,9 +1,24 @@
 server:
-  port: 8888
-  servlet:
-    context-path: /api
-project:
-  folder: D:/Code/JavaCode/r-chat/
-log:
-  root:
-    level: info
+  port: 8080
+spring:
+  profiles:
+    active: dev
+  datasource:
+    druid:
+      driver-class-name: ${r.chat.datasource.driver-class-name}
+      url: jdbc:mysql://${r.chat.datasource.host}:${r.chat.datasource.port}/${r.chat.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${r.chat.datasource.username}
+      password: ${r.chat.datasource.password}
+logging:
+  level:
+    com:
+      r:
+        chat:
+          mapper: debug
+          service: info
+          controller: info
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.r.chat.entity
+  configuration:
+    map-underscore-to-camel-case: true
