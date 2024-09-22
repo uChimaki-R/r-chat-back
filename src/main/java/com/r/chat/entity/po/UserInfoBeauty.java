@@ -1,4 +1,4 @@
-package com.r.chat.entity;
+package com.r.chat.entity.po;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
