@@ -1,6 +1,6 @@
 package com.r.chat.service.impl;
 
-import com.r.chat.entity.UserInfoBeauty;
+import com.r.chat.entity.po.UserInfoBeauty;
 import com.r.chat.mapper.UserInfoBeautyMapper;
 import com.r.chat.service.IUserInfoBeautyService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

@@ -1,6 +1,6 @@
 package com.r.chat.service;
 
-import com.r.chat.entity.UserInfo;
+import com.r.chat.entity.po.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

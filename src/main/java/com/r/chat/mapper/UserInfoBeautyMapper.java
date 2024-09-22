@@ -1,6 +1,6 @@
 package com.r.chat.mapper;
 
-import com.r.chat.entity.UserInfoBeauty;
+import com.r.chat.entity.po.UserInfoBeauty;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
