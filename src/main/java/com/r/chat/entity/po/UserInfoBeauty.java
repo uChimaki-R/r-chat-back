@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -20,6 +23,7 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("user_info_beauty")
+@Builder
 public class UserInfoBeauty implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -43,7 +47,5 @@ public class UserInfoBeauty implements Serializable {
     /**
      * 靓号使用状态 0：未使用 1：已使用
      */
-    private Integer status;
-
-
+    private UserInfoBeautyStatusEnum status; // 使用枚举类型接收
 }
