@@ -22,6 +22,11 @@ spring:
     multipart:
       max-request-size: 15MB
       max-file-size: 15MB
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
 
 logging:
   level:
