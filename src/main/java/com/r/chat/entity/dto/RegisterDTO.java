@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RegisterDTO {
-    private String checkCodeKey; // UID
+    private String checkCodeKey; // UUID唯一标识
     private String checkCode; // 发送的验证码结果
     private String email;
     private String password;
