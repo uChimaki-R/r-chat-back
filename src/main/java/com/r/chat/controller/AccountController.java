@@ -50,6 +50,7 @@ public class AccountController {
     @PostMapping("/register")
     public Result<String> register(@RequestBody RegisterDTO registerDTO) {
         // 先判断验证码是否正确
+        log.info("用户注册: {}", registerDTO);
         String checkCodeKey = registerDTO.getCheckCodeKey();
         String code = redisUtils.get(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
         if (code == null || !code.equals(registerDTO.getCheckCode())) {
