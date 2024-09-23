@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.r.chat.entity.enums.UserInfoStatusEnum;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -24,6 +26,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("user_info")
+@Builder
 public class UserInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -67,7 +70,7 @@ public class UserInfo implements Serializable {
     /**
      * 账号状态
      */
-    private Integer status;
+    private UserInfoStatusEnum status; // 使用枚举类型接收
 
     /**
      * 创建时间
