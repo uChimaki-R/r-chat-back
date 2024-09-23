@@ -1,5 +1,6 @@
 package com.r.chat.service;
 
+import com.r.chat.entity.dto.RegisterDTO;
 import com.r.chat.entity.po.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserInfoService extends IService<UserInfo> {
 
+    /**
+     * 注册账号
+     */
+    void register(RegisterDTO registerDTO);
 }
