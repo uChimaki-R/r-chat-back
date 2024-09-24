@@ -42,3 +42,8 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+r:
+  chat:
+    ws-port: ${r.chat.ws-port}
+    project-folder: ${r.chat.project-folder}
+    admin-emails: ${r.chat.admin-emails}
