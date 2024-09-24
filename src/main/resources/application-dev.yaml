@@ -12,3 +12,8 @@ r:
       port: 6379
       password: 123456
       database: 9
+    ws-port: 8081
+    project-folder: D:/Code/JavaCode/r-chat/r-chat-data
+    admin-emails:
+      - 1259864733@qq.com
+      - test@tt.com
