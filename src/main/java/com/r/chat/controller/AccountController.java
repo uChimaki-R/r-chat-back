@@ -1,7 +1,9 @@
 package com.r.chat.controller;
 
 import com.r.chat.entity.constants.Constants;
+import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
+import com.r.chat.entity.vo.UserInfoVO;
 import com.r.chat.exception.BusinessException;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.entity.vo.Result;
@@ -45,24 +47,42 @@ public class AccountController {
     }
 
     /**
+     * 校验验证码
+     *
+     * @param checkCodeKey UUID唯一标识
+     * @param checkCode    输入的验证码
+     */
+    private void checkCheckCode(String checkCodeKey, String checkCode) {
+        // 获取正确的验证码
+        String code = redisUtils.get(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
+        // 无论成功与否都要删除掉验证码，防止重复提交暴力破解验证码
+        redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
+        if (code == null || !code.equals(checkCode)) {
+            throw new BusinessException("验证码错误");
+        }
+    }
+
+    /**
      * 注册账号
      */
     @PostMapping("/register")
     public Result<String> register(@RequestBody RegisterDTO registerDTO) {
-        // 先判断验证码是否正确
         log.info("用户注册: {}", registerDTO);
-        String checkCodeKey = registerDTO.getCheckCodeKey();
-        String code = redisUtils.get(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
-        if (code == null || !code.equals(registerDTO.getCheckCode())) {
-            throw new BusinessException("验证码错误");
-        }
-        try {
-            // 注册账号
-            userInfoService.register(registerDTO);
-            return Result.success();
-        } finally {
-            // 无论成功与否都要删除掉验证码，防止重复提交暴力破解验证码
-            redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
-        }
+        // 先判断验证码是否正确
+        checkCheckCode(registerDTO.getCheckCodeKey(), registerDTO.getCheckCode());
+        // 注册账号
+        userInfoService.register(registerDTO);
+        return Result.success();
+    }
+
+
+    @GetMapping("/login")
+    public Result<UserInfoVO> login(@RequestBody LoginDTO loginDTO) {
+        log.info("用户登录: {}", loginDTO);
+        // 先判断验证码是否正确
+        checkCheckCode(loginDTO.getCheckCodeKey(), loginDTO.getCheckCode());
+        // 登陆账号
+        UserInfoVO userInfoVO = userInfoService.login(loginDTO);
+        return Result.success(userInfoVO);
     }
 }
