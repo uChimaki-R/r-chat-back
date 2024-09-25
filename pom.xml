@@ -27,7 +27,8 @@
         <skipTests>true</skipTests>
 
         <springboot.version>2.6.1</springboot.version>
-        <mybatisplus.version>3.5.1</mybatisplus.version>
+        <!--3.5.3 lambdaQuery().one() 会报错-->
+        <mybatisplus.version>3.5.3.1</mybatisplus.version>
         <mysql.version>8.0.23</mysql.version>
         <knif4j.version>2.0.8</knif4j.version>
         <lombok.version>1.18.32</lombok.version>
