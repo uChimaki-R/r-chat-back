@@ -10,7 +10,7 @@ public class MyStringUtils {
      * 随机获取一个id
      */
     private static String getRandomId(){
-        return RandomStringUtils.random(Constants.ID_LENGTH, false, true);
+        return RandomStringUtils.random(Constants.LENGTH_ID, false, true);
     }
 
     /**
@@ -26,10 +26,18 @@ public class MyStringUtils {
     public static String getRandomGroupId(){
         return IdPrefixEnum.GROUP.getPrefix() + getRandomId();
     }
+
     /**
      * 对字符串进行md5加密
      */
     public static String encodeMd5(String str){
         return DigestUtils.md5Hex(str);
+    }
+
+    /**
+     * 获取指定长度的随机字符序列
+     */
+    public static String getRandomChars(Integer length){
+        return RandomStringUtils.random(length, true, false);
     }
 }
