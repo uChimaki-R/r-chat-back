@@ -23,7 +23,6 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("user_info_beauty")
-@Builder
 public class UserInfoBeauty implements Serializable {
 
     private static final long serialVersionUID = 1L;
