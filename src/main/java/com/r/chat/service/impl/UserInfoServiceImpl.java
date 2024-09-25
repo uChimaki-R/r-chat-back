@@ -9,7 +9,7 @@ import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
 import com.r.chat.entity.enums.UserInfoStatusEnum;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.po.UserInfoBeauty;
-import com.r.chat.exception.BusinessException;
+import com.r.chat.exception.*;
 import com.r.chat.mapper.UserInfoBeautyMapper;
 import com.r.chat.mapper.UserInfoMapper;
 import com.r.chat.properties.AppProperties;
@@ -52,7 +52,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .one();
         if (userInfo != null) {
             log.warn("拒绝注册：邮箱 [{}] 已存在", userInfo.getEmail());
-            throw new BusinessException("邮箱已注册");
+            throw new EmailAlreadyRegisteredException(Constants.MESSAGE_EMAIL_ALREADY_REGISTERED);
         }
         // 新增用户
         userInfo = new UserInfo();
@@ -88,22 +88,22 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .one();
         if (userInfo == null) {
             log.warn("拒绝登录：账号 [{}] 不存在", loginDTO.getEmail());
-            throw new BusinessException("账号不存在");
+            throw new AccountNotExistException(Constants.MESSAGE_ACCOUNT_NOT_EXIST);
         }
         // 检测账号是否被禁用
         if (UserInfoStatusEnum.DISABLED == userInfo.getStatus()) {
             log.warn("拒绝登录：账号 [{}] 已被锁定", loginDTO.getEmail());
-            throw new BusinessException("账号被锁定");
+            throw new AccountDisableException(Constants.MESSAGE_ACCOUNT_DISABLE);
         }
         // 检测账号是否已经登录
         if (redisUtils.getUserHeartBeat(userInfo.getUserId()) != null) {
             log.warn("拒绝登录：账号 [{}] 已在别处登录", loginDTO.getEmail());
-            throw new BusinessException("此账号已在别处登录");
+            throw new AccountAlreadyLoginException(Constants.MESSAGE_ACCOUNT_ALREADY_LOGIN);
         }
         // 校验密码是否正确
         if (!userInfo.getPassword().equals(loginDTO.getPassword())) { // 登陆时前端传来的密码是密文，和数据库中的比对前就不需要再加密了
             log.warn("拒绝登录：账号 [{}] 密码错误", loginDTO.getEmail());
-            throw new BusinessException("密码错误");
+            throw new PasswordErrorException(Constants.MESSAGE_PASSWORD_ERROR);
         }
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtils.copyProperties(userInfo, userInfoVO);
@@ -115,7 +115,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfoVO.setToken(token);
         // 保存到redis
         redisUtils.saveUserTokenInfo(userInfoVO);
-        log.info("账号 [{}] 登录成功", loginDTO.getEmail());
+        log.info("{}账号 [{}] 登录成功", isAdmin ? "管理员" : "", loginDTO.getEmail());
         return userInfoVO;
     }
 }

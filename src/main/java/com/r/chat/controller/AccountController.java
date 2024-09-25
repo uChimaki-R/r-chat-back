@@ -4,7 +4,7 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
 import com.r.chat.entity.vo.UserInfoVO;
-import com.r.chat.exception.BusinessException;
+import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
 import com.r.chat.entity.vo.Result;
 import com.r.chat.service.IUserInfoService;
@@ -57,7 +57,7 @@ public class AccountController {
         redisOperation.delete(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
         if (code == null || !code.equals(checkCode)) {
             log.debug("验证码验证不通过：{} != {}", checkCode, code);
-            throw new BusinessException("验证码错误");
+            throw new CheckCodeErrorException(Constants.MESSAGE_CHECK_CODE_ERROR);
         }
     }
 
