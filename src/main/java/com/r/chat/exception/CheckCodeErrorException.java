@@ -5,5 +5,6 @@ public class CheckCodeErrorException extends BusinessException {
     }
 
     public CheckCodeErrorException(String message) {
+        super(message);
     }
 }

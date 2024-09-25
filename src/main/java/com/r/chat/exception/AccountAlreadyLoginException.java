@@ -5,5 +5,6 @@ public class AccountAlreadyLoginException extends BusinessException {
     }
 
     public AccountAlreadyLoginException(String message) {
+        super(message);
     }
 }

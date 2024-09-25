@@ -5,5 +5,6 @@ public class AccountDisableException extends BusinessException {
     }
 
     public AccountDisableException(String message) {
+        super(message);
     }
 }
