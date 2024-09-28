@@ -4,20 +4,18 @@ import lombok.Getter;
 
 @Getter
 public enum ResponseCodeEnum {
-    SUCCESS(200, "Success"),
-    BAD_REQUEST(400, "Bad Request"),
-    UNAUTHORIZED(401, "Unauthorized"),
-    FORBIDDEN(403, "Forbidden"),
-    NOT_FOUND(404, "Not Found"),
-    INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
-    NOT_ACCEPTABLE(406, "Not Acceptable");
+    SUCCESS(200),  // 正常请求
+    NOT_FOUND(404),  // 请求地址不存在
+    PARAMETERS_ERROR(600),  // 参数错误
+    ALREADY_EXIST(601),  // 信息已存在
+    UNOBTAINABLE(602),  // 无法获取该信息
+    UNAUTHORIZED(901),  // 未登录
+    INTERNAL_ERROR(500);  // 内部错误
 
     private final int code;
-    private final String message;
 
-    ResponseCodeEnum(int code, String message) {
+    ResponseCodeEnum(int code) {
         this.code = code;
-        this.message = message;
     }
 
 }
