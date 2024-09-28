@@ -1,5 +1,6 @@
 package com.r.chat.entity.vo;
 
+import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.ResponseCodeEnum;
 import lombok.Data;
 
@@ -13,16 +14,16 @@ import java.io.Serializable;
 @Data
 public class Result<T> implements Serializable {
 
-    private Integer code; // 编码：200成功，0和其它数字为失败
-    private String status;
-    private String info; // 信息
+    private Integer code; // 状态码
+    private String status; // 成功或失败
+    private String message; // 显示给用户的提醒信息
     private T data; // 数据
 
     public static <T> Result<T> success() {
         Result<T> result = new Result<>();
         result.code = ResponseCodeEnum.SUCCESS.getCode();
-        result.status = ResponseCodeEnum.SUCCESS.getMessage();
-        result.info = "请求成功";
+        result.status = "success";
+        result.message = Constants.MESSAGE_SUCCESS;
         return result;
     }
 
@@ -35,8 +36,8 @@ public class Result<T> implements Serializable {
     public static <T> Result<T> error(Integer code, String msg) {
         Result<T> result = new Result<>();
         result.code = code;
-        result.status = "Error";
-        result.info = msg;
+        result.status = "error";
+        result.message = msg;
         return result;
     }
 
