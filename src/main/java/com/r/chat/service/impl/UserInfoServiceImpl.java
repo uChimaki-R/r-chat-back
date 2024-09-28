@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
-import com.r.chat.entity.vo.UserInfoVO;
+import com.r.chat.entity.vo.UserInfoToken;
 import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
 import com.r.chat.entity.enums.UserInfoStatusEnum;
 import com.r.chat.entity.po.UserInfo;
@@ -80,7 +80,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     }
 
     @Override
-    public UserInfoVO login(LoginDTO loginDTO) {
+    public UserInfoToken login(LoginDTO loginDTO) {
         // 登录账号
         // 检查邮箱是否存在
         UserInfo userInfo = lambdaQuery()
@@ -90,32 +90,32 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             log.warn("拒绝登录：账号 [{}] 不存在", loginDTO.getEmail());
             throw new AccountNotExistException(Constants.MESSAGE_ACCOUNT_NOT_EXIST);
         }
-        // 检测账号是否被禁用
-        if (UserInfoStatusEnum.DISABLED == userInfo.getStatus()) {
-            log.warn("拒绝登录：账号 [{}] 已被锁定", loginDTO.getEmail());
-            throw new AccountDisableException(Constants.MESSAGE_ACCOUNT_DISABLE);
+        // 校验密码是否正确
+        if (!userInfo.getPassword().equals(loginDTO.getPassword())) { // 登陆时前端传来的密码是密文，和数据库中的比对前就不需要再加密了
+            log.warn("拒绝登录：账号 [{}] 密码错误", loginDTO.getEmail());
+            throw new PasswordErrorException(Constants.MESSAGE_PASSWORD_ERROR);
         }
         // 检测账号是否已经登录
         if (redisUtils.getUserHeartBeat(userInfo.getUserId()) != null) {
             log.warn("拒绝登录：账号 [{}] 已在别处登录", loginDTO.getEmail());
             throw new AccountAlreadyLoginException(Constants.MESSAGE_ACCOUNT_ALREADY_LOGIN);
         }
-        // 校验密码是否正确
-        if (!userInfo.getPassword().equals(loginDTO.getPassword())) { // 登陆时前端传来的密码是密文，和数据库中的比对前就不需要再加密了
-            log.warn("拒绝登录：账号 [{}] 密码错误", loginDTO.getEmail());
-            throw new PasswordErrorException(Constants.MESSAGE_PASSWORD_ERROR);
+        // 检测账号是否被禁用
+        if (UserInfoStatusEnum.DISABLED == userInfo.getStatus()) {
+            log.warn("拒绝登录：账号 [{}] 已被锁定", loginDTO.getEmail());
+            throw new AccountDisableException(Constants.MESSAGE_ACCOUNT_DISABLE);
         }
-        UserInfoVO userInfoVO = new UserInfoVO();
-        BeanUtils.copyProperties(userInfo, userInfoVO);
+        UserInfoToken userInfoToken = new UserInfoToken();
+        BeanUtils.copyProperties(userInfo, userInfoToken);
         // 查看是否管理员账号
         boolean isAdmin = appProperties.getAdminEmails().contains(userInfo.getEmail());
-        userInfoVO.setAdmin(isAdmin);
+        userInfoToken.setAdmin(isAdmin);
         // 设置并保存token
-        String token = MyStringUtils.encodeMd5(userInfo.getUserId() + MyStringUtils.getRandomChars(Constants.LENGTH_TOKEN_RANDOM_CHARS));
-        userInfoVO.setToken(token);
+        String token = MyStringUtils.generateToken(userInfo.getUserId());
+        userInfoToken.setToken(token);
         // 保存到redis
-        redisUtils.saveUserTokenInfo(userInfoVO);
+        redisUtils.saveUserTokenInfo(userInfoToken);
         log.info("{}账号 [{}] 登录成功", isAdmin ? "管理员" : "", loginDTO.getEmail());
-        return userInfoVO;
+        return userInfoToken;
     }
 }
