@@ -35,6 +35,13 @@ public class MyStringUtils {
     }
 
     /**
+     * 获取token
+     */
+    public static String generateToken(String userId){
+        return encodeMd5(userId + getRandomChars(Constants.LENGTH_TOKEN_RANDOM_CHARS));
+    }
+
+    /**
      * 获取指定长度的随机字符序列
      */
     public static String getRandomChars(Integer length){
