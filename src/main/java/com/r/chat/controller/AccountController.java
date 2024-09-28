@@ -3,7 +3,7 @@ package com.r.chat.controller;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
-import com.r.chat.entity.vo.UserInfoVO;
+import com.r.chat.entity.vo.UserInfoToken;
 import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
 import com.r.chat.entity.vo.Result;
@@ -56,7 +56,7 @@ public class AccountController {
         // 无论成功与否都要删除掉验证码，防止重复提交暴力破解验证码
         redisOperation.delete(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
         if (code == null || !code.equals(checkCode)) {
-            log.debug("验证码验证不通过：{} != {}", checkCode, code);
+            log.warn("拒绝注册/登录：验证码验证不通过：{} != {}", checkCode, code);
             throw new CheckCodeErrorException(Constants.MESSAGE_CHECK_CODE_ERROR);
         }
     }
@@ -74,14 +74,13 @@ public class AccountController {
         return Result.success();
     }
 
-
     @PostMapping("/login")
-    public Result<UserInfoVO> login(LoginDTO loginDTO) {
+    public Result<UserInfoToken> login(LoginDTO loginDTO) {
         log.info("用户登录: {}", loginDTO);
         // 先判断验证码是否正确
         checkCheckCode(loginDTO.getCheckCodeKey(), loginDTO.getCheckCode());
         // 登陆账号
-        UserInfoVO userInfoVO = userInfoService.login(loginDTO);
-        return Result.success(userInfoVO);
+        UserInfoToken userInfoToken = userInfoService.login(loginDTO);
+        return Result.success(userInfoToken);
     }
 }
