@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInfoVO implements Serializable {
+public class UserInfoToken implements Serializable {
     private static final long serialVersionUID = 1L;
     private String userId;
     private String email;
