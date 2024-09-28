@@ -12,10 +12,14 @@ public class Constants {
     public static final Integer LENGTH_TOKEN_RANDOM_CHARS = 20;  // token中拼接的随机字符串的长度
 
     // exception message
-    public static final String MESSAGE_EMAIL_ALREADY_REGISTERED = "邮箱已注册";
+    public static final String MESSAGE_SUCCESS = "请求成功";
+    public static final String MESSAGE_INTERNAL_ERROR = "服务器内部错误";
+    public static final String MESSAGE_NOT_FOUND = "请求地址不存在";
     public static final String MESSAGE_CHECK_CODE_ERROR = "验证码错误";
+    public static final String MESSAGE_EMAIL_ALREADY_REGISTERED = "邮箱已注册";
     public static final String MESSAGE_ACCOUNT_NOT_EXIST = "账号不存在";
-    public static final String MESSAGE_ACCOUNT_DISABLE = "账号被锁定";
-    public static final String MESSAGE_ACCOUNT_ALREADY_LOGIN = "账号已在别处登录";
     public static final String MESSAGE_PASSWORD_ERROR = "密码错误";
+    public static final String MESSAGE_ACCOUNT_ALREADY_LOGIN = "账号已在别处登录";
+    public static final String MESSAGE_ACCOUNT_DISABLE = "账号被锁定";
+    public static final String MESSAGE_LOGIN_TIME_OUT = "登录超时";
 }
