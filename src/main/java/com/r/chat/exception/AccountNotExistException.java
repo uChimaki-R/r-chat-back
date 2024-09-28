@@ -1,10 +1,9 @@
 package com.r.chat.exception;
 
-public class AccountNotExistException extends BusinessException {
-    public AccountNotExistException() {
-    }
+import com.r.chat.entity.enums.ResponseCodeEnum;
 
+public class AccountNotExistException extends BusinessException {
     public AccountNotExistException(String message) {
-        super(message);
+        super(message, ResponseCodeEnum.PARAMETERS_ERROR.getCode());
     }
 }
