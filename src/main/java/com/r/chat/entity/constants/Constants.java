@@ -2,10 +2,11 @@ package com.r.chat.entity.constants;
 
 public class Constants {
     // redis
-    public static final String REDIS_KEY_CHECK_CODE_PREFIX = "rchat:checkcode:";  // 验证码结果保存前缀
-    public static final String REDIS_KEY_WS_HEART_BEAT_PREFIX = "rchat:ws:heartbeat:";  // ws的心跳保存前缀
-    public static final String REDIS_KEY_USER_TOKEN_PREFIX = "rchat:user:token:";  // 用户token保存前缀
-    public static final String REDIS_KEY_USER_ID_PREFIX = "rchat:user:id:";  // 用户id保存前缀
+    public static final String REDIS_KEY_PREFIX_CHECK_CODE = "rchat:checkcode:";  // 验证码结果保存路径前缀
+    public static final String REDIS_KEY_PREFIX_WS_HEART_BEAT = "rchat:ws:heartbeat:";  // ws的心跳保存路径前缀
+    public static final String REDIS_KEY_PREFIX_USER_TOKEN = "rchat:user:token:";  // 用户token保存路径前缀
+    public static final String REDIS_KEY_PREFIX_USER_ID = "rchat:user:id:";  // 用户id保存路径前缀
+    public static final String REDIS_KEY_SYS_SETTINGS = "rchat:sys:settings";  // 系统设置保存路径
 
     // length
     public static final Integer LENGTH_ID = 11;  // 用户id及群组id的长度
@@ -22,4 +23,5 @@ public class Constants {
     public static final String MESSAGE_ACCOUNT_ALREADY_LOGIN = "账号已在别处登录";
     public static final String MESSAGE_ACCOUNT_DISABLE = "账号被锁定";
     public static final String MESSAGE_NOT_LOGIN = "登录超时";
+    public static final String MESSAGE_GROUP_COUNT_LIMIT = "拥有的群组数量达到上限";
 }
