@@ -17,3 +17,12 @@ r:
     admin-emails:
       - 1259864733@qq.com
       - test@tt.com
+    default-settings:
+      max-group-count: 5
+      max-group-member-count: 200
+      max-image-size: 2
+      max-video-size: 5
+      max-file-size: 5
+      robot-id: robot@robot.com
+      robot-nick-name: Robot-Chat
+      robot-welcome-msg: 欢迎使用R-Chat!
