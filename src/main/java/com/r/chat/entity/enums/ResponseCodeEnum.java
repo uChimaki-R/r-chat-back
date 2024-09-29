@@ -8,7 +8,7 @@ public enum ResponseCodeEnum {
     NOT_FOUND(404),  // 请求地址不存在
     PARAMETERS_ERROR(600),  // 参数错误
     ALREADY_EXIST(601),  // 信息已存在
-    UNOBTAINABLE(602),  // 无法获取该信息
+    REJECTED(602),  // 无法/拒绝获取该信息
     UNAUTHORIZED(901),  // 未登录
     INTERNAL_ERROR(500);  // 内部错误
 
