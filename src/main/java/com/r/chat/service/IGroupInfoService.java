@@ -1,5 +1,6 @@
 package com.r.chat.service;
 
+import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.po.GroupInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IGroupInfoService extends IService<GroupInfo> {
 
+    /**
+     * 新增或修改群组信息
+     */
+    void saveOrUpdateGroupInfo(GroupInfoDTO groupInfoDTO);
 }
