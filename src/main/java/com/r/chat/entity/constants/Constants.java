@@ -25,4 +25,11 @@ public class Constants {
     public static final String MESSAGE_NOT_LOGIN = "登录超时";
     public static final String MESSAGE_GROUP_COUNT_LIMIT = "拥有的群组数量达到上限";
     public static final String MESSAGE_MISSING_AVATAR_FILE = "缺少头像文件";
+    public static final String MESSAGE_NOT_GROUP_OWNER_OPERATION = "非群主操作";
+    public static final String MESSAGE_FAILED_TO_SAVE_AVATAR_FILE = "头像保存失败";
+
+    // file
+    public static final String FILE_FOLDER_AVATAR = "avatar";
+    public static final String FILE_SUFFIX_AVATAR = ".png";
+    public static final String FILE_SUFFIX_COVER = "_cover.png";
 }
