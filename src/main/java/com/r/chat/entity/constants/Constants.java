@@ -21,5 +21,5 @@ public class Constants {
     public static final String MESSAGE_PASSWORD_ERROR = "密码错误";
     public static final String MESSAGE_ACCOUNT_ALREADY_LOGIN = "账号已在别处登录";
     public static final String MESSAGE_ACCOUNT_DISABLE = "账号被锁定";
-    public static final String MESSAGE_LOGIN_TIME_OUT = "登录超时";
+    public static final String MESSAGE_NOT_LOGIN = "登录超时";
 }
