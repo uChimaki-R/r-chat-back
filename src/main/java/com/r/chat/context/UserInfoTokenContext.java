@@ -2,7 +2,7 @@ package com.r.chat.context;
 
 import com.r.chat.entity.vo.UserInfoToken;
 
-public class BaseContext {
+public class UserInfoTokenContext {
 
     public static ThreadLocal<UserInfoToken> threadLocal = new ThreadLocal<>();
 
