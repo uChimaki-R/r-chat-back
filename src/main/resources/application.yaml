@@ -47,3 +47,12 @@ r:
     ws-port: ${r.chat.ws-port}
     project-folder: ${r.chat.project-folder}
     admin-emails: ${r.chat.admin-emails}
+    default-settings:
+      max-group-count: ${r.chat.default-settings.max-group-member-count}
+      max-group-member-count: ${r.chat.default-settings.max-group-member-count}
+      max-image-size: ${r.chat.default-settings.max-image-size}
+      max-video-size: ${r.chat.default-settings.max-video-size}
+      max-file-size: ${r.chat.default-settings.max-file-size}
+      robot-id: ${r.chat.default-settings.robot-id}
+      robot-nick-name: ${r.chat.default-settings.robot-nick-name}
+      robot-welcome-msg: ${r.chat.default-settings.robot-welcome-msg}
