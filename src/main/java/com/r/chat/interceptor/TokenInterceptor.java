@@ -32,15 +32,15 @@ public class TokenInterceptor implements HandlerInterceptor {
         // 从请求头中获取token
         String token = request.getHeader("token");
         if (token == null) {
-            log.warn("未携带token的请求：{}", request.getRequestURI());
+            log.warn("未携带token的请求: {}", request.getRequestURI());
             throw new LoginTimeOutException(Constants.MESSAGE_NOT_LOGIN);
         }
-        log.info("获取token：{}", token);
+        log.info("获取token: {}", token);
 
         try {
             // 用token从redis中获取用户对象
             UserInfoToken userInfoToken = redisUtils.getUserInfoToken(token);
-            log.info("获取用户信息：{}", userInfoToken);
+            log.info("获取用户信息: {}", userInfoToken);
             BaseContext.setCurrentUserInfoToken(userInfoToken);
             // 放行
             return true;

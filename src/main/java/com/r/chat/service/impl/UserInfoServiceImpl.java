@@ -51,7 +51,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .eq(UserInfo::getEmail, registerDTO.getEmail())
                 .one();
         if (userInfo != null) {
-            log.warn("拒绝注册：邮箱 [{}] 已存在", userInfo.getEmail());
+            log.warn("拒绝注册: 邮箱 [{}] 已存在", userInfo.getEmail());
             throw new EmailAlreadyRegisteredException(Constants.MESSAGE_EMAIL_ALREADY_REGISTERED);
         }
         // 新增用户
@@ -76,7 +76,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfo.setCreateTime(now);
         userInfo.setLastOffTime(System.currentTimeMillis());
         userInfoMapper.insert(userInfo);
-        log.info("注册新账号：{}", userInfo);
+        log.info("注册新账号: {}", userInfo);
     }
 
     @Override
@@ -87,22 +87,22 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .eq(UserInfo::getEmail, loginDTO.getEmail())
                 .one();
         if (userInfo == null) {
-            log.warn("拒绝登录：账号 [{}] 不存在", loginDTO.getEmail());
+            log.warn("拒绝登录: 账号 [{}] 不存在", loginDTO.getEmail());
             throw new AccountNotExistException(Constants.MESSAGE_ACCOUNT_NOT_EXIST);
         }
         // 校验密码是否正确
         if (!userInfo.getPassword().equals(loginDTO.getPassword())) { // 登陆时前端传来的密码是密文，和数据库中的比对前就不需要再加密了
-            log.warn("拒绝登录：账号 [{}] 密码错误", loginDTO.getEmail());
+            log.warn("拒绝登录: 账号 [{}] 密码错误", loginDTO.getEmail());
             throw new PasswordErrorException(Constants.MESSAGE_PASSWORD_ERROR);
         }
         // 检测账号是否已经登录
         if (redisUtils.getUserHeartBeat(userInfo.getUserId()) != null) {
-            log.warn("拒绝登录：账号 [{}] 已在别处登录", loginDTO.getEmail());
+            log.warn("拒绝登录: 账号 [{}] 已在别处登录", loginDTO.getEmail());
             throw new AccountAlreadyLoginException(Constants.MESSAGE_ACCOUNT_ALREADY_LOGIN);
         }
         // 检测账号是否被禁用
         if (UserInfoStatusEnum.DISABLED == userInfo.getStatus()) {
-            log.warn("拒绝登录：账号 [{}] 已被锁定", loginDTO.getEmail());
+            log.warn("拒绝登录: 账号 [{}] 已被锁定", loginDTO.getEmail());
             throw new AccountDisableException(Constants.MESSAGE_ACCOUNT_DISABLE);
         }
         UserInfoToken userInfoToken = new UserInfoToken();
