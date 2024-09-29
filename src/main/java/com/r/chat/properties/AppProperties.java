@@ -10,7 +10,10 @@ import java.util.List;
 @ConfigurationProperties(prefix = "r.chat")
 @Data
 public class AppProperties {
+    // ws端口
     private Integer wsPort;
+    // 管理员邮箱
     private List<String> adminEmails;
+    // 项目文件夹
     private String projectFolder;
 }
