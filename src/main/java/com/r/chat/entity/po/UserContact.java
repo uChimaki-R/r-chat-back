@@ -33,9 +33,15 @@ public class UserContact implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
+     * 自增id
+     */
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
+
+    /**
      * 用户id
      */
-    @TableId(value = "user_id", type = IdType.AUTO)
+    @TableField("user_id")
     private String userId;
 
     /**
