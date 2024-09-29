@@ -24,4 +24,5 @@ public class Constants {
     public static final String MESSAGE_ACCOUNT_DISABLE = "账号被锁定";
     public static final String MESSAGE_NOT_LOGIN = "登录超时";
     public static final String MESSAGE_GROUP_COUNT_LIMIT = "拥有的群组数量达到上限";
+    public static final String MESSAGE_MISSING_AVATAR_FILE = "缺少头像文件";
 }
