@@ -1,6 +1,7 @@
 package com.r.chat.interceptor;
 
-import com.r.chat.context.BaseContext;
+import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserInfoTokenContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.vo.UserInfoToken;
 import com.r.chat.exception.LoginTimeOutException;
@@ -41,7 +42,8 @@ public class TokenInterceptor implements HandlerInterceptor {
             // 用token从redis中获取用户对象
             UserInfoToken userInfoToken = redisUtils.getUserInfoToken(token);
             log.info("获取用户信息: {}", userInfoToken);
-            BaseContext.setCurrentUserInfoToken(userInfoToken);
+            UserInfoTokenContext.setCurrentUserInfoToken(userInfoToken);
+            UserIdContext.setCurrentUserId(userInfoToken.getUserId());
             // 放行
             return true;
         } catch (Exception ex) {
@@ -53,6 +55,7 @@ public class TokenInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         // 释放上下文对象
-        BaseContext.removeCurrentUserInfoToken();
+        UserInfoTokenContext.removeCurrentUserInfoToken();
+        UserIdContext.removeCurrentUserId();
     }
 }
