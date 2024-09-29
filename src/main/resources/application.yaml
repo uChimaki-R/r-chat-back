@@ -34,8 +34,8 @@ logging:
       r:
         chat:
           mapper: debug
-          service: info
-          controller: info
+          service: debug
+          controller: debug
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.r.chat.entity
