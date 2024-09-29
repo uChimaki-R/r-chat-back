@@ -3,10 +3,12 @@ package com.r.chat.controller;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
+import com.r.chat.entity.dto.SysSettingDTO;
 import com.r.chat.entity.vo.UserInfoToken;
 import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
 import com.r.chat.entity.vo.Result;
+import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserInfoService;
 import com.wf.captcha.ArithmeticCaptcha;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class AccountController {
     private final RedisOperation redisOperation;
     private final IUserInfoService userInfoService;
+    private final RedisUtils redisUtils;
 
     /**
      * 获取验证码图片
@@ -35,9 +38,9 @@ public class AccountController {
         String base64 = captcha.toBase64(); // 验证码图片的base64编码
         String code = captcha.text(); // 验证码的结果
         String checkCodeKey = UUID.randomUUID().toString(); // 用户提交验证码结果时的唯一标识
-        log.debug("获取验证码。checkCodeKey: [{}], code: {}", checkCodeKey, code);
+        log.debug("获取验证码 checkCodeKey: [{}], code: {}", checkCodeKey, code);
         // 保存到redis，设置10分钟的时间
-        redisOperation.setEx(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey, code, 10, TimeUnit.MINUTES);
+        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_CHECK_CODE + checkCodeKey, code, 10, TimeUnit.MINUTES);
         Map<String, String> map = new HashMap<>();
         map.put("checkCode", base64);
         map.put("checkCodeKey", checkCodeKey);
@@ -52,11 +55,11 @@ public class AccountController {
      */
     private void checkCheckCode(String checkCodeKey, String checkCode) {
         // 获取正确的验证码
-        String code = (String) redisOperation.get(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
+        String code = (String) redisOperation.get(Constants.REDIS_KEY_PREFIX_CHECK_CODE + checkCodeKey);
         // 无论成功与否都要删除掉验证码，防止重复提交暴力破解验证码
-        redisOperation.delete(Constants.REDIS_KEY_CHECK_CODE_PREFIX + checkCodeKey);
+        redisOperation.delete(Constants.REDIS_KEY_PREFIX_CHECK_CODE + checkCodeKey);
         if (code == null || !code.equals(checkCode)) {
-            log.warn("拒绝注册/登录：验证码验证不通过：{} != {}", checkCode, code);
+            log.warn("拒绝注册/登录: 验证码验证不通过: {} != {}", checkCode, code);
             throw new CheckCodeErrorException(Constants.MESSAGE_CHECK_CODE_ERROR);
         }
     }
@@ -74,6 +77,9 @@ public class AccountController {
         return Result.success();
     }
 
+    /**
+     * 登录账号
+     */
     @PostMapping("/login")
     public Result<UserInfoToken> login(LoginDTO loginDTO) {
         log.info("用户登录: {}", loginDTO);
@@ -82,5 +88,13 @@ public class AccountController {
         // 登陆账号
         UserInfoToken userInfoToken = userInfoService.login(loginDTO);
         return Result.success(userInfoToken);
+    }
+
+    /**
+     * 获取系统设置
+     */
+    @GetMapping("/getSysSetting")
+    public Result<SysSettingDTO> getSysSetting() {
+        return Result.success(redisUtils.getSysSetting());
     }
 }
