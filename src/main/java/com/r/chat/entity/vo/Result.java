@@ -16,14 +16,14 @@ public class Result<T> implements Serializable {
 
     private Integer code; // 状态码
     private String status; // 成功或失败
-    private String message; // 显示给用户的提醒信息
+    private String info; // 显示给用户的提醒信息
     private T data; // 数据
 
     public static <T> Result<T> success() {
         Result<T> result = new Result<>();
         result.code = ResponseCodeEnum.SUCCESS.getCode();
         result.status = "success";
-        result.message = Constants.MESSAGE_SUCCESS;
+        result.info = Constants.MESSAGE_SUCCESS;
         return result;
     }
 
@@ -37,7 +37,7 @@ public class Result<T> implements Serializable {
         Result<T> result = new Result<>();
         result.code = code;
         result.status = "error";
-        result.message = msg;
+        result.info = msg;
         return result;
     }
 
