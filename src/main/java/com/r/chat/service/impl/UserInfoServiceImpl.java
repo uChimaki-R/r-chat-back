@@ -17,7 +17,7 @@ import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
-import com.r.chat.utils.MyStringUtils;
+import com.r.chat.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -55,7 +55,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             throw new EmailAlreadyRegisteredException(Constants.MESSAGE_EMAIL_ALREADY_REGISTERED);
         }
         // 随机获取一个userId
-        String userId = MyStringUtils.getRandomUserId();
+        String userId = StringUtils.getRandomUserId();
         // 判断是否可以使用靓号注册，可以的话需要替换为靓号
         UserInfoBeauty userInfoBeauty = userInfoBeautyMapper.selectOne(new QueryWrapper<UserInfoBeauty>().lambda()
                 .eq(UserInfoBeauty::getEmail, registerDTO.getEmail()));
@@ -69,7 +69,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         LocalDateTime now = LocalDateTime.now();
         userInfo = CopyUtils.copyBean(registerDTO, UserInfo.class);
         userInfo.setUserId(userId);
-        userInfo.setPassword(MyStringUtils.encodeMd5(registerDTO.getPassword())); // 使用md5加密后再存储
+        userInfo.setPassword(StringUtils.encodeMd5(registerDTO.getPassword())); // 使用md5加密后再存储
         userInfo.setStatus(UserInfoStatusEnum.ENABLE);
         userInfo.setCreateTime(now);
         userInfo.setLastOffTime(System.currentTimeMillis());
@@ -108,7 +108,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         boolean isAdmin = appProperties.getAdminEmails().contains(userInfo.getEmail());
         userTokenInfoDTO.setAdmin(isAdmin);
         // 设置并保存token
-        String token = MyStringUtils.generateToken(userInfo.getUserId());
+        String token = StringUtils.generateToken(userInfo.getUserId());
         userTokenInfoDTO.setToken(token);
         // 保存到redis
         redisUtils.saveUserTokenInfo(userTokenInfoDTO);

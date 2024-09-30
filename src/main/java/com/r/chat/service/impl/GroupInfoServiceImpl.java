@@ -1,6 +1,5 @@
 package com.r.chat.service.impl;
 
-import com.alibaba.druid.util.StringUtils;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
@@ -21,7 +20,7 @@ import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IGroupInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
-import com.r.chat.utils.MyStringUtils;
+import com.r.chat.utils.StringUtils;
 import com.r.chat.utils.VerifyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +71,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
 
             // 添加群组到数据库
             // 新建群号，设置添加时间
-            groupInfo.setGroupId(MyStringUtils.getRandomGroupId());
+            groupInfo.setGroupId(StringUtils.getRandomGroupId());
             groupInfo.setCreateTime(now);
             groupInfo.setStatus(GroupInfoStatusEnum.NORMAL);
             save(groupInfo);
