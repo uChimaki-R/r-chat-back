@@ -5,46 +5,53 @@ import com.r.chat.entity.enums.IdPrefixEnum;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
-public class MyStringUtils {
+public class StringUtils {
+    /**
+     * 判断字符串是否为空
+     */
+    public static boolean isEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
     /**
      * 随机获取一个id
      */
-    private static String getRandomId(){
+    public static String getRandomId() {
         return RandomStringUtils.random(Constants.LENGTH_ID, false, true);
     }
 
     /**
      * 随机获取一个用户id
      */
-    public static String getRandomUserId(){
+    public static String getRandomUserId() {
         return IdPrefixEnum.USER.getPrefix() + getRandomId();
     }
 
     /**
      * 随机获取一个群组id
      */
-    public static String getRandomGroupId(){
+    public static String getRandomGroupId() {
         return IdPrefixEnum.GROUP.getPrefix() + getRandomId();
     }
 
     /**
      * 对字符串进行md5加密
      */
-    public static String encodeMd5(String str){
+    public static String encodeMd5(String str) {
         return DigestUtils.md5Hex(str);
     }
 
     /**
      * 获取token
      */
-    public static String generateToken(String userId){
+    public static String generateToken(String userId) {
         return encodeMd5(userId + getRandomChars(Constants.LENGTH_TOKEN_RANDOM_CHARS));
     }
 
     /**
      * 获取指定长度的随机字符序列
      */
-    public static String getRandomChars(Integer length){
+    public static String getRandomChars(Integer length) {
         return RandomStringUtils.random(length, true, false);
     }
 }
