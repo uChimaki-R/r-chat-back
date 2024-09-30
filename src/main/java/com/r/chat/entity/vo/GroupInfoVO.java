@@ -1,17 +1,10 @@
 package com.r.chat.entity.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.r.chat.entity.enums.GroupInfoStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -43,13 +36,6 @@ public class GroupInfoVO implements Serializable {
     private String groupOwnerId;
 
     /**
-     * 创建时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
-
-    /**
      * 群公告
      */
     private String groupNotice;
@@ -60,7 +46,7 @@ public class GroupInfoVO implements Serializable {
     private Integer joinType;
 
     /**
-     * 状态：1：正常 0：解散
+     * 群成员数
      */
-    private GroupInfoStatusEnum status;
+    private Long memberCount;
 }
