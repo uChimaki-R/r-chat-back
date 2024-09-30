@@ -33,7 +33,7 @@ public class TokenInterceptor implements HandlerInterceptor {
         // 从请求头中获取token
         String token = request.getHeader("token");
         if (token == null) {
-            log.warn("未携带token的请求: {}", request.getRequestURI());
+            log.warn("拒绝请求: 未携带token 请求uri: {}", request.getRequestURI());
             throw new LoginTimeOutException(Constants.MESSAGE_NOT_LOGIN);
         }
         log.info("获取token: {}", token);
@@ -47,7 +47,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             // 放行
             return true;
         } catch (Exception ex) {
-            log.warn("无法获取该token对应的用户信息");
+            log.warn("拒绝请求: 无法获取该token对应的用户信息");
             throw new LoginTimeOutException(Constants.MESSAGE_NOT_LOGIN);
         }
     }
