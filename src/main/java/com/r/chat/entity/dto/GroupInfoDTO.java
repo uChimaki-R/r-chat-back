@@ -15,12 +15,12 @@ public class GroupInfoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 群组id，修改信息的时候用
+     * 群聊id，修改信息的时候用
      */
     private String groupId;
 
     /**
-     * 群组名
+     * 群聊名
      */
     private String groupName;
 

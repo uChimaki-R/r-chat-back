@@ -12,9 +12,9 @@ import java.io.Serializable;
 public class SysSettingVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    // 个人最多群组数量
+    // 个人最多群聊数量
     private Integer maxGroupCount;
-    // 单个群组最多群成员
+    // 单个群聊最多群成员
     private Integer maxGroupMemberCount;
     // 图片最大大小
     private Integer maxImageSize;

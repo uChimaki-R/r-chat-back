@@ -28,7 +28,7 @@ public class StringUtils {
     }
 
     /**
-     * 随机获取一个群组id
+     * 随机获取一个群聊id
      */
     public static String getRandomGroupId() {
         return IdPrefixEnum.GROUP.getPrefix() + getRandomId();

@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * <p>
- * 群组信息 服务类
+ * 群聊信息 服务类
  * </p>
  *
  * @author r-pocky
@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface IGroupInfoService extends IService<GroupInfo> {
 
     /**
-     * 新增或修改群组信息
+     * 新增或修改群聊信息
      */
     void saveOrUpdateGroupInfo(GroupInfoDTO groupInfoDTO);
 }

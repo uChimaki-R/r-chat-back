@@ -42,13 +42,13 @@ public class UserContactApply implements Serializable {
     private String applyUserId;
 
     /**
-     * 接收人id（加群的时候是群组id）
+     * 接收人id（加群的时候是群聊id）
      */
     @TableField("receive_user_id")
     private String receiveUserId;
 
     /**
-     * 联系人类型：0：好友 1：群组
+     * 联系人类型：0：好友 1：群聊
      */
     @TableField("contact_type")
     private UserContactTypeEnum contactType;

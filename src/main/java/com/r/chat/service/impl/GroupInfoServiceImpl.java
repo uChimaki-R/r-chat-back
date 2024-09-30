@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 群组信息 服务实现类
+ * 群聊信息 服务实现类
  * </p>
  *
  * @author r-pocky
@@ -54,22 +54,22 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         GroupInfo groupInfo = CopyUtils.copyBean(groupInfoDTO, GroupInfo.class);
 
         if (StringUtils.isEmpty(groupInfoDTO.getGroupId())) {
-            // 新增群组
-            // 判断该用户的群组是否已经达到上限
+            // 新增群聊
+            // 判断该用户的群聊是否已经达到上限
             SysSettingDTO sysSettingDTO = redisUtils.getSysSetting();
             Long count = lambdaQuery().eq(GroupInfo::getGroupOwnerId, groupInfoDTO.getGroupOwnerId()).count();
             if (count > sysSettingDTO.getMaxGroupCount()) {
-                log.warn("拒绝新增群组: 群组数量达到上限 [{}]", sysSettingDTO.getMaxGroupCount());
+                log.warn("拒绝新增群聊: 群聊数量达到上限 [{}]", sysSettingDTO.getMaxGroupCount());
                 throw new GroupCountLimitException(Constants.MESSAGE_GROUP_COUNT_LIMIT + ": [" + sysSettingDTO.getMaxGroupCount() + "]");
             }
 
             // 没有携带群头像
             if (groupInfoDTO.getAvatarFile() == null) {
-                log.warn("拒绝新增群组: 未指定群头像");
+                log.warn("拒绝新增群聊: 未指定群头像");
                 throw new MissingRequestParametersException(Constants.MESSAGE_MISSING_AVATAR_FILE);
             }
 
-            // 添加群组到数据库
+            // 添加群聊到数据库
             // 新建群号，设置添加时间
             groupInfo.setGroupId(StringUtils.getRandomGroupId());
             groupInfo.setCreateTime(now);
@@ -85,16 +85,16 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             userContact.setCreateTime(now);
             userContact.setLastUpdateTime(now);
             userContactMapper.insert(userContact);
-            log.info("新增群组成功: {}", groupInfo);
+            log.info("新增群聊成功: {}", groupInfo);
         } else {
-            // 修改群组信息
+            // 修改群聊信息
             if (!VerifyUtils.isCurrentUser(groupInfoDTO.getGroupOwnerId())) {
-                // 操作群的人不是群组
-                log.warn("拒绝群组操作: 非群主操作, 操作者: {}", UserIdContext.getCurrentUserId());
+                // 操作群的人不是群聊
+                log.warn("拒绝群聊操作: 非群主操作, 操作者: {}", UserIdContext.getCurrentUserId());
                 throw new IllegalOperationException(Constants.MESSAGE_NOT_GROUP_OWNER_OPERATION);
             }
             updateById(groupInfo);
-            log.info("修改群组信息成功: {}", groupInfo);
+            log.info("修改群聊信息成功: {}", groupInfo);
         }
         // 头像文件的操作
         if (groupInfoDTO.getAvatarFile() == null) {

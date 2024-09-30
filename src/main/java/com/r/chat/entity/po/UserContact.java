@@ -47,13 +47,13 @@ public class UserContact implements Serializable {
     private String userId;
 
     /**
-     * 联系人/群组id
+     * 联系人/群聊id
      */
     @TableField("contact_id")
     private String contactId;
 
     /**
-     * 联系人类型：0：好友 1：群组
+     * 联系人类型：0：好友 1：群聊
      */
     @TableField("contact_type")
     private UserContactTypeEnum contactType;

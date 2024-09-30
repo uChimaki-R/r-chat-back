@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 群组信息
+ * 群聊信息
  * </p>
  *
  * @author r-pocky
@@ -28,12 +28,12 @@ public class GroupInfoVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 群组id
+     * 群聊id
      */
     private String groupId;
 
     /**
-     * 群组名
+     * 群聊名
      */
     private String groupName;
 

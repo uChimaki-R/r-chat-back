@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "r.chat.default-settings")
 @Data
 public class DefaultSysSettingProperties {
-    // 个人最多群组数量
+    // 个人最多群聊数量
     private Integer maxGroupCount;
-    // 单个群组最多群成员
+    // 单个群聊最多群成员
     private Integer maxGroupMemberCount;
     // 图片最大大小
     private Integer maxImageSize;

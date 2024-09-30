@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * <p>
- * 群组信息 Mapper 接口
+ * 群聊信息 Mapper 接口
  * </p>
  *
  * @author r-pocky

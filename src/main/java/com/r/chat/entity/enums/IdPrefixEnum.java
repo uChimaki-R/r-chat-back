@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum IdPrefixEnum {
     USER(0, "U", "用户"),
-    GROUP(1, "G", "群组");
+    GROUP(1, "G", "群聊");
     private final int id;
     private final String prefix;
     private final String desc;
