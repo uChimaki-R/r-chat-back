@@ -31,6 +31,7 @@
         <mybatisplus.version>3.5.3.1</mybatisplus.version>
         <mysql.version>8.0.23</mysql.version>
         <knif4j.version>2.0.8</knif4j.version>
+        <hutool.version>5.8.11</hutool.version>
         <lombok.version>1.18.32</lombok.version>
         <druid.version>1.2.1</druid.version>
         <aspectjweaver.version>1.9.4</aspectjweaver.version>
@@ -58,6 +59,11 @@
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-boot-starter</artifactId>
             <version>${knif4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
         </dependency>
         <!--lombok -->
         <dependency>
