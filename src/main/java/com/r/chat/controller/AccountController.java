@@ -4,6 +4,7 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
+import com.r.chat.entity.vo.CheckCodeVO;
 import com.r.chat.entity.vo.SysSettingVO;
 import com.r.chat.entity.vo.UserTokenInfoVO;
 import com.r.chat.exception.CheckCodeErrorException;
@@ -35,7 +36,7 @@ public class AccountController {
      * 获取验证码图片
      */
     @GetMapping("/checkCode")
-    public Result<Map<String, String>> checkCode() {
+    public Result<CheckCodeVO> checkCode() {
         ArithmeticCaptcha captcha = new ArithmeticCaptcha(100, 30);
         String base64 = captcha.toBase64(); // 验证码图片的base64编码
         String code = captcha.text(); // 验证码的结果
@@ -43,10 +44,10 @@ public class AccountController {
         log.debug("获取验证码 checkCodeKey: [{}], code: {}", checkCodeKey, code);
         // 保存到redis，设置10分钟的时间
         redisOperation.setEx(Constants.REDIS_KEY_PREFIX_CHECK_CODE + checkCodeKey, code, 10, TimeUnit.MINUTES);
-        Map<String, String> map = new HashMap<>();
-        map.put("checkCode", base64);
-        map.put("checkCodeKey", checkCodeKey);
-        return Result.success(map);
+        CheckCodeVO checkCodeVO = new CheckCodeVO();
+        checkCodeVO.setCheckCode(base64);
+        checkCodeVO.setCheckCodeKey(checkCodeKey);
+        return Result.success(checkCodeVO);
     }
 
     /**
