@@ -1,16 +1,16 @@
 package com.r.chat.context;
 
-import com.r.chat.entity.vo.UserInfoToken;
+import com.r.chat.entity.dto.UserTokenInfoDTO;
 
 public class UserInfoTokenContext {
 
-    public static ThreadLocal<UserInfoToken> threadLocal = new ThreadLocal<>();
+    public static ThreadLocal<UserTokenInfoDTO> threadLocal = new ThreadLocal<>();
 
-    public static void setCurrentUserInfoToken(UserInfoToken userInfoToken) {
-        threadLocal.set(userInfoToken);
+    public static void setCurrentUserInfoToken(UserTokenInfoDTO userTokenInfoDTO) {
+        threadLocal.set(userTokenInfoDTO);
     }
 
-    public static UserInfoToken getCurrentUserInfoToken() {
+    public static UserTokenInfoDTO getCurrentUserInfoToken() {
         return threadLocal.get();
     }
 

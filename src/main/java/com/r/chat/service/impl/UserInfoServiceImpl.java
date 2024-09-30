@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
-import com.r.chat.entity.vo.UserInfoToken;
+import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
 import com.r.chat.entity.enums.UserInfoStatusEnum;
 import com.r.chat.entity.po.UserInfo;
@@ -80,7 +80,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     }
 
     @Override
-    public UserInfoToken login(LoginDTO loginDTO) {
+    public UserTokenInfoDTO login(LoginDTO loginDTO) {
         // 登录账号
         // 检查邮箱是否存在
         UserInfo userInfo = lambdaQuery()
@@ -105,17 +105,17 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             log.warn("拒绝登录: 账号 [{}] 已被锁定", loginDTO.getEmail());
             throw new AccountDisableException(Constants.MESSAGE_ACCOUNT_DISABLE);
         }
-        UserInfoToken userInfoToken = new UserInfoToken();
-        BeanUtils.copyProperties(userInfo, userInfoToken);
+        UserTokenInfoDTO userTokenInfoDTO = new UserTokenInfoDTO();
+        BeanUtils.copyProperties(userInfo, userTokenInfoDTO);
         // 查看是否管理员账号
         boolean isAdmin = appProperties.getAdminEmails().contains(userInfo.getEmail());
-        userInfoToken.setAdmin(isAdmin);
+        userTokenInfoDTO.setAdmin(isAdmin);
         // 设置并保存token
         String token = MyStringUtils.generateToken(userInfo.getUserId());
-        userInfoToken.setToken(token);
+        userTokenInfoDTO.setToken(token);
         // 保存到redis
-        redisUtils.saveUserTokenInfo(userInfoToken);
+        redisUtils.saveUserTokenInfo(userTokenInfoDTO);
         log.info("{}账号 [{}] 登录成功", isAdmin ? "管理员" : "", loginDTO.getEmail());
-        return userInfoToken;
+        return userTokenInfoDTO;
     }
 }

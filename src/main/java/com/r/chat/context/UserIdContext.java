@@ -1,7 +1,5 @@
 package com.r.chat.context;
 
-import com.r.chat.entity.vo.UserInfoToken;
-
 public class UserIdContext {
 
     public static ThreadLocal<String> threadLocal = new ThreadLocal<>();

@@ -3,7 +3,7 @@ package com.r.chat.interceptor;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.context.UserInfoTokenContext;
 import com.r.chat.entity.constants.Constants;
-import com.r.chat.entity.vo.UserInfoToken;
+import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.exception.LoginTimeOutException;
 import com.r.chat.redis.RedisUtils;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +40,10 @@ public class TokenInterceptor implements HandlerInterceptor {
 
         try {
             // 用token从redis中获取用户对象
-            UserInfoToken userInfoToken = redisUtils.getUserInfoToken(token);
-            log.info("获取用户信息: {}", userInfoToken);
-            UserInfoTokenContext.setCurrentUserInfoToken(userInfoToken);
-            UserIdContext.setCurrentUserId(userInfoToken.getUserId());
+            UserTokenInfoDTO userTokenInfoDTO = redisUtils.getUserTokenInfo(token);
+            log.info("获取用户信息: {}", userTokenInfoDTO);
+            UserInfoTokenContext.setCurrentUserInfoToken(userTokenInfoDTO);
+            UserIdContext.setCurrentUserId(userTokenInfoDTO.getUserId());
             // 放行
             return true;
         } catch (Exception ex) {
