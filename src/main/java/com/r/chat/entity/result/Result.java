@@ -1,4 +1,4 @@
-package com.r.chat.result;
+package com.r.chat.entity.result;
 
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.ResponseCodeEnum;

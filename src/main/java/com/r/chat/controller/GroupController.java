@@ -4,7 +4,7 @@ import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.vo.GroupInfoVO;
-import com.r.chat.result.Result;
+import com.r.chat.entity.result.Result;
 import com.r.chat.service.IGroupInfoService;
 import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;

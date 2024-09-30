@@ -8,7 +8,7 @@ import com.r.chat.entity.vo.SysSettingVO;
 import com.r.chat.entity.vo.UserTokenInfoVO;
 import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
-import com.r.chat.result.Result;
+import com.r.chat.entity.result.Result;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserInfoService;
 import com.r.chat.utils.CopyUtils;
