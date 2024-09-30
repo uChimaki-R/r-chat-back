@@ -3,8 +3,10 @@ package com.r.chat.controller;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.po.GroupInfo;
+import com.r.chat.entity.vo.GroupInfoVO;
 import com.r.chat.result.Result;
 import com.r.chat.service.IGroupInfoService;
+import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,9 +38,9 @@ public class GroupController {
      * 获取自己创建的群组
      */
     @GetMapping("/loadMyGroup")
-    public Result<List<GroupInfo>> loadMyGroup() {
+    public Result<List<GroupInfoVO>> loadMyGroup() {
         String ownerId = UserIdContext.getCurrentUserId();
         List<GroupInfo> list = groupInfoService.lambdaQuery().eq(GroupInfo::getGroupOwnerId, ownerId).list();
-        return Result.success(list);
+        return Result.success(CopyUtils.copyList(list, GroupInfoVO.class));
     }
 }

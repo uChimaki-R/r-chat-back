@@ -3,8 +3,8 @@ package com.r.chat.controller;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
-import com.r.chat.entity.dto.SysSettingDTO;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
+import com.r.chat.entity.vo.SysSettingVO;
 import com.r.chat.entity.vo.UserTokenInfoVO;
 import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
@@ -97,7 +97,8 @@ public class AccountController {
      * 获取系统设置
      */
     @GetMapping("/getSysSetting")
-    public Result<SysSettingDTO> getSysSetting() {
-        return Result.success(redisUtils.getSysSetting());
+    public Result<SysSettingVO> getSysSetting() {
+        SysSettingVO sysSettingVO = CopyUtils.copyBean(redisUtils.getSysSetting(), SysSettingVO.class);
+        return Result.success(sysSettingVO);
     }
 }
