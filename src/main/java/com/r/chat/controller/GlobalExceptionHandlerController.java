@@ -2,7 +2,7 @@ package com.r.chat.controller;
 
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.ResponseCodeEnum;
-import com.r.chat.entity.vo.Result;
+import com.r.chat.result.Result;
 import com.r.chat.exception.BusinessException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

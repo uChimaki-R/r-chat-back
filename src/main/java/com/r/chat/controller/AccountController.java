@@ -7,7 +7,7 @@ import com.r.chat.entity.dto.SysSettingDTO;
 import com.r.chat.entity.vo.UserInfoToken;
 import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
-import com.r.chat.entity.vo.Result;
+import com.r.chat.result.Result;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserInfoService;
 import com.wf.captcha.ArithmeticCaptcha;
