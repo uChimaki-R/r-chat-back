@@ -11,10 +11,10 @@ import com.r.chat.redis.RedisOperation;
 import com.r.chat.result.Result;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserInfoService;
+import com.r.chat.utils.CopyUtils;
 import com.wf.captcha.ArithmeticCaptcha;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -89,8 +89,7 @@ public class AccountController {
         checkCheckCode(loginDTO.getCheckCodeKey(), loginDTO.getCheckCode());
         // 登陆账号
         UserTokenInfoDTO userTokenInfoDTO = userInfoService.login(loginDTO);
-        UserTokenInfoVO userTokenInfoVO = new UserTokenInfoVO();
-        BeanUtils.copyProperties(userTokenInfoDTO, userTokenInfoVO);
+        UserTokenInfoVO userTokenInfoVO = CopyUtils.copyBean(userTokenInfoDTO, UserTokenInfoVO.class);
         return Result.success(userTokenInfoVO);
     }
 

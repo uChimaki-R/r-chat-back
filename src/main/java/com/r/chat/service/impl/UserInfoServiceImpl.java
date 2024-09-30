@@ -16,10 +16,10 @@ import com.r.chat.properties.AppProperties;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.r.chat.utils.CopyUtils;
 import com.r.chat.utils.MyStringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,8 +54,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             log.warn("拒绝注册: 邮箱 [{}] 已存在", userInfo.getEmail());
             throw new EmailAlreadyRegisteredException(Constants.MESSAGE_EMAIL_ALREADY_REGISTERED);
         }
-        // 新增用户
-        userInfo = new UserInfo();
         // 随机获取一个userId
         String userId = MyStringUtils.getRandomUserId();
         // 判断是否可以使用靓号注册，可以的话需要替换为靓号
@@ -69,7 +67,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             userInfoBeautyMapper.updateById(userInfoBeauty);
         }
         LocalDateTime now = LocalDateTime.now();
-        BeanUtils.copyProperties(registerDTO, userInfo);
+        userInfo = CopyUtils.copyBean(registerDTO, UserInfo.class);
         userInfo.setUserId(userId);
         userInfo.setPassword(MyStringUtils.encodeMd5(registerDTO.getPassword())); // 使用md5加密后再存储
         userInfo.setStatus(UserInfoStatusEnum.ENABLE);
@@ -105,8 +103,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             log.warn("拒绝登录: 账号 [{}] 已被锁定", loginDTO.getEmail());
             throw new AccountDisableException(Constants.MESSAGE_ACCOUNT_DISABLE);
         }
-        UserTokenInfoDTO userTokenInfoDTO = new UserTokenInfoDTO();
-        BeanUtils.copyProperties(userInfo, userTokenInfoDTO);
+        UserTokenInfoDTO userTokenInfoDTO = CopyUtils.copyBean(userInfo, UserTokenInfoDTO.class);
         // 查看是否管理员账号
         boolean isAdmin = appProperties.getAdminEmails().contains(userInfo.getEmail());
         userTokenInfoDTO.setAdmin(isAdmin);

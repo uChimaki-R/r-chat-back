@@ -4,8 +4,8 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.SysSettingDTO;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.properties.DefaultSysSettingProperties;
+import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -57,8 +57,7 @@ public class RedisUtils {
         SysSettingDTO sysSettingDTO = (SysSettingDTO) redisOperation.get(Constants.REDIS_KEY_SYS_SETTINGS);
         if (sysSettingDTO == null) {
             // 获取默认配置
-            sysSettingDTO = new SysSettingDTO();
-            BeanUtils.copyProperties(defaultSysSettingProperties, sysSettingDTO);
+            sysSettingDTO = CopyUtils.copyBean(defaultSysSettingProperties, SysSettingDTO.class);
         }
         return sysSettingDTO;
     }

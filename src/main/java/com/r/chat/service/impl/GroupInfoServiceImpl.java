@@ -20,11 +20,11 @@ import com.r.chat.properties.AppProperties;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IGroupInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.r.chat.utils.CopyUtils;
 import com.r.chat.utils.MyStringUtils;
 import com.r.chat.utils.VerifyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,8 +52,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     public void saveOrUpdateGroupInfo(GroupInfoDTO groupInfoDTO) {
         LocalDateTime now = LocalDateTime.now();  // 当前时间
         // 填充GroupInfo对象
-        GroupInfo groupInfo = new GroupInfo();
-        BeanUtils.copyProperties(groupInfoDTO, groupInfo);
+        GroupInfo groupInfo = CopyUtils.copyBean(groupInfoDTO, GroupInfo.class);
 
         if (StringUtils.isEmpty(groupInfoDTO.getGroupId())) {
             // 新增群组
