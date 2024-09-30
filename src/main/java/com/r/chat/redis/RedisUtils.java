@@ -2,7 +2,7 @@ package com.r.chat.redis;
 
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.SysSettingDTO;
-import com.r.chat.entity.vo.UserInfoToken;
+import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.properties.DefaultSysSettingProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -29,24 +29,24 @@ public class RedisUtils {
     /**
      * 保存用户token信息
      */
-    public void saveUserTokenInfo(UserInfoToken userInfoToken) {
+    public void saveUserTokenInfo(UserTokenInfoDTO userTokenInfoDTO) {
         // 保存两份信息，一份是用token找到用户信息，一份是userId找到token
         // 保存一天的登录信息
-        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_TOKEN + userInfoToken.getToken(), userInfoToken, 1, TimeUnit.DAYS);
-        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_ID + userInfoToken.getUserId(), userInfoToken.getToken(), 1, TimeUnit.DAYS);
+        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_TOKEN + userTokenInfoDTO.getToken(), userTokenInfoDTO, 1, TimeUnit.DAYS);
+        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_ID + userTokenInfoDTO.getUserId(), userTokenInfoDTO.getToken(), 1, TimeUnit.DAYS);
     }
 
     /**
      * 根据token获取用户信息
      */
-    public UserInfoToken getUserInfoToken(String token) {
-        return (UserInfoToken) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
+    public UserTokenInfoDTO getUserTokenInfo(String token) {
+        return (UserTokenInfoDTO) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
     }
 
     /**
      * 根据用户id获取token
      */
-    public String getToken(String userId) {
+    public String getUserToken(String userId) {
         return (String) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_ID + userId);
     }
 
