@@ -10,7 +10,6 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class SysSettingDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
