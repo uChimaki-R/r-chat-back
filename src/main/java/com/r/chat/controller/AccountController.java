@@ -4,7 +4,8 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
 import com.r.chat.entity.dto.SysSettingDTO;
-import com.r.chat.entity.vo.UserInfoToken;
+import com.r.chat.entity.dto.UserTokenInfoDTO;
+import com.r.chat.entity.vo.UserTokenInfoVO;
 import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
 import com.r.chat.result.Result;
@@ -13,6 +14,7 @@ import com.r.chat.service.IUserInfoService;
 import com.wf.captcha.ArithmeticCaptcha;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -81,13 +83,15 @@ public class AccountController {
      * 登录账号
      */
     @PostMapping("/login")
-    public Result<UserInfoToken> login(LoginDTO loginDTO) {
+    public Result<UserTokenInfoVO> login(LoginDTO loginDTO) {
         log.info("用户登录: {}", loginDTO);
         // 先判断验证码是否正确
         checkCheckCode(loginDTO.getCheckCodeKey(), loginDTO.getCheckCode());
         // 登陆账号
-        UserInfoToken userInfoToken = userInfoService.login(loginDTO);
-        return Result.success(userInfoToken);
+        UserTokenInfoDTO userTokenInfoDTO = userInfoService.login(loginDTO);
+        UserTokenInfoVO userTokenInfoVO = new UserTokenInfoVO();
+        BeanUtils.copyProperties(userTokenInfoDTO, userTokenInfoVO);
+        return Result.success(userTokenInfoVO);
     }
 
     /**
