@@ -2,4 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.r.chat.mapper.UserContactMapper">
 
+    <select id="selectGroupMemberByGroupId" resultType="com.r.chat.entity.dto.GroupMemberInfoDTO">
+        select uc.user_id, ui.nick_name
+        from r_chat.user_contact uc
+                 join r_chat.user_info ui on uc.user_id = ui.user_id
+        where uc.contact_id = #{groupId}
+        order by uc.create_time
+    </select>
 </mapper>
