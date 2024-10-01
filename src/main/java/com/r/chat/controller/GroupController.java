@@ -3,12 +3,15 @@ package com.r.chat.controller;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
+import com.r.chat.entity.dto.GroupMemberInfoDTO;
 import com.r.chat.entity.enums.GroupInfoStatusEnum;
 import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
+import com.r.chat.entity.vo.GroupInfo4ChatVO;
 import com.r.chat.entity.vo.GroupInfoVO;
 import com.r.chat.entity.result.Result;
+import com.r.chat.entity.vo.GroupMemberInfoVO;
 import com.r.chat.exception.GroupAlreadyDisbandException;
 import com.r.chat.exception.GroupNotExistException;
 import com.r.chat.exception.IllegalOperationException;
@@ -51,13 +54,13 @@ public class GroupController {
     public Result<List<GroupInfoVO>> loadMyGroup() {
         String ownerId = UserIdContext.getCurrentUserId();
         List<GroupInfo> list = groupInfoService.lambdaQuery().eq(GroupInfo::getGroupOwnerId, ownerId).list();
-        List<GroupInfoVO> groupInfoVOS = CopyUtils.copyList(list, GroupInfoVO.class);
-        initGroupMemberCounts(groupInfoVOS);  // 计算群成员数
-        return Result.success(groupInfoVOS);
+        List<GroupInfoVO> groupInfoVOList = CopyUtils.copyList(list, GroupInfoVO.class);
+        initGroupMemberCounts(groupInfoVOList);  // 计算群成员数
+        return Result.success(groupInfoVOList);
     }
 
     /**
-     * 获取群聊详情
+     * 获取群聊简介部分详情
      */
     @GetMapping("/getGroupInfo")
     public Result<GroupInfoVO> getGroupInfo(String groupId) {
@@ -65,6 +68,27 @@ public class GroupController {
         GroupInfoVO groupInfoVO = CopyUtils.copyBean(groupInfo, GroupInfoVO.class);
         initGroupMemberCounts(groupInfoVO);  // 计算群成员数
         return Result.success(groupInfoVO);
+    }
+
+    /**
+     * 获取群聊详情，包括群成员清单
+     */
+    @GetMapping("getGroupInfo4Chat")
+    public Result<GroupInfo4ChatVO> getGroupInfo4Chat(String groupId) {
+        GroupInfo4ChatVO groupInfo4ChatVO = new GroupInfo4ChatVO();
+
+        // 群聊信息
+        GroupInfo groupInfo = getBasicGroupInfo(groupId);
+        GroupInfoVO groupInfoVO = CopyUtils.copyBean(groupInfo, GroupInfoVO.class);
+        initGroupMemberCounts(groupInfoVO);
+
+        // 获取群成员信息
+        List<GroupMemberInfoDTO> groupMemberInfoDTOList = userContactService.getGroupMemberInfo(groupId);
+        List<GroupMemberInfoVO> userContactList = CopyUtils.copyList(groupMemberInfoDTOList, GroupMemberInfoVO.class);
+
+        groupInfo4ChatVO.setGroupInfo(groupInfoVO);
+        groupInfo4ChatVO.setUserContactList(userContactList);
+        return Result.success(groupInfo4ChatVO);
     }
 
     /**
