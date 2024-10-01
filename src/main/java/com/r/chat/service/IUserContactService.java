@@ -1,5 +1,6 @@
 package com.r.chat.service;
 
+import com.r.chat.entity.dto.ContactSearchResultDTO;
 import com.r.chat.entity.dto.GroupMemberInfoDTO;
 import com.r.chat.entity.po.UserContact;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -20,4 +21,9 @@ public interface IUserContactService extends IService<UserContact> {
      * 获取群聊的群成员信息
      */
     List<GroupMemberInfoDTO> getGroupMemberInfo(String groupId);
+
+    /**
+     * 搜索联系人
+     */
+    ContactSearchResultDTO search(String contactId);
 }
