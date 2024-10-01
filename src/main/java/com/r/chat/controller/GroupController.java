@@ -12,7 +12,7 @@ import com.r.chat.entity.vo.GroupInfo4ChatVO;
 import com.r.chat.entity.vo.GroupInfoVO;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.GroupMemberInfoVO;
-import com.r.chat.exception.GroupAlreadyDisbandException;
+import com.r.chat.exception.GroupDisbandException;
 import com.r.chat.exception.GroupNotExistException;
 import com.r.chat.exception.IllegalOperationException;
 import com.r.chat.service.IGroupInfoService;
@@ -127,7 +127,7 @@ public class GroupController {
         }
         if (GroupInfoStatusEnum.DISBAND.equals(groupInfo.getStatus())) {
             // 群聊已解散
-            throw new GroupAlreadyDisbandException(Constants.MESSAGE_GROUP_ALREADY_DISBAND);
+            throw new GroupDisbandException(Constants.MESSAGE_GROUP_ALREADY_DISBAND);
         }
         return groupInfo;
     }
