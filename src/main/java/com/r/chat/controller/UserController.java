@@ -18,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/account")
 @RequiredArgsConstructor
-public class AccountController {
+public class UserController {
     private final RedisOperation redisOperation;
     private final IUserInfoService userInfoService;
     private final RedisUtils redisUtils;
