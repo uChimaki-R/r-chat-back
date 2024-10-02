@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.Collections;
 import java.util.List;
 
@@ -64,7 +65,7 @@ public class GroupController {
      * 获取群聊简介部分的详情
      */
     @GetMapping("/getGroupInfo")
-    public Result<GroupInfoVO> getGroupInfo(String groupId) {
+    public Result<GroupInfoVO> getGroupInfo(@NotEmpty String groupId) {
         log.info("获取群聊简介部分的详情 groupId: {}", groupId);
         GroupInfo groupInfo = getBasicGroupInfo(groupId);
         GroupInfoVO groupInfoVO = CopyUtils.copyBean(groupInfo, GroupInfoVO.class);
@@ -76,7 +77,7 @@ public class GroupController {
      * 获取群聊详情，包括群成员清单
      */
     @GetMapping("getGroupInfo4Chat")
-    public Result<GroupInfo4ChatVO> getGroupInfo4Chat(String groupId) {
+    public Result<GroupInfo4ChatVO> getGroupInfo4Chat(@NotEmpty String groupId) {
         log.info("获取群聊详情(包括群成员清单) groupId: {}", groupId);
         GroupInfo4ChatVO groupInfo4ChatVO = new GroupInfo4ChatVO();
 

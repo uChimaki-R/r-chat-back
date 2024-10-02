@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +55,7 @@ public class UserController {
      * @param checkCodeKey UUID唯一标识
      * @param checkCode    输入的验证码
      */
-    private void checkCheckCode(String checkCodeKey, String checkCode) {
+    private void checkCheckCode(@NotEmpty String checkCodeKey, @NotEmpty String checkCode) {
         // 获取正确的验证码
         String code = (String) redisOperation.get(Constants.REDIS_KEY_PREFIX_CHECK_CODE + checkCodeKey);
         // 无论成功与否都要删除掉验证码，防止重复提交暴力破解验证码
