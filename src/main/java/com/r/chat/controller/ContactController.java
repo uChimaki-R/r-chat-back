@@ -23,6 +23,7 @@ public class ContactController {
      */
     @GetMapping("/search")
     public Result<ContactSearchResultVO> search(String contactId) {
+        log.info("搜索用户或群组 contactId: {}", contactId);
         ContactSearchResultDTO contactSearchResultDTO = userContactService.search(contactId);
         ContactSearchResultVO contactSearchResultVO = CopyUtils.copyBean(contactSearchResultDTO, ContactSearchResultVO.class);
         return Result.success(contactSearchResultVO);

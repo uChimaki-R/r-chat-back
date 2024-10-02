@@ -1,5 +1,6 @@
 package com.r.chat.interceptor;
 
+import com.alibaba.fastjson.JSONObject;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.context.UserInfoTokenContext;
 import com.r.chat.entity.constants.Constants;
@@ -30,6 +31,18 @@ public class TokenInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        log.info("----------------------------------------------------------------");
+        log.info("请求uri : {}", request.getRequestURI());
+        log.info("请求方法 : {}", request.getMethod());
+        log.info("请求ip : {}", request.getRemoteAddr());
+        JSONObject json = new JSONObject();
+        request.getParameterMap().forEach((key, value) -> {
+            json.put(key, request.getParameter(key));
+        });
+        if (!json.isEmpty()) {
+            log.info("请求参数: {}", json.toJSONString());
+        }
+
         // 从请求头中获取token
         String token = request.getHeader("token");
         if (token == null) {
@@ -45,6 +58,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             UserInfoTokenContext.setCurrentUserInfoToken(userTokenInfoDTO);
             UserIdContext.setCurrentUserId(userTokenInfoDTO.getUserId());
             // 放行
+            log.info("<<<<<<<<<<<<<<<<<<<<<<<< [{}] <<<<<<<<<<<<<<<<<<<<<<<<", UserIdContext.getCurrentUserId());
             return true;
         } catch (Exception ex) {
             log.warn("拒绝请求: 无法获取该token对应的用户信息");
@@ -54,6 +68,7 @@ public class TokenInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>> [{}] >>>>>>>>>>>>>>>>>>>>>>>>", UserIdContext.getCurrentUserId());
         // 释放上下文对象
         UserInfoTokenContext.removeCurrentUserInfoToken();
         UserIdContext.removeCurrentUserId();

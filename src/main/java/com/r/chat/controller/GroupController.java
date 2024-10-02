@@ -42,7 +42,7 @@ public class GroupController {
      */
     @PostMapping("/saveGroup")
     public Result<String> saveGroup(GroupInfoDTO groupInfoDTO) {
-        log.info("群聊操作: {}", groupInfoDTO);
+        log.info("新增或修改群聊信息 {}", groupInfoDTO);
         groupInfoService.saveOrUpdateGroupInfo(groupInfoDTO);
         return Result.success();
     }
@@ -53,6 +53,7 @@ public class GroupController {
     @GetMapping("/loadMyGroup")
     public Result<List<GroupInfoVO>> loadMyGroup() {
         String ownerId = UserIdContext.getCurrentUserId();
+        log.info("获取创建的群聊");
         List<GroupInfo> list = groupInfoService.lambdaQuery().eq(GroupInfo::getGroupOwnerId, ownerId).list();
         List<GroupInfoVO> groupInfoVOList = CopyUtils.copyList(list, GroupInfoVO.class);
         initGroupMemberCounts(groupInfoVOList);  // 计算群成员数
@@ -60,10 +61,11 @@ public class GroupController {
     }
 
     /**
-     * 获取群聊简介部分详情
+     * 获取群聊简介部分的详情
      */
     @GetMapping("/getGroupInfo")
     public Result<GroupInfoVO> getGroupInfo(String groupId) {
+        log.info("获取群聊简介部分的详情 groupId: {}", groupId);
         GroupInfo groupInfo = getBasicGroupInfo(groupId);
         GroupInfoVO groupInfoVO = CopyUtils.copyBean(groupInfo, GroupInfoVO.class);
         initGroupMemberCounts(groupInfoVO);  // 计算群成员数
@@ -75,6 +77,7 @@ public class GroupController {
      */
     @GetMapping("getGroupInfo4Chat")
     public Result<GroupInfo4ChatVO> getGroupInfo4Chat(String groupId) {
+        log.info("获取群聊详情(包括群成员清单) groupId: {}", groupId);
         GroupInfo4ChatVO groupInfo4ChatVO = new GroupInfo4ChatVO();
 
         // 群聊信息

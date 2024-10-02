@@ -19,6 +19,7 @@ import com.r.chat.mapper.UserInfoMapper;
 import com.r.chat.service.IUserContactService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.Objects;
  * @author r-pocky
  * @since 2024-09-28
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserContact> implements IUserContactService {
@@ -51,6 +53,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         IdPrefixEnum prefix = IdPrefixEnum.getByPrefix(contactId.charAt(0));
         if (prefix == null) {
             // id输错，默认报用户不存在
+            log.warn("搜索id前缀错误");
             throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
         }
         contactSearchResultDTO.setContactType(
@@ -63,6 +66,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 userInfoQueryWrapper.lambda().eq(UserInfo::getUserId, contactId);
                 UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
                 if (userInfo == null) {
+                    log.warn("搜索不到该用户: {}", contactId);
                     throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
                 }
                 // 如果是用户的话填写昵称、性别、地区信息
@@ -75,16 +79,19 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 groupInfoQueryWrapper.lambda().eq(GroupInfo::getGroupId, contactId);
                 GroupInfo groupInfo = groupInfoMapper.selectOne(groupInfoQueryWrapper);
                 if (groupInfo == null) {
+                    log.warn("搜索不到该群组: {}", contactId);
                     throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
                 }
                 // 如果是群组的话填写名称为群名
                 contactSearchResultDTO.setNickName(groupInfo.getGroupName());
                 break;
             default:
+                log.warn("进入非USER/GROUP的default分支");
                 throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
         }
         // 自己查自己的话就直接返回
         if (Objects.equals(UserIdContext.getCurrentUserId(), contactId)) {
+            log.info("搜索自己: {}", contactSearchResultDTO);
             return contactSearchResultDTO;
         }
         // 否则补充此联系人和自己的关系（是不是朋友，有没有拉黑状态等等）
@@ -93,7 +100,8 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
                 .eq(UserContact::getContactId, contactId);
         UserContact userContact = userContactMapper.selectOne(userContactQueryWrapper);
-        contactSearchResultDTO.setStatus(userContact == null? UserContactStatusEnum.NOT_FRIENDS: userContact.getStatus());
+        contactSearchResultDTO.setStatus(userContact == null ? UserContactStatusEnum.NOT_FRIENDS : userContact.getStatus());
+        log.info("搜索结果: {}", contactSearchResultDTO);
         return contactSearchResultDTO;
     }
 }
