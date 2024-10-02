@@ -1,5 +1,6 @@
 package com.r.chat.entity.vo;
 
+import com.r.chat.entity.enums.JoinTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,7 +44,7 @@ public class GroupInfoVO implements Serializable {
     /**
      * 加群类型：0：直接加入 1：管理员同意后加入
      */
-    private Integer joinType;
+    private JoinTypeEnum joinType;
 
     /**
      * 群成员数

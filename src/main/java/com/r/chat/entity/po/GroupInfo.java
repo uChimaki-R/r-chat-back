@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.r.chat.entity.enums.GroupInfoStatusEnum;
+import com.r.chat.entity.enums.JoinTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -66,7 +67,7 @@ public class GroupInfo implements Serializable {
      * 加群类型：0：直接加入 1：管理员同意后加入
      */
     @TableField("join_type")
-    private Integer joinType;
+    private JoinTypeEnum joinType;
 
     /**
      * 状态：1：正常 0：解散

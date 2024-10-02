@@ -7,8 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.r.chat.entity.enums.JoinTypeEnum;
 import com.r.chat.entity.enums.UserInfoStatusEnum;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -49,7 +49,7 @@ public class UserInfo implements Serializable {
     /**
      * 好友添加模式 0: 可以直接添加好友 1: 同意后添加好友
      */
-    private Integer joinType;
+    private JoinTypeEnum joinType;
 
     /**
      * 性别 0：女 1：男

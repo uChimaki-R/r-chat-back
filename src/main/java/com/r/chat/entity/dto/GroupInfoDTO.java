@@ -1,7 +1,7 @@
 package com.r.chat.entity.dto;
 
+import com.r.chat.entity.enums.JoinTypeEnum;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,7 +37,7 @@ public class GroupInfoDTO implements Serializable {
     /**
      * 加群类型：0：直接加入 1：管理员同意后加入
      */
-    private Integer joinType;
+    private JoinTypeEnum joinType;
 
     /**
      * 头像图片文件，一个压缩过一个没压缩过

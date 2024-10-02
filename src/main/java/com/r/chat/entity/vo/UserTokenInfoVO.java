@@ -1,5 +1,6 @@
 package com.r.chat.entity.vo;
 
+import com.r.chat.entity.enums.JoinTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,7 +30,7 @@ public class UserTokenInfoVO implements Serializable {
     /**
      * 好友添加模式 0: 可以直接添加好友 1: 同意后添加好友
      */
-    private Integer joinType;
+    private JoinTypeEnum joinType;
 
     /**
      * 性别
