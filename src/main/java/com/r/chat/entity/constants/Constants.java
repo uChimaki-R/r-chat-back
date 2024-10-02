@@ -30,9 +30,13 @@ public class Constants {
     public static final String MESSAGE_GROUP_NOT_EXIST = "群聊不存在";
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
     public static final String MESSAGE_NOT_IN_THE_GROUP = "不在此群聊";
+    public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
 
     // file
     public static final String FILE_FOLDER_AVATAR = "avatar";
     public static final String FILE_SUFFIX_AVATAR = ".png";
     public static final String FILE_SUFFIX_COVER = "_cover.png";
+
+    // other
+    public static final String IN_SWITCH_DEFAULT = "进入default分支";
 }
