@@ -33,4 +33,8 @@ public enum IdPrefixEnum {
         }
         return null;
     }
+
+    public UserContactTypeEnum getUserContactTypeEnum() {
+        return this == USER ? UserContactTypeEnum.FRIENDS : UserContactTypeEnum.GROUP;
+    }
 }
