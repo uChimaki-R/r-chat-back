@@ -88,11 +88,8 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             log.info("新增群聊成功: {}", groupInfo);
         } else {
             // 修改群聊信息
-            if (!VerifyUtils.isCurrentUser(groupInfoDTO.getGroupOwnerId())) {
-                // 操作群的人不是群聊
-                log.warn("拒绝群聊操作: 非群主操作, 操作者: {}", UserIdContext.getCurrentUserId());
-                throw new IllegalOperationException(Constants.MESSAGE_NOT_GROUP_OWNER_OPERATION);
-            }
+            // 需要断言当前的用户就是群主
+            VerifyUtils.assertIsCurrentUser(groupInfoDTO.getGroupOwnerId());
             updateById(groupInfo);
             log.info("修改群聊信息成功: {}", groupInfo);
         }
