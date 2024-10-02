@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 @Data
@@ -16,7 +15,6 @@ public class ApplyDTO implements Serializable {
     /**
      * 打算添加的联系人id
      */
-    @NotEmpty
     private String contactId;
 
     /**

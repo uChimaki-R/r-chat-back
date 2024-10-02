@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotEmpty;
-
 @Slf4j
 @RestController
 @RequestMapping("/contact")
@@ -27,7 +25,7 @@ public class ContactController {
      * 搜索用户或群组
      */
     @GetMapping("/search")
-    public Result<ContactSearchResultVO> search(@NotEmpty String contactId) {
+    public Result<ContactSearchResultVO> search(String contactId) {
         log.info("搜索用户或群组 contactId: {}", contactId);
         ContactSearchResultDTO contactSearchResultDTO = userContactService.search(contactId);
         ContactSearchResultVO contactSearchResultVO = CopyUtils.copyBean(contactSearchResultDTO, ContactSearchResultVO.class);
