@@ -6,12 +6,15 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.r.chat.entity.enums.UserContactApplyStatusEnum;
 import com.r.chat.entity.enums.UserContactTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * <p>
@@ -42,7 +45,7 @@ public class UserContactApply implements Serializable {
     private String applyUserId;
 
     /**
-     * 接收人id（加群的时候是群聊id）
+     * 接收人id（加群的时候是群主id）
      */
     @TableField("receive_user_id")
     private String receiveUserId;
@@ -63,7 +66,9 @@ public class UserContactApply implements Serializable {
      * 最后申请时间
      */
     @TableField("last_apply_time")
-    private Long lastApplyTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastApplyTime;
 
     /**
      * 状态：0：待处理 1：已同意 2：已拒绝 3：已拉黑
