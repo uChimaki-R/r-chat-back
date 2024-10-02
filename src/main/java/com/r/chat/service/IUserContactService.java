@@ -1,7 +1,9 @@
 package com.r.chat.service;
 
+import com.r.chat.entity.dto.ApplyDTO;
 import com.r.chat.entity.dto.ContactSearchResultDTO;
 import com.r.chat.entity.dto.GroupMemberInfoDTO;
+import com.r.chat.entity.enums.JoinTypeEnum;
 import com.r.chat.entity.po.UserContact;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -26,4 +28,9 @@ public interface IUserContactService extends IService<UserContact> {
      * 搜索联系人
      */
     ContactSearchResultDTO search(String contactId);
+
+    /**
+     * 请求添加联系人
+     */
+    JoinTypeEnum applyAdd(ApplyDTO applyDTO);
 }
