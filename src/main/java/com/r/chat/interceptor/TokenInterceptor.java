@@ -68,7 +68,9 @@ public class TokenInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>> [{}] >>>>>>>>>>>>>>>>>>>>>>>>", UserIdContext.getCurrentUserId());
+        if (UserIdContext.getCurrentUserId() != null) {
+            log.info(">>>>>>>>>>>>>>>>>>>>>>>> [{}] >>>>>>>>>>>>>>>>>>>>>>>>", UserIdContext.getCurrentUserId());
+        }
         // 释放上下文对象
         UserInfoTokenContext.removeCurrentUserInfoToken();
         UserIdContext.removeCurrentUserId();
