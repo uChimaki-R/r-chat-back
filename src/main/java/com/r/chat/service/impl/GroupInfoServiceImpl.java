@@ -60,7 +60,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             Long count = lambdaQuery().eq(GroupInfo::getGroupOwnerId, groupInfoDTO.getGroupOwnerId()).count();
             if (count > sysSettingDTO.getMaxGroupCount()) {
                 log.warn("拒绝新增群聊: 群聊数量达到上限 [{}]", sysSettingDTO.getMaxGroupCount());
-                throw new GroupCountLimitException(Constants.MESSAGE_GROUP_COUNT_LIMIT + ": [" + sysSettingDTO.getMaxGroupCount() + "]");
+                throw new GroupCountLimitException(String.format(Constants.MESSAGE_GROUP_COUNT_LIMIT, sysSettingDTO.getMaxGroupCount()));
             }
 
             // 没有携带群头像
