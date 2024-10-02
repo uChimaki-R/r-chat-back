@@ -52,9 +52,8 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         // 先根据传入的id前缀判断是打算加用户还是加群聊
         IdPrefixEnum prefix = IdPrefixEnum.getByPrefix(contactId.charAt(0));
         if (prefix == null) {
-            // id输错，默认报用户不存在
             log.warn("搜索id前缀错误");
-            throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
+            return null;  // return null后前端会处理显示无结果
         }
         contactSearchResultDTO.setContactType(
                 prefix == IdPrefixEnum.USER ? UserContactTypeEnum.FRIENDS : UserContactTypeEnum.GROUP
@@ -67,7 +66,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
                 if (userInfo == null) {
                     log.warn("搜索不到该用户: {}", contactId);
-                    throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
+                    return null;  // return null后前端会处理显示无结果
                 }
                 // 如果是用户的话填写昵称、性别、地区信息
                 contactSearchResultDTO.setNickName(userInfo.getNickName());
@@ -80,14 +79,14 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 GroupInfo groupInfo = groupInfoMapper.selectOne(groupInfoQueryWrapper);
                 if (groupInfo == null) {
                     log.warn("搜索不到该群组: {}", contactId);
-                    throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
+                    return null;  // return null后前端会处理显示无结果
                 }
                 // 如果是群组的话填写名称为群名
                 contactSearchResultDTO.setNickName(groupInfo.getGroupName());
                 break;
             default:
                 log.warn("进入非USER/GROUP的default分支");
-                throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
+                return null;  // return null后前端会处理显示无结果
         }
         // 自己查自己的话就直接返回
         if (Objects.equals(UserIdContext.getCurrentUserId(), contactId)) {
