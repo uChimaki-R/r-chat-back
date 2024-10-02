@@ -25,7 +25,7 @@ public class Constants {
     public static final String MESSAGE_NOT_LOGIN = "登录超时";
     public static final String MESSAGE_GROUP_COUNT_LIMIT = "拥有的群聊数量达到上限";
     public static final String MESSAGE_MISSING_AVATAR_FILE = "缺少头像文件";
-    public static final String MESSAGE_NOT_GROUP_OWNER_OPERATION = "非群主操作";
+    public static final String MESSAGE_ILLEGAL_OPERATION = "非法操作";
     public static final String MESSAGE_FAILED_TO_SAVE_AVATAR_FILE = "头像保存失败";
     public static final String MESSAGE_GROUP_NOT_EXIST = "群聊不存在";
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
