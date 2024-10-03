@@ -2,8 +2,9 @@ package com.r.chat.service;
 
 import com.r.chat.entity.dto.ApplyDTO;
 import com.r.chat.entity.dto.ContactSearchResultDTO;
-import com.r.chat.entity.dto.GroupMemberInfoDTO;
+import com.r.chat.entity.dto.BasicInfoDTO;
 import com.r.chat.entity.enums.JoinTypeEnum;
+import com.r.chat.entity.enums.UserContactTypeEnum;
 import com.r.chat.entity.po.UserContact;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -22,7 +23,7 @@ public interface IUserContactService extends IService<UserContact> {
     /**
      * 获取群聊的群成员信息
      */
-    List<GroupMemberInfoDTO> getGroupMemberInfo(String groupId);
+    List<BasicInfoDTO> getGroupMemberInfo(String groupId);
 
     /**
      * 搜索联系人
@@ -33,4 +34,9 @@ public interface IUserContactService extends IService<UserContact> {
      * 请求添加联系人
      */
     JoinTypeEnum applyAdd(ApplyDTO applyDTO);
+
+    /**
+     * 获取好友或加入的群聊的信息
+     */
+    List<BasicInfoDTO> loadContact(UserContactTypeEnum userContactType);
 }
