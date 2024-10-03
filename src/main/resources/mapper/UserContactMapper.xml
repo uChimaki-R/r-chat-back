@@ -2,11 +2,31 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.r.chat.mapper.UserContactMapper">
 
-    <select id="selectGroupMemberByGroupId" resultType="com.r.chat.entity.dto.GroupMemberInfoDTO">
-        select uc.user_id, ui.nick_name
+    <select id="selectGroupMemberByGroupId" resultType="com.r.chat.entity.dto.BasicInfoDTO">
+        select uc.user_id userOrGroupId, ui.nick_name userOrGroupName
         from r_chat.user_contact uc
                  join r_chat.user_info ui on uc.user_id = ui.user_id
         where uc.contact_id = #{groupId}
         order by uc.create_time
+    </select>
+
+    <select id="selectUserFriends" resultType="com.r.chat.entity.dto.BasicInfoDTO"
+            parameterType="java.lang.String">
+        select uc.contact_id userOrGroupId, ui.nick_name userOrGroupName
+        from r_chat.user_contact uc
+                 join r_chat.user_info ui on uc.contact_id = ui.user_id
+        where uc.user_id = #{userId}
+          and uc.status = 1
+        order by ui.nick_name
+    </select>
+
+    <select id="selectGroupFriends" resultType="com.r.chat.entity.dto.BasicInfoDTO"
+            parameterType="java.lang.String">
+        select uc.contact_id userOrGroupId, gi.group_name userOrGroupName
+        from r_chat.user_contact uc
+                 join r_chat.group_info gi on uc.contact_id = gi.group_id
+        where uc.user_id = #{userId}
+          and uc.status = 1
+        order by gi.group_name
     </select>
 </mapper>
