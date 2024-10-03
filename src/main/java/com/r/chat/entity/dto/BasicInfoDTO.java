@@ -6,19 +6,22 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * 用户/群聊基础信息，包括id和名称
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupMemberInfoDTO implements Serializable {
+public class BasicInfoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 用户id
+     * id
      */
-    private String userId;
+    private String userOrGroupId;  // 本来名字想写成id的，但是感觉sql查询可能有报错隐患
 
     /**
-     * 用户昵称
+     * 昵称
      */
-    private String nickName;
+    private String userOrGroupName;
 }
