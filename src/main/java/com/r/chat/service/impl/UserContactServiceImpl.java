@@ -5,16 +5,13 @@ import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.ApplyDTO;
 import com.r.chat.entity.dto.ContactSearchResultDTO;
-import com.r.chat.entity.dto.GroupMemberInfoDTO;
+import com.r.chat.entity.dto.BasicInfoDTO;
 import com.r.chat.entity.enums.*;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
 import com.r.chat.entity.po.UserContactApply;
 import com.r.chat.entity.po.UserInfo;
-import com.r.chat.exception.BeingBlockedException;
-import com.r.chat.exception.GroupDisbandException;
-import com.r.chat.exception.GroupNotExistException;
-import com.r.chat.exception.UserNotExistException;
+import com.r.chat.exception.*;
 import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactApplyMapper;
 import com.r.chat.mapper.UserContactMapper;
@@ -47,7 +44,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     private final UserContactApplyMapper userContactApplyMapper;
 
     @Override
-    public List<GroupMemberInfoDTO> getGroupMemberInfo(String groupId) {
+    public List<BasicInfoDTO> getGroupMemberInfo(String groupId) {
         return userContactMapper.selectGroupMemberByGroupId(groupId);
     }
 
@@ -81,10 +78,10 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 groupInfoQueryWrapper.lambda().eq(GroupInfo::getGroupId, contactId);
                 GroupInfo groupInfo = groupInfoMapper.selectOne(groupInfoQueryWrapper);
                 if (groupInfo == null) {
-                    log.warn("搜索不到该群组");
+                    log.warn("搜索不到该群聊");
                     return null;  // return null后前端会处理显示无结果
                 }
-                // 如果是群组的话填写名称为群名
+                // 如果是群聊的话填写名称为群名
                 contactSearchResultDTO.setNickName(groupInfo.getGroupName());
                 break;
             default:
@@ -207,5 +204,30 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             log.info("发送ws消息通知接收者 receiveUserId: {}", receiveUserId);
         }
         return joinType;
+    }
+
+    @Override
+    public List<BasicInfoDTO> loadContact(UserContactTypeEnum userContactType) {
+        if (userContactType == null) {
+            log.warn("查询失败: 传入的联系人类型为null");
+            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+        }
+        // 因为还要查出用户名/群聊名，所以需要联查
+        // 而如果是用户，则联查用户信息表，群聊则联查群聊信息表
+        List<BasicInfoDTO> basicInfoDTOList;
+        switch (userContactType) {
+            case FRIENDS:
+                basicInfoDTOList = userContactMapper.selectUserFriends(UserIdContext.getCurrentUserId());
+                log.info("查询到好友列表: {}", basicInfoDTOList);
+                break;
+            case GROUP:
+                basicInfoDTOList = userContactMapper.selectGroupFriends(UserIdContext.getCurrentUserId());
+                log.info("查询到加入的群聊: {}", basicInfoDTOList);
+                break;
+            default:
+                log.warn(Constants.IN_SWITCH_DEFAULT);
+                throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+        }
+        return basicInfoDTOList;
     }
 }
