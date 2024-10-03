@@ -1,6 +1,5 @@
 package com.r.chat.service.impl;
 
-import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.dto.SysSettingDTO;
@@ -11,8 +10,7 @@ import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
 import com.r.chat.exception.FileSaveFailedException;
 import com.r.chat.exception.GroupCountLimitException;
-import com.r.chat.exception.IllegalOperationException;
-import com.r.chat.exception.MissingRequestParametersException;
+import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.properties.AppProperties;
@@ -66,7 +64,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             // 没有携带群头像
             if (groupInfoDTO.getAvatarFile() == null) {
                 log.warn("拒绝新增群聊: 未指定群头像");
-                throw new MissingRequestParametersException(Constants.MESSAGE_MISSING_AVATAR_FILE);
+                throw new ParameterErrorException(Constants.MESSAGE_MISSING_AVATAR_FILE);
             }
 
             // 添加群聊到数据库
