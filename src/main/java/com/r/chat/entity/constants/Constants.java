@@ -16,6 +16,8 @@ public class Constants {
     public static final String MESSAGE_SUCCESS = "请求成功";
     public static final String MESSAGE_INTERNAL_ERROR = "服务器内部错误";
     public static final String MESSAGE_NOT_FOUND = "请求地址不存在";
+    public static final String MESSAGE_ILLEGAL_OPERATION = "非法操作";
+    public static final String MESSAGE_PARAMETER_ERROR = "参数错误";
     public static final String MESSAGE_CHECK_CODE_ERROR = "验证码错误";
     public static final String MESSAGE_EMAIL_ALREADY_REGISTERED = "邮箱已注册";
     public static final String MESSAGE_USER_NOT_EXIST = "用户不存在";
@@ -25,7 +27,6 @@ public class Constants {
     public static final String MESSAGE_NOT_LOGIN = "登录超时";
     public static final String MESSAGE_GROUP_COUNT_LIMIT = "拥有的群聊数量达到上限: %d";
     public static final String MESSAGE_MISSING_AVATAR_FILE = "缺少头像文件";
-    public static final String MESSAGE_ILLEGAL_OPERATION = "非法操作";
     public static final String MESSAGE_FAILED_TO_SAVE_AVATAR_FILE = "头像保存失败";
     public static final String MESSAGE_GROUP_NOT_EXIST = "群聊不存在";
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
