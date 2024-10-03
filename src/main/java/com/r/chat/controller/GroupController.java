@@ -3,7 +3,7 @@ package com.r.chat.controller;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
-import com.r.chat.entity.dto.GroupMemberInfoDTO;
+import com.r.chat.entity.dto.BasicInfoDTO;
 import com.r.chat.entity.enums.GroupInfoStatusEnum;
 import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.po.GroupInfo;
@@ -11,7 +11,7 @@ import com.r.chat.entity.po.UserContact;
 import com.r.chat.entity.vo.GroupInfo4ChatVO;
 import com.r.chat.entity.vo.GroupInfoVO;
 import com.r.chat.entity.result.Result;
-import com.r.chat.entity.vo.GroupMemberInfoVO;
+import com.r.chat.entity.vo.BasicInfoVO;
 import com.r.chat.exception.GroupDisbandException;
 import com.r.chat.exception.GroupNotExistException;
 import com.r.chat.exception.IllegalOperationException;
@@ -86,8 +86,8 @@ public class GroupController {
         initGroupMemberCounts(groupInfoVO);
 
         // 获取群成员信息
-        List<GroupMemberInfoDTO> groupMemberInfoDTOList = userContactService.getGroupMemberInfo(groupId);
-        List<GroupMemberInfoVO> userContactList = CopyUtils.copyList(groupMemberInfoDTOList, GroupMemberInfoVO.class);
+        List<BasicInfoDTO> basicInfoDTOList = userContactService.getGroupMemberInfo(groupId);
+        List<BasicInfoVO> userContactList = CopyUtils.copyList(basicInfoDTOList, BasicInfoVO.class);
 
         groupInfo4ChatVO.setGroupInfo(groupInfoVO);
         groupInfo4ChatVO.setUserContactList(userContactList);
@@ -111,7 +111,7 @@ public class GroupController {
     }
 
     /**
-     * 获取群组基本信息
+     * 获取群聊基本信息
      */
     private GroupInfo getBasicGroupInfo(String groupId) {
         // 看该用户是否在群里
