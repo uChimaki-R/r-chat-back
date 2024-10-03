@@ -1,6 +1,5 @@
 package com.r.chat.entity.vo;
 
-import com.r.chat.entity.po.GroupInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,5 +21,5 @@ public class GroupInfo4ChatVO implements Serializable {
     /**
      * 群成员信息
      */
-    private List<GroupMemberInfoVO> userContactList;
+    private List<BasicInfoVO> userContactList;
 }
