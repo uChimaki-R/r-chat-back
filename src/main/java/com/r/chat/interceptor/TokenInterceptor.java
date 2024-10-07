@@ -2,7 +2,7 @@ package com.r.chat.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.r.chat.context.UserIdContext;
-import com.r.chat.context.UserInfoTokenContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.exception.LoginTimeOutException;
@@ -53,7 +53,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             // 用token从redis中获取用户对象
             UserTokenInfoDTO userTokenInfoDTO = redisUtils.getUserTokenInfo(token);
             log.info("获取用户信息: {}", userTokenInfoDTO);
-            UserInfoTokenContext.setCurrentUserInfoToken(userTokenInfoDTO);
+            UserTokenInfoContext.setCurrentUserTokenInfo(userTokenInfoDTO);
             UserIdContext.setCurrentUserId(userTokenInfoDTO.getUserId());
             // 放行
             // 保存自定义的日志输出标识
@@ -68,7 +68,7 @@ public class TokenInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         // 释放上下文对象
-        UserInfoTokenContext.removeCurrentUserInfoToken();
+        UserTokenInfoContext.removeCurrentUserTokenInfo();
         UserIdContext.removeCurrentUserId();
         // 移除自定义的日志输出标识
         MDC.remove("userId");
