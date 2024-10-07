@@ -1,5 +1,6 @@
 package com.r.chat.controller;
 
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
     private final RedisOperation redisOperation;
@@ -100,5 +101,15 @@ public class UserController {
         log.info("获取系统设置");
         SysSettingVO sysSettingVO = CopyUtils.copyBean(redisUtils.getSysSetting(), SysSettingVO.class);
         return Result.success(sysSettingVO);
+    }
+
+    /**
+     * 获取用户信息
+     */
+    @GetMapping("/getUserInfo")
+    public Result<UserTokenInfoVO> getUserInfo() {
+        UserTokenInfoVO userTokenInfoVO = CopyUtils.copyBean(UserTokenInfoContext.getCurrentUserTokenInfo(), UserTokenInfoVO.class);
+        log.info("获取用户信息 userTokenInfoVO: {}", userTokenInfoVO);
+        return Result.success(userTokenInfoVO);
     }
 }
