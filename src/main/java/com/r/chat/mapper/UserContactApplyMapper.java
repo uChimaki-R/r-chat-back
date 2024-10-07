@@ -1,7 +1,9 @@
 package com.r.chat.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.po.UserContactApply;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.r.chat.entity.vo.ContactApplyVO;
 
 /**
  * <p>
@@ -13,4 +15,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface UserContactApplyMapper extends BaseMapper<UserContactApply> {
 
+    /**
+     * 根据用户id分页查询该用户收到的申请信息
+     */
+    Page<ContactApplyVO> selectApplyInfoPage(Page<ContactApplyVO> page, String userId);
 }
