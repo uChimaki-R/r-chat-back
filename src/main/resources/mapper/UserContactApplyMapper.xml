@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.r.chat.mapper.UserContactApplyMapper">
-
+    <select id="selectApplyInfoPage" resultType="com.r.chat.entity.vo.ContactApplyVO">
+        select uca.*, ui.nick_name applyUserName, gi.group_id, gi.group_name
+        from r_chat.user_contact_apply uca
+        left join r_chat.user_info ui on ui.user_id = uca.apply_user_id
+        left join r_chat.group_info gi on gi.group_id = uca.contact_id
+        where uca.receive_user_id = #{userId}
+    </select>
 </mapper>
