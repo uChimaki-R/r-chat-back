@@ -207,15 +207,15 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     }
 
     @Override
-    public List<BasicInfoDTO> loadContact(UserContactTypeEnum userContactType) {
-        if (userContactType == null) {
+    public List<BasicInfoDTO> loadContact(UserContactTypeEnum contactType) {
+        if (contactType == null) {
             log.warn("查询失败: 传入的联系人类型为null");
             throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
         }
         // 因为还要查出用户名/群聊名，所以需要联查
         // 而如果是用户，则联查用户信息表，群聊则联查群聊信息表
         List<BasicInfoDTO> basicInfoDTOList;
-        switch (userContactType) {
+        switch (contactType) {
             case FRIENDS:
                 basicInfoDTOList = userContactMapper.selectUserFriends(UserIdContext.getCurrentUserId());
                 log.info("查询到好友列表: {}", basicInfoDTOList);

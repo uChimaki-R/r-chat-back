@@ -38,5 +38,5 @@ public interface IUserContactService extends IService<UserContact> {
     /**
      * 获取好友或加入的群聊的信息
      */
-    List<BasicInfoDTO> loadContact(UserContactTypeEnum userContactType);
+    List<BasicInfoDTO> loadContact(UserContactTypeEnum contactType);
 }
