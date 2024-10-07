@@ -9,6 +9,7 @@ import com.r.chat.exception.LoginTimeOutException;
 import com.r.chat.redis.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -31,10 +32,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        log.info("----------------------------------------------------------------");
         log.info("请求uri : {}", request.getRequestURI());
-        log.info("请求方法 : {}", request.getMethod());
-        log.info("请求ip : {}", request.getRemoteAddr());
         JSONObject json = new JSONObject();
         request.getParameterMap().forEach((key, value) -> {
             json.put(key, request.getParameter(key));
@@ -58,7 +56,8 @@ public class TokenInterceptor implements HandlerInterceptor {
             UserInfoTokenContext.setCurrentUserInfoToken(userTokenInfoDTO);
             UserIdContext.setCurrentUserId(userTokenInfoDTO.getUserId());
             // 放行
-            log.info("<<<<<<<<<<<<<<<<<<<<<<<< [{}] <<<<<<<<<<<<<<<<<<<<<<<<", UserIdContext.getCurrentUserId());
+            // 保存自定义的日志输出标识
+            MDC.put("userId", UserIdContext.getCurrentUserId());
             return true;
         } catch (Exception ex) {
             log.warn("拒绝请求: 无法获取该token对应的用户信息");
@@ -68,11 +67,10 @@ public class TokenInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        if (UserIdContext.getCurrentUserId() != null) {
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>> [{}] >>>>>>>>>>>>>>>>>>>>>>>>", UserIdContext.getCurrentUserId());
-        }
         // 释放上下文对象
         UserInfoTokenContext.removeCurrentUserInfoToken();
         UserIdContext.removeCurrentUserId();
+        // 移除自定义的日志输出标识
+        MDC.remove("userId");
     }
 }
