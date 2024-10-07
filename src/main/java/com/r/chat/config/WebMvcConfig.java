@@ -24,9 +24,9 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         registry.addInterceptor(tokenInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/swagger-resources/**","/swagger-ui/**", "/v3/**", "/error")  // NoHandlerFoundException映射到的error请求、knife4j的请求
-                .excludePathPatterns("/account/checkCode")  // 验证码
-                .excludePathPatterns("/account/register")  // 注册
-                .excludePathPatterns("/account/login");  // 登录
+                .excludePathPatterns("/user/checkCode")  // 验证码
+                .excludePathPatterns("/user/register")  // 注册
+                .excludePathPatterns("/user/login");  // 登录
     }
 
     /**
