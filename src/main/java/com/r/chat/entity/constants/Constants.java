@@ -11,6 +11,8 @@ public class Constants {
     // length
     public static final Integer LENGTH_ID = 11;  // 用户id及群聊id的长度
     public static final Integer LENGTH_TOKEN_RANDOM_CHARS = 20;  // token中拼接的随机字符串的长度
+    // size
+    public static final Integer SIZE_DEFAULT_PAGE_SIZE = 15;
 
     // exception message
     public static final String MESSAGE_SUCCESS = "请求成功";
