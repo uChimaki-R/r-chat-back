@@ -47,6 +47,8 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveOrUpdateGroupInfo(GroupInfoDTO groupInfoDTO) {
+        // 需要断言当前的用户操作用户是群主，防止他人操作
+        VerifyUtils.assertIsCurrentUser(groupInfoDTO.getGroupOwnerId());
         LocalDateTime now = LocalDateTime.now();  // 当前时间
         // 填充GroupInfo对象
         GroupInfo groupInfo = CopyUtils.copyBean(groupInfoDTO, GroupInfo.class);
@@ -68,7 +70,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             }
 
             // 添加群聊到数据库
-            // 新建群号，设置添加时间
+            // 新建群号，补充内容
             groupInfo.setGroupId(StringUtils.getRandomGroupId());
             groupInfo.setCreateTime(now);
             groupInfo.setStatus(GroupInfoStatusEnum.NORMAL);
@@ -86,8 +88,6 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             log.info("新增群聊成功: {}", groupInfo);
         } else {
             // 修改群聊信息
-            // 需要断言当前的用户就是群主
-            VerifyUtils.assertIsCurrentUser(groupInfoDTO.getGroupOwnerId());
             updateById(groupInfo);
             log.info("修改群聊信息成功: {}", groupInfo);
         }
