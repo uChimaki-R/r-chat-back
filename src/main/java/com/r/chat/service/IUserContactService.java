@@ -1,9 +1,6 @@
 package com.r.chat.service;
 
-import com.r.chat.entity.dto.ApplyDTO;
-import com.r.chat.entity.dto.ContactSearchResultDTO;
-import com.r.chat.entity.dto.BasicInfoDTO;
-import com.r.chat.entity.dto.ContactTypeDTO;
+import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.JoinTypeEnum;
 import com.r.chat.entity.po.UserContact;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -39,4 +36,9 @@ public interface IUserContactService extends IService<UserContact> {
      * 获取好友或加入的群聊的信息
      */
     List<BasicInfoDTO> loadContact(ContactTypeDTO contactTypeDTO);
+
+    /**
+     * 添加联系人
+     */
+    void addContact(ContactApplyAddDTO contactApplyAddDTO);
 }
