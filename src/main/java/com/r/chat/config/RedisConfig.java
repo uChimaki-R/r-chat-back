@@ -1,4 +1,4 @@
-package com.r.chat.redis;
+package com.r.chat.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,7 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 @Configuration
-public class RedisConfiguration<V> {
+public class RedisConfig<V> {
     @Bean
     public RedisTemplate<String, V> redisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, V> template = new RedisTemplate<>();
