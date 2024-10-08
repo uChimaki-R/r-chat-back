@@ -6,6 +6,7 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.ApplyDTO;
 import com.r.chat.entity.dto.ContactSearchResultDTO;
 import com.r.chat.entity.dto.BasicInfoDTO;
+import com.r.chat.entity.dto.ContactTypeDTO;
 import com.r.chat.entity.enums.*;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
@@ -207,7 +208,8 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     }
 
     @Override
-    public List<BasicInfoDTO> loadContact(UserContactTypeEnum contactType) {
+    public List<BasicInfoDTO> loadContact(ContactTypeDTO contactTypeDTO) {
+        UserContactTypeEnum contactType = contactTypeDTO.getContactType();
         if (contactType == null) {
             log.warn("查询失败: 传入的联系人类型为null");
             throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
