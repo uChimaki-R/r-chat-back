@@ -550,7 +550,7 @@ public class RedisOperation {
      * @param value 值数组
      * @return 操作后 list 长度
      */
-    public Long lLeftPushAll(String key, String... value) {
+    public Long lLeftPushAll(String key, Object... value) {
         return redisTemplate.opsForList().leftPushAll(key, value);
     }
 
@@ -606,7 +606,7 @@ public class RedisOperation {
      * @param value 值数组
      * @return 操作后 list 长度
      */
-    public Long lRightPushAll(String key, String... value) {
+    public Long lRightPushAll(String key, Object... value) {
         return redisTemplate.opsForList().rightPushAll(key, value);
     }
 
@@ -769,7 +769,7 @@ public class RedisOperation {
      * @param values 值（变长）
      * @return 剩余数量
      */
-    public Long sAdd(String key, String... values) {
+    public Long sAdd(String key, Object... values) {
         return redisTemplate.opsForSet().add(key, values);
     }
 
