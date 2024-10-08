@@ -2,11 +2,8 @@ package com.r.chat.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.constants.Constants;
-import com.r.chat.entity.dto.ApplyDTO;
-import com.r.chat.entity.dto.ContactSearchResultDTO;
-import com.r.chat.entity.dto.BasicInfoDTO;
+import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.JoinTypeEnum;
-import com.r.chat.entity.enums.UserContactTypeEnum;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.ContactApplyVO;
@@ -79,12 +76,22 @@ public class ContactController {
     }
 
     /**
+     * 处理申请
+     */
+    @PostMapping("/dealWithApply")
+    public Result<String> dealWithApply(ApplyDealDTO applyDealDTO) {
+        log.info("处理申请信息 applyDealDTO: {}", applyDealDTO);
+        userContactApplyService.dealWithApply(applyDealDTO);
+        return Result.success();
+    }
+
+    /**
      * 加载好友或加入的群聊
      */
     @GetMapping("/loadContact")
-    public Result<List<BasicInfoVO>> loadContact(UserContactTypeEnum contactType) {
+    public Result<List<BasicInfoVO>> loadContact(ContactTypeDTO contactTypeDTO) {
         log.info("查询好友/加入的群聊");
-        List<BasicInfoDTO> basicInfoDTOList = userContactService.loadContact(contactType);
+        List<BasicInfoDTO> basicInfoDTOList = userContactService.loadContact(contactTypeDTO);
         List<BasicInfoVO> basicInfoVOList = CopyUtils.copyList(basicInfoDTOList, BasicInfoVO.class);
         return Result.success(basicInfoVOList);
     }
