@@ -3,10 +3,7 @@ package com.r.chat.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
-import com.r.chat.entity.dto.ApplyDTO;
-import com.r.chat.entity.dto.ContactSearchResultDTO;
-import com.r.chat.entity.dto.BasicInfoDTO;
-import com.r.chat.entity.dto.ContactTypeDTO;
+import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
@@ -17,13 +14,16 @@ import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactApplyMapper;
 import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.mapper.UserInfoMapper;
+import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserContactService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,6 +43,8 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     private final UserInfoMapper userInfoMapper;
     private final GroupInfoMapper groupInfoMapper;
     private final UserContactApplyMapper userContactApplyMapper;
+
+    private final RedisUtils redisUtils;
 
     @Override
     public List<BasicInfoDTO> getGroupMemberInfo(String groupId) {
@@ -106,6 +108,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public JoinTypeEnum applyAdd(ApplyDTO applyDTO) {
         String contactId = applyDTO.getContactId();
         // 查看对方是否已将自己拉黑
@@ -165,7 +168,13 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         }
         // 如果可以直接添加，则直接添加，不用发送申请
         if (JoinTypeEnum.JOIN_DIRECTLY.equals(joinType)) {
-            // todo 添加联系人
+            // 添加联系人
+            ContactApplyAddDTO contactApplyAddDTO = new ContactApplyAddDTO();
+            contactApplyAddDTO.setApplyUserId(UserIdContext.getCurrentUserId());
+            contactApplyAddDTO.setContactId(contactId);
+            contactApplyAddDTO.setReceiveUserId(receiveUserId);
+            contactApplyAddDTO.setContactType(prefix.getUserContactTypeEnum());
+            addContact(contactApplyAddDTO);
             log.info("可直接添加联系人, 已直接添加联系人");
             return joinType;
         }
@@ -231,5 +240,49 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
         }
         return basicInfoDTOList;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void addContact(ContactApplyAddDTO contactApplyAddDTO) {
+        // 如果是加群聊，要判断群聊人数是不是达到了上限
+        if (UserContactTypeEnum.GROUP.equals(contactApplyAddDTO.getContactType())) {
+            // 查询该群聊的人数
+            QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
+            queryWrapper.lambda()
+                    .eq(UserContact::getContactId, contactApplyAddDTO.getContactId())  // 联系人是群聊
+                    .eq(UserContact::getStatus, UserContactStatusEnum.FRIENDS);  // 是好友
+            Long count = userContactMapper.selectCount(queryWrapper);
+            if (count >= redisUtils.getSysSetting().getMaxGroupMemberCount()) {
+                log.warn("群聊人数达到上限, 无法加入 count: {}", count);
+                throw new GroupMemberCountLimitException(String.format(Constants.MESSAGE_GROUP_MEMBER_COUNT_LIMIT, count));
+            }
+        }
+        // 添加好友
+        LocalDateTime now = LocalDateTime.now();
+        // 如果是加用户，则需要添加两条数据，群聊则只用添加用户到群聊的关系，使用批量插入
+        List<UserContact> contactList = new ArrayList<>();
+        UserContact uc1 = new UserContact();
+        uc1.setUserId(contactApplyAddDTO.getApplyUserId());
+        uc1.setContactId(contactApplyAddDTO.getContactId());
+        uc1.setContactType(contactApplyAddDTO.getContactType());
+        uc1.setStatus(UserContactStatusEnum.FRIENDS);
+        uc1.setCreateTime(now);
+        uc1.setLastUpdateTime(now);
+        contactList.add(uc1);
+        if (UserContactTypeEnum.FRIENDS.equals(contactApplyAddDTO.getContactType())) {
+            // 用户互相为朋友关系
+            UserContact uc2 = new UserContact();
+            uc2.setUserId(contactApplyAddDTO.getContactId());
+            uc2.setContactId(contactApplyAddDTO.getApplyUserId());
+            uc2.setContactType(contactApplyAddDTO.getContactType());
+            uc2.setStatus(UserContactStatusEnum.FRIENDS);
+            uc2.setCreateTime(now);
+            uc2.setLastUpdateTime(now);
+            contactList.add(uc2);
+        }
+        saveBatch(contactList);
+
+        // todo 添加缓存，创建会话等
     }
 }
