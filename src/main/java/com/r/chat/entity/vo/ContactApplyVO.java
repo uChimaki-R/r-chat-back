@@ -13,6 +13,10 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class ContactApplyVO implements Serializable {
     private static final long serialVersionUID = 1L;
+    /**
+     * 申请信息的自增id，返回给前端，处理申请时由前端带回
+     */
+    private Integer applyId;
 
     /**
      * 申请人id
