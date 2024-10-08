@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.ApplyDealDTO;
+import com.r.chat.entity.dto.ContactApplyAddDTO;
 import com.r.chat.entity.enums.UserContactApplyStatusEnum;
 import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.po.UserContact;
@@ -16,6 +17,8 @@ import com.r.chat.mapper.UserContactApplyMapper;
 import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.service.IUserContactApplyService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.r.chat.service.IUserContactService;
+import com.r.chat.utils.CopyUtils;
 import com.r.chat.utils.VerifyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +39,8 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMapper, UserContactApply> implements IUserContactApplyService {
+    private final IUserContactService userContactService;
+
     private final UserContactApplyMapper userContactApplyMapper;
     private final UserContactMapper userContactMapper;
 
@@ -73,7 +78,9 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
         updateById(userContactApply);
         switch (status) {
             case AGREED:
-                // todo 添加联系人
+                // 添加联系人
+                ContactApplyAddDTO contactApplyAddDTO = CopyUtils.copyBean(userContactApply, ContactApplyAddDTO.class);
+                userContactService.addContact(contactApplyAddDTO);
                 break;
             case REJECTED:
                 // 拒绝无需处理
