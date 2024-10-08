@@ -1,6 +1,7 @@
 package com.r.chat.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.r.chat.entity.dto.ApplyDealDTO;
 import com.r.chat.entity.po.UserContactApply;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.r.chat.entity.vo.ContactApplyVO;
@@ -20,4 +21,9 @@ public interface IUserContactApplyService extends IService<UserContactApply> {
      * 因为需要查出申请人/群聊名称，需要多表联查
      */
     Page<ContactApplyVO> getApplyInfoPage(Page<ContactApplyVO> page);
+
+    /**
+     * 处理对申请的操作，同意/拒绝/拉黑
+     */
+    void dealWithApply(ApplyDealDTO applyDealDTO);
 }
