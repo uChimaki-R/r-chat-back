@@ -1,5 +1,6 @@
 package com.r.chat.entity.vo;
 
+import com.r.chat.entity.enums.UserContactTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,12 +17,27 @@ public class BasicInfoVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * id
+     * 用户id
      */
-    private String userOrGroupId;  // 本来名字想写成id的，但是感觉sql查询可能有报错隐患
+    private String userId;
 
     /**
-     * 昵称
+     * 用户名
      */
-    private String userOrGroupName;
+    private String userName;
+
+    /**
+     * 群聊id
+     */
+    private String groupId;
+
+    /**
+     * 群聊名
+     */
+    private String groupName;
+
+    /**
+     * 类型 用户/群聊
+     */
+    private UserContactTypeEnum contactType;
 }
