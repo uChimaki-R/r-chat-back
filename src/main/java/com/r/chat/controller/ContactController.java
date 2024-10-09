@@ -7,6 +7,7 @@ import com.r.chat.entity.enums.JoinTypeEnum;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.ContactApplyVO;
+import com.r.chat.entity.vo.ContactBasicInfoVO;
 import com.r.chat.entity.vo.ContactSearchResultVO;
 import com.r.chat.entity.vo.BasicInfoVO;
 import com.r.chat.service.IUserContactApplyService;
@@ -94,6 +95,17 @@ public class ContactController {
         List<BasicInfoDTO> basicInfoDTOList = userContactService.loadContact(contactTypeDTO);
         List<BasicInfoVO> basicInfoVOList = CopyUtils.copyList(basicInfoDTOList, BasicInfoVO.class);
         return Result.success(basicInfoVOList);
+    }
+
+    /**
+     * 点击头像时获取的基础信息（名片，非好友也可以获取）
+     */
+    @GetMapping("/getContactBasicInfo")
+    public Result<ContactBasicInfoVO> getContactBasicInfo(String contactId) {
+        log.info("获取用户名片信息 contactId: {}", contactId);
+        ContactBasicInfoDTO contactBasicInfoDTO = userContactService.getContactBasicInfo(contactId);
+        ContactBasicInfoVO contactBasicInfoVO = CopyUtils.copyBean(contactBasicInfoDTO, ContactBasicInfoVO.class);
+        return Result.success(contactBasicInfoVO);
     }
 
 }
