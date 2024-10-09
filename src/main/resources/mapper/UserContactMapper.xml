@@ -12,7 +12,7 @@
 
     <select id="selectUserFriends" resultType="com.r.chat.entity.dto.BasicInfoDTO"
             parameterType="java.lang.String">
-        select uc.contact_id userOrGroupId, ui.nick_name userOrGroupName
+        select uc.contact_id userId, ui.nick_name userName
         from r_chat.user_contact uc
                  join r_chat.user_info ui on uc.contact_id = ui.user_id
         where uc.user_id = #{userId}
@@ -22,7 +22,7 @@
 
     <select id="selectGroupFriends" resultType="com.r.chat.entity.dto.BasicInfoDTO"
             parameterType="java.lang.String">
-        select uc.contact_id userOrGroupId, gi.group_name userOrGroupName
+        select uc.contact_id groupId, gi.group_name groupName
         from r_chat.user_contact uc
                  join r_chat.group_info gi on uc.contact_id = gi.group_id
         where uc.user_id = #{userId}
