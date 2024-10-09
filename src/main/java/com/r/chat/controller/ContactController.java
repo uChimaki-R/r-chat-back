@@ -6,10 +6,7 @@ import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.JoinTypeEnum;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
-import com.r.chat.entity.vo.ContactApplyVO;
-import com.r.chat.entity.vo.ContactBasicInfoVO;
-import com.r.chat.entity.vo.ContactSearchResultVO;
-import com.r.chat.entity.vo.BasicInfoVO;
+import com.r.chat.entity.vo.*;
 import com.r.chat.service.IUserContactApplyService;
 import com.r.chat.service.IUserContactService;
 import com.r.chat.utils.CopyUtils;
@@ -106,6 +103,17 @@ public class ContactController {
         ContactBasicInfoDTO contactBasicInfoDTO = userContactService.getContactBasicInfo(contactId);
         ContactBasicInfoVO contactBasicInfoVO = CopyUtils.copyBean(contactBasicInfoDTO, ContactBasicInfoVO.class);
         return Result.success(contactBasicInfoVO);
+    }
+
+    /**
+     * 获取联系人详情
+     */
+    @GetMapping("/getContactDetailInfo")
+    public Result<ContactDetailInfoVO> getContactDetailInfo(String contactId) {
+        log.info("获取用户详细信息 contactId: {}", contactId);
+        ContactDetailInfoDTO contactBasicInfoDTO = userContactService.getContactDetailInfo(contactId);
+        ContactDetailInfoVO contactDetailInfoVO = CopyUtils.copyBean(contactBasicInfoDTO, ContactDetailInfoVO.class);
+        return Result.success(contactDetailInfoVO);
     }
 
 }
