@@ -46,4 +46,9 @@ public interface IUserContactService extends IService<UserContact> {
      * 获取联系人基础信息（名片）
      */
     ContactBasicInfoDTO getContactBasicInfo(String contactId);
+
+    /**
+     * 获取联系人详细信息
+     */
+    ContactDetailInfoDTO getContactDetailInfo(String contactId);
 }
