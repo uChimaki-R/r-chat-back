@@ -241,6 +241,10 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 log.warn(Constants.IN_SWITCH_DEFAULT);
                 throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
         }
+        // 设置联系人类型
+        basicInfoDTOList.forEach(basicInfoDTO -> {
+            basicInfoDTO.setContactType(contactType);
+        });
         return basicInfoDTOList;
     }
 
