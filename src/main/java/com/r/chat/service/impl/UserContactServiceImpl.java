@@ -1,5 +1,6 @@
 package com.r.chat.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
@@ -17,6 +18,7 @@ import com.r.chat.mapper.UserInfoMapper;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserContactService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -227,7 +230,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         // 而如果是用户，则联查用户信息表，群聊则联查群聊信息表
         List<BasicInfoDTO> basicInfoDTOList;
         switch (contactType) {
-            case FRIENDS:
+            case USER:
                 basicInfoDTOList = userContactMapper.selectUserFriends(UserIdContext.getCurrentUserId());
                 log.info("查询到好友列表: {}", basicInfoDTOList);
                 break;
@@ -270,7 +273,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         uc1.setCreateTime(now);
         uc1.setLastUpdateTime(now);
         contactList.add(uc1);
-        if (UserContactTypeEnum.FRIENDS.equals(contactApplyAddDTO.getContactType())) {
+        if (UserContactTypeEnum.USER.equals(contactApplyAddDTO.getContactType())) {
             // 用户互相为朋友关系
             UserContact uc2 = new UserContact();
             uc2.setUserId(contactApplyAddDTO.getContactId());
@@ -284,5 +287,34 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         saveBatch(contactList);
 
         // todo 添加缓存，创建会话等
+    }
+
+    @Override
+    public ContactBasicInfoDTO getContactBasicInfo(String contactId) {
+        // 获取用户信息
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.lambda()
+                .eq(UserInfo::getUserId, contactId);
+        UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
+        // 拷贝信息
+        ContactBasicInfoDTO contactBasicInfoDTO = CopyUtils.copyBean(userInfo, ContactBasicInfoDTO.class);
+        // 查看该用户与本人的关系
+        QueryWrapper<UserContact> userContactQueryWrapper = new QueryWrapper<>();
+        userContactQueryWrapper.lambda()
+                .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
+                .eq(UserContact::getContactId, contactId);
+        UserContact userContact = userContactMapper.selectOne(userContactQueryWrapper);
+        // 可以显示为好友的状态：是朋友、被删除、被拉黑
+        List<UserContactStatusEnum> friendStatus = new ArrayList<>();
+        friendStatus.add(UserContactStatusEnum.FRIENDS);
+        friendStatus.add(UserContactStatusEnum.DELETED_BY_FRIEND);
+        friendStatus.add(UserContactStatusEnum.BLOCKED_BY_FRIEND);
+        // 分情况设置状态
+        if (userContact == null || !CollUtil.contains(friendStatus, userContact.getStatus())) {
+            contactBasicInfoDTO.setContactStatus(UserContactStatusEnum.NOT_FRIENDS);
+        }
+        else contactBasicInfoDTO.setContactStatus(UserContactStatusEnum.FRIENDS);
+        log.info("获取名片信息 {}", contactBasicInfoDTO);
+        return contactBasicInfoDTO;
     }
 }
