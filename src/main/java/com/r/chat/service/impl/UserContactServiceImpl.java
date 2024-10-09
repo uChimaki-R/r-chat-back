@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -285,6 +284,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             contactList.add(uc2);
         }
         saveBatch(contactList);
+        log.info("添加好友/群聊成功 contactId: {}", contactApplyAddDTO.getContactId());
 
         // todo 添加缓存，创建会话等
     }
@@ -298,23 +298,47 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
         // 拷贝信息
         ContactBasicInfoDTO contactBasicInfoDTO = CopyUtils.copyBean(userInfo, ContactBasicInfoDTO.class);
+        // 分情况设置状态
+        if (canSeeTheFriend(contactId)) {
+            contactBasicInfoDTO.setContactStatus(UserContactStatusEnum.FRIENDS);
+        } else contactBasicInfoDTO.setContactStatus(UserContactStatusEnum.NOT_FRIENDS);
+        log.info("获取名片信息 {}", contactBasicInfoDTO);
+        return contactBasicInfoDTO;
+    }
+
+    @Override
+    public ContactDetailInfoDTO getContactDetailInfo(String contactId) {
+        // 是好友才可以查看详情，先判断是不是好友
+        if (!canSeeTheFriend(contactId)) {
+            log.warn("非法操作 与用户 {} 非好友(状态非: 好友/被删除/被拉黑)", contactId);
+            throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
+        }
+        // 获取用户信息
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.lambda()
+                .eq(UserInfo::getUserId, contactId);
+        UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
+        // 拷贝信息
+        ContactDetailInfoDTO contactDetailInfoDTO = CopyUtils.copyBean(userInfo, ContactDetailInfoDTO.class);
+        log.info("获取用户详细信息 {}", contactDetailInfoDTO);
+        return contactDetailInfoDTO;
+    }
+
+    /**
+     * 判断本用户是否能够看到contactId这个用户，即判断对该用户的关系是否是 好友/被删除/被拉黑 中的一种
+     */
+    private boolean canSeeTheFriend(String contactId) {
         // 查看该用户与本人的关系
         QueryWrapper<UserContact> userContactQueryWrapper = new QueryWrapper<>();
         userContactQueryWrapper.lambda()
                 .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
                 .eq(UserContact::getContactId, contactId);
         UserContact userContact = userContactMapper.selectOne(userContactQueryWrapper);
-        // 可以显示为好友的状态：是朋友、被删除、被拉黑
+        // 可以显示为好友的状态：好友、被删除、被拉黑
         List<UserContactStatusEnum> friendStatus = new ArrayList<>();
         friendStatus.add(UserContactStatusEnum.FRIENDS);
         friendStatus.add(UserContactStatusEnum.DELETED_BY_FRIEND);
         friendStatus.add(UserContactStatusEnum.BLOCKED_BY_FRIEND);
-        // 分情况设置状态
-        if (userContact == null || !CollUtil.contains(friendStatus, userContact.getStatus())) {
-            contactBasicInfoDTO.setContactStatus(UserContactStatusEnum.NOT_FRIENDS);
-        }
-        else contactBasicInfoDTO.setContactStatus(UserContactStatusEnum.FRIENDS);
-        log.info("获取名片信息 {}", contactBasicInfoDTO);
-        return contactBasicInfoDTO;
+        return userContact != null && CollUtil.contains(friendStatus, userContact.getStatus());
     }
 }
