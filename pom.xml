@@ -144,12 +144,13 @@
             <artifactId>easy-captcha</artifactId>
             <version>${captcha.verion}</version>
         </dependency>
-        <!--验证码依赖引擎nashorn-->
-        <dependency>
-            <groupId>org.openjdk.nashorn</groupId>
-            <artifactId>nashorn-core</artifactId>
-            <version>${nashorn.version}</version>
-        </dependency>
+        <!-- 使用jdk1.8 就不用引入依赖(引入的话构建会报警告，而且验证码加载不了) 如果是11以上则需要 -->
+<!--        &lt;!&ndash;验证码依赖引擎nashorn&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.openjdk.nashorn</groupId>-->
+<!--            <artifactId>nashorn-core</artifactId>-->
+<!--            <version>${nashorn.version}</version>-->
+<!--        </dependency>-->
         <!--netty-->
         <dependency>
             <groupId>io.netty</groupId>
