@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public enum UserContactTypeEnum {
-    FRIENDS(0, "好友"),
+    USER(0, "用户"),
     GROUP(1, "群聊");
     @EnumValue
     @JsonValue
