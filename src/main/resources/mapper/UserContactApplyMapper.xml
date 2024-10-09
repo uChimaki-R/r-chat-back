@@ -7,5 +7,6 @@
         left join r_chat.user_info ui on ui.user_id = uca.apply_user_id
         left join r_chat.group_info gi on gi.group_id = uca.contact_id
         where uca.receive_user_id = #{userId}
+        order by uca.last_apply_time desc
     </select>
 </mapper>
