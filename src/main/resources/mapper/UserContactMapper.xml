@@ -16,7 +16,7 @@
         from r_chat.user_contact uc
                  join r_chat.user_info ui on uc.contact_id = ui.user_id
         where uc.user_id = #{userId}
-          and uc.status = 1
+          and uc.status in (1, 3, 5)
         order by ui.nick_name
     </select>
 
@@ -26,7 +26,8 @@
         from r_chat.user_contact uc
                  join r_chat.group_info gi on uc.contact_id = gi.group_id
         where uc.user_id = #{userId}
-          and uc.status = 1
+          and uc.status in (1, 3, 5)
+          and gi.group_owner_id != #{userId}
         order by gi.group_name
     </select>
 </mapper>
