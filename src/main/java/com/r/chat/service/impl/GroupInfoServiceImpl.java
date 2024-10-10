@@ -85,11 +85,11 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             userContact.setCreateTime(now);
             userContact.setLastUpdateTime(now);
             userContactMapper.insert(userContact);
-            log.info("新增群聊成功: {}", groupInfo);
+            log.info("新增群聊成功 {}", groupInfo);
         } else {
             // 修改群聊信息
             updateById(groupInfo);
-            log.info("修改群聊信息成功: {}", groupInfo);
+            log.info("修改群聊信息成功 {}", groupInfo);
         }
         // 头像文件的操作
         if (groupInfoDTO.getAvatarFile() == null) {

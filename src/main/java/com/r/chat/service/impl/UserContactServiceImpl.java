@@ -71,7 +71,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 userInfoQueryWrapper.lambda().eq(UserInfo::getUserId, contactId);
                 UserInfo userInfo = userInfoMapper.selectOne(userInfoQueryWrapper);
                 if (userInfo == null) {
-                    log.warn("搜索不到该用户");
+                    log.warn("搜索不到该用户 userId: {}", contactId);
                     return null;  // return null后前端会处理显示无结果
                 }
                 // 如果是用户的话填写昵称、性别、地区信息
@@ -84,7 +84,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 groupInfoQueryWrapper.lambda().eq(GroupInfo::getGroupId, contactId);
                 GroupInfo groupInfo = groupInfoMapper.selectOne(groupInfoQueryWrapper);
                 if (groupInfo == null) {
-                    log.warn("搜索不到该群聊");
+                    log.warn("搜索不到该群聊 groupId: {}", contactId);
                     return null;  // return null后前端会处理显示无结果
                 }
                 // 如果是群聊的话填写名称为群名
@@ -96,7 +96,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         }
         // 自己查自己的话就直接返回
         if (Objects.equals(UserIdContext.getCurrentUserId(), contactId)) {
-            log.info("搜索自己: {}", contactSearchResultDTO);
+            log.info("搜索自己 {}", contactSearchResultDTO);
             return contactSearchResultDTO;
         }
         // 否则补充此联系人和自己的关系（是不是朋友，有没有拉黑状态等等）
@@ -106,7 +106,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 .eq(UserContact::getContactId, contactId);
         UserContact userContact = userContactMapper.selectOne(userContactQueryWrapper);
         contactSearchResultDTO.setStatus(userContact == null ? UserContactStatusEnum.NOT_FRIENDS : userContact.getStatus());
-        log.info("搜索结果: {}", contactSearchResultDTO);
+        log.info("搜索结果 {}", contactSearchResultDTO);
         return contactSearchResultDTO;
     }
 
@@ -232,11 +232,11 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         switch (contactType) {
             case USER:
                 basicInfoDTOList = userContactMapper.selectUserFriends(UserIdContext.getCurrentUserId());
-                log.info("查询到好友列表: {}", basicInfoDTOList);
+                log.info("查询到好友列表 {}", basicInfoDTOList);
                 break;
             case GROUP:
                 basicInfoDTOList = userContactMapper.selectGroupFriends(UserIdContext.getCurrentUserId());
-                log.info("查询到加入的群聊: {}", basicInfoDTOList);
+                log.info("查询到加入的群聊 {}", basicInfoDTOList);
                 break;
             default:
                 log.warn(Constants.IN_SWITCH_DEFAULT);
@@ -345,7 +345,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             anotherStatus = UserContactStatusEnum.BLOCKED_BY_FRIEND;
         }
         else {
-            log.warn("传递了错误的状态 status: {}", status);
+            log.warn("传递了错误的状态 {}", status);
             throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
         }
         LocalDateTime now = LocalDateTime.now();

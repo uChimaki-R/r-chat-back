@@ -43,7 +43,7 @@ public class ContactController {
      */
     @PostMapping("/applyAdd")
     public Result<JoinTypeEnum> applyAdd(ApplyDTO applyDTO) {
-        log.info("添加用户或群聊 applyDTO: {}", applyDTO);
+        log.info("添加用户或群聊 {}", applyDTO);
         return Result.success(userContactService.applyAdd(applyDTO));
     }
 
@@ -67,7 +67,7 @@ public class ContactController {
         pageResult.setPageTotal(page.getPages());
         pageResult.setTotalCount(page.getTotal());
         pageResult.setData(page.getRecords());
-        log.info("获取到申请信息 pageResult: {}", pageResult);
+        log.info("获取到申请信息 {}", pageResult);
         return Result.success(pageResult);
     }
 
@@ -76,7 +76,7 @@ public class ContactController {
      */
     @PostMapping("/dealWithApply")
     public Result<String> dealWithApply(ApplyDealDTO applyDealDTO) {
-        log.info("处理申请信息 applyDealDTO: {}", applyDealDTO);
+        log.info("处理申请信息 {}", applyDealDTO);
         userContactApplyService.dealWithApply(applyDealDTO);
         return Result.success();
     }
@@ -86,7 +86,7 @@ public class ContactController {
      */
     @GetMapping("/loadContact")
     public Result<List<BasicInfoVO>> loadContact(ContactTypeDTO contactTypeDTO) {
-        log.info("查询好友/加入的群聊");
+        log.info("查询好友/加入的群聊 {}", contactTypeDTO);
         List<BasicInfoDTO> basicInfoDTOList = userContactService.loadContact(contactTypeDTO);
         List<BasicInfoVO> basicInfoVOList = CopyUtils.copyList(basicInfoDTOList, BasicInfoVO.class);
         return Result.success(basicInfoVOList);

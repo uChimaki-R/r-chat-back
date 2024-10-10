@@ -71,7 +71,7 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result<String> register(RegisterDTO registerDTO) {
-        log.info("用户注册: {}", registerDTO);
+        log.info("用户注册 {}", registerDTO);
         // 先判断验证码是否正确
         checkCheckCode(registerDTO.getCheckCodeKey(), registerDTO.getCheckCode());
         // 注册账号
@@ -84,7 +84,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public Result<UserTokenInfoVO> login(LoginDTO loginDTO) {
-        log.info("用户登录: {}", loginDTO);
+        log.info("用户登录 {}", loginDTO);
         // 先判断验证码是否正确
         checkCheckCode(loginDTO.getCheckCodeKey(), loginDTO.getCheckCode());
         // 登陆账号
@@ -109,7 +109,7 @@ public class UserController {
     @GetMapping("/getUserInfo")
     public Result<UserTokenInfoVO> getUserInfo() {
         UserTokenInfoVO userTokenInfoVO = CopyUtils.copyBean(UserTokenInfoContext.getCurrentUserTokenInfo(), UserTokenInfoVO.class);
-        log.info("获取用户信息 userTokenInfoVO: {}", userTokenInfoVO);
+        log.info("获取用户信息 {}", userTokenInfoVO);
         return Result.success(userTokenInfoVO);
     }
 }

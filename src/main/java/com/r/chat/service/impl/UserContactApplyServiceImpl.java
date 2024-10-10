@@ -56,7 +56,7 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
         Integer applyId = applyDealDTO.getApplyId();
         UserContactApplyStatusEnum status = applyDealDTO.getStatus();
         if (status == null || UserContactApplyStatusEnum.PENDING.equals(status)) {
-            log.warn("传入的申请状态不合法 status: {}", status);
+            log.warn("传入的申请状态不合法 {}", status);
             throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
         }
         // 查询这个申请
