@@ -40,7 +40,7 @@ public class UserController {
         String base64 = captcha.toBase64(); // 验证码图片的base64编码
         String code = captcha.text(); // 验证码的结果
         String checkCodeKey = UUID.randomUUID().toString(); // 用户提交验证码结果时的唯一标识
-        log.debug("获取验证码 checkCodeKey: [{}], code: {}", checkCodeKey, code);
+        log.info("获取验证码 checkCodeKey: [{}], code: {}", checkCodeKey, code);
         // 保存到redis，设置10分钟的时间
         redisOperation.setEx(Constants.REDIS_KEY_PREFIX_CHECK_CODE + checkCodeKey, code, 10, TimeUnit.MINUTES);
         CheckCodeVO checkCodeVO = new CheckCodeVO();
@@ -98,8 +98,8 @@ public class UserController {
      */
     @GetMapping("/getSysSetting")
     public Result<SysSettingVO> getSysSetting() {
-        log.info("获取系统设置");
         SysSettingVO sysSettingVO = CopyUtils.copyBean(redisUtils.getSysSetting(), SysSettingVO.class);
+        log.info("获取系统设置 {}", sysSettingVO);
         return Result.success(sysSettingVO);
     }
 
