@@ -346,7 +346,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         }
         else {
             log.warn("传递了错误的状态 {}", status);
-            throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
+            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
         }
         LocalDateTime now = LocalDateTime.now();
         // 对好友的关系
@@ -366,7 +366,12 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 .set(UserContact::getLastUpdateTime, now);
         update(fromFriend);
         // todo 从自己的好友列表缓存中删除联系人
-        log.info("成功删除联系人 contactId: {}", contactId);
+        if (UserContactStatusEnum.DELETED_THE_FRIEND.equals(status)) {
+            log.info("成功删除联系人 contactId: {}", contactId);
+        }
+        else {
+            log.info("成功拉黑联系人 contactId: {}", contactId);
+        }
     }
 
     /**
