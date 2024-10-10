@@ -124,4 +124,14 @@ public class ContactController {
         return Result.success();
     }
 
+    /**
+     * 拉黑联系人
+     */
+    @PostMapping("/blockContact")
+    public Result<String> blockContact(String contactId) {
+        log.info("拉黑联系人 contactId: {}", contactId);
+        userContactService.removeContact(contactId, UserContactStatusEnum.BLOCKED_THE_FRIEND);
+        return Result.success();
+    }
+
 }
