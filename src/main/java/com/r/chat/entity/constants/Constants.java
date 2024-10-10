@@ -38,6 +38,18 @@ public class Constants {
     public static final String MESSAGE_NOT_IN_THE_GROUP = "不在此群聊";
     public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
 
+    // validate
+    public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
+    public static final String VALIDATE_EMPTY_CHECK_CODE_KEY = "验证码唯一标识key不能为空";
+    public static final String VALIDATE_EMPTY_EMAIL = "邮箱不能为空";
+    public static final String VALIDATE_EMPTY_NICKNAME = "用户名不能为空";
+    public static final String VALIDATE_EMPTY_PASSWORD = "密码不能为空";
+    public static final String VALIDATE_EMPTY_CONTACT_ID = "联系人id不能为空";
+    public static final String VALIDATE_EMPTY_GROUP_ID = "群聊id不能为空";
+    public static final String VALIDATE_EMPTY_APPLY_ID = "申请id不能为空";
+    public static final String VALIDATE_EMPTY_CONTACT_TYPE = "联系人类型不能为空";
+    public static final String VALIDATE_EMPTY_CONTACT_APPLY_STATUS = "联系人申请状态不能为空";
+
     // file
     public static final String FILE_FOLDER_AVATAR = "avatar";
     public static final String FILE_SUFFIX_AVATAR = ".png";
