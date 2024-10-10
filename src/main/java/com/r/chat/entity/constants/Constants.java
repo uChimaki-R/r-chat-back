@@ -19,6 +19,7 @@ public class Constants {
     public static final String MESSAGE_INTERNAL_ERROR = "服务器内部错误";
     public static final String MESSAGE_NOT_FOUND = "请求地址不存在";
     public static final String MESSAGE_ILLEGAL_OPERATION = "非法操作";
+    public static final String MESSAGE_CAN_NOT_SEE_THE_FRIEND = "非法操作 与用户 [{}] 非好友(状态非: 好友/被删除/被拉黑)";
     public static final String MESSAGE_REPETITIVE_OPERATION = "重复操作";
     public static final String MESSAGE_PARAMETER_ERROR = "参数错误";
     public static final String MESSAGE_CHECK_CODE_ERROR = "验证码错误";
