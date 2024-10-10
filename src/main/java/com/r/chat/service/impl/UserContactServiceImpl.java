@@ -2,6 +2,7 @@ package com.r.chat.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
@@ -314,7 +315,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     public ContactDetailInfoDTO getContactDetailInfo(String contactId) {
         // 是好友才可以查看详情，先判断是不是好友
         if (!canSeeTheFriend(contactId)) {
-            log.warn("非法操作 与用户 {} 非好友(状态非: 好友/被删除/被拉黑)", contactId);
+            log.warn(Constants.MESSAGE_CAN_NOT_SEE_THE_FRIEND, contactId);
             throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
         }
         // 获取用户信息
@@ -326,6 +327,46 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         ContactDetailInfoDTO contactDetailInfoDTO = CopyUtils.copyBean(userInfo, ContactDetailInfoDTO.class);
         log.info("获取用户详细信息 {}", contactDetailInfoDTO);
         return contactDetailInfoDTO;
+    }
+
+    @Override
+    public void removeContact(String contactId, UserContactStatusEnum status) {
+        // 合法验证
+        if (!canSeeTheFriend(contactId)) {
+            log.warn(Constants.MESSAGE_CAN_NOT_SEE_THE_FRIEND, contactId);
+            throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
+        }
+        // 更新二者的关系
+        UserContactStatusEnum anotherStatus;
+        if (UserContactStatusEnum.DELETED_THE_FRIEND.equals(status)) {
+            anotherStatus = UserContactStatusEnum.DELETED_BY_FRIEND;
+        }
+        else if (UserContactStatusEnum.BLOCKED_THE_FRIEND.equals(status)) {
+            anotherStatus = UserContactStatusEnum.BLOCKED_BY_FRIEND;
+        }
+        else {
+            log.warn("传递了错误的状态 status: {}", status);
+            throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        // 对好友的关系
+        UpdateWrapper<UserContact> toFriend = new UpdateWrapper<>();
+        toFriend.lambda()
+                .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
+                .eq(UserContact::getContactId, contactId)
+                .set(UserContact::getStatus, status)
+                .set(UserContact::getLastUpdateTime, now);
+        update(toFriend);
+        // 好友对自己的关系
+        UpdateWrapper<UserContact> fromFriend = new UpdateWrapper<>();
+        fromFriend.lambda()
+                .eq(UserContact::getUserId, contactId)
+                .eq(UserContact::getContactId, UserIdContext.getCurrentUserId())
+                .set(UserContact::getStatus, anotherStatus)
+                .set(UserContact::getLastUpdateTime, now);
+        update(fromFriend);
+        // todo 从自己的好友列表缓存中删除联系人
+        log.info("成功删除联系人 contactId: {}", contactId);
     }
 
     /**
