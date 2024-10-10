@@ -60,7 +60,7 @@ public class UserTokenInfoVO implements Serializable {
     /**
      * 是否是管理员账号
      */
-    private boolean admin = false;
+    private Boolean admin = false;
 
     /**
      * 当前状态
