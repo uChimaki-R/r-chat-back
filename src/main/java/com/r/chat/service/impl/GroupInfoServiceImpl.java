@@ -1,5 +1,6 @@
 package com.r.chat.service.impl;
 
+import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.dto.SysSettingDTO;
@@ -47,31 +48,30 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveOrUpdateGroupInfo(GroupInfoDTO groupInfoDTO) {
-        // 需要断言当前的用户操作用户是群主，防止他人操作
-        VerifyUtils.assertIsCurrentUser(groupInfoDTO.getGroupOwnerId());
         LocalDateTime now = LocalDateTime.now();  // 当前时间
         // 填充GroupInfo对象
         GroupInfo groupInfo = CopyUtils.copyBean(groupInfoDTO, GroupInfo.class);
-
         if (StringUtils.isEmpty(groupInfoDTO.getGroupId())) {
             // 新增群聊
             // 判断该用户的群聊是否已经达到上限
             SysSettingDTO sysSettingDTO = redisUtils.getSysSetting();
-            Long count = lambdaQuery().eq(GroupInfo::getGroupOwnerId, groupInfoDTO.getGroupOwnerId()).count();
+            Long count = lambdaQuery().eq(GroupInfo::getGroupOwnerId, UserIdContext.getCurrentUserId()).count();
             if (count > sysSettingDTO.getMaxGroupCount()) {
                 log.warn("拒绝新增群聊: 群聊数量达到上限 [{}]", sysSettingDTO.getMaxGroupCount());
                 throw new GroupCountLimitException(String.format(Constants.MESSAGE_GROUP_COUNT_LIMIT, sysSettingDTO.getMaxGroupCount()));
             }
 
-            // 没有携带群头像
-            if (groupInfoDTO.getAvatarFile() == null) {
-                log.warn("拒绝新增群聊: 未指定群头像");
-                throw new ParameterErrorException(Constants.MESSAGE_MISSING_AVATAR_FILE);
-            }
+            // todo 暂时注释掉这段代码，让前端先跳过上传图片的逻辑，后续需要再放开
+//            // 没有携带群头像
+//            if (groupInfoDTO.getAvatarFile() == null) {
+//                log.warn("拒绝新增群聊: 未指定群头像");
+//                throw new ParameterErrorException(Constants.MESSAGE_MISSING_AVATAR_FILE);
+//            }
 
             // 添加群聊到数据库
             // 新建群号，补充内容
             groupInfo.setGroupId(StringUtils.getRandomGroupId());
+            groupInfo.setGroupOwnerId(UserIdContext.getCurrentUserId());
             groupInfo.setCreateTime(now);
             groupInfo.setStatus(GroupInfoStatusEnum.NORMAL);
             save(groupInfo);
