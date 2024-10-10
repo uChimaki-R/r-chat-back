@@ -13,11 +13,14 @@ import com.r.chat.service.IUserContactService;
 import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/contact")
 @RequiredArgsConstructor
@@ -29,7 +32,7 @@ public class ContactController {
      * 搜索用户或群聊
      */
     @GetMapping("/search")
-    public Result<ContactSearchResultVO> search(String contactId) {
+    public Result<ContactSearchResultVO> search(@NotEmpty(message = Constants.VALIDATE_EMPTY_CONTACT_ID) String contactId) {
         log.info("搜索用户或群聊 contactId: {}", contactId);
         ContactSearchResultDTO contactSearchResultDTO = userContactService.search(contactId);
         ContactSearchResultVO contactSearchResultVO = CopyUtils.copyBean(contactSearchResultDTO, ContactSearchResultVO.class);
@@ -96,7 +99,7 @@ public class ContactController {
      * 点击头像时获取的基础信息（名片，非好友也可以获取）
      */
     @GetMapping("/getContactBasicInfo")
-    public Result<ContactBasicInfoVO> getContactBasicInfo(String contactId) {
+    public Result<ContactBasicInfoVO> getContactBasicInfo(@NotEmpty(message = Constants.VALIDATE_EMPTY_CONTACT_ID) String contactId) {
         log.info("获取用户名片信息 contactId: {}", contactId);
         ContactBasicInfoDTO contactBasicInfoDTO = userContactService.getContactBasicInfo(contactId);
         ContactBasicInfoVO contactBasicInfoVO = CopyUtils.copyBean(contactBasicInfoDTO, ContactBasicInfoVO.class);
@@ -107,7 +110,7 @@ public class ContactController {
      * 获取联系人详情
      */
     @GetMapping("/getContactDetailInfo")
-    public Result<ContactDetailInfoVO> getContactDetailInfo(String contactId) {
+    public Result<ContactDetailInfoVO> getContactDetailInfo(@NotEmpty(message = Constants.VALIDATE_EMPTY_CONTACT_ID) String contactId) {
         log.info("获取用户详细信息 contactId: {}", contactId);
         ContactDetailInfoDTO contactBasicInfoDTO = userContactService.getContactDetailInfo(contactId);
         ContactDetailInfoVO contactDetailInfoVO = CopyUtils.copyBean(contactBasicInfoDTO, ContactDetailInfoVO.class);
@@ -118,7 +121,7 @@ public class ContactController {
      * 删除联系人
      */
     @PutMapping("/delContact")
-    public Result<String> delContact(String contactId) {
+    public Result<String> delContact(@NotEmpty(message = Constants.VALIDATE_EMPTY_CONTACT_ID) String contactId) {
         log.info("删除联系人 contactId: {}", contactId);
         userContactService.removeContact(contactId, UserContactStatusEnum.DELETED_THE_FRIEND);
         return Result.success();
@@ -128,7 +131,7 @@ public class ContactController {
      * 拉黑联系人
      */
     @PostMapping("/blockContact")
-    public Result<String> blockContact(String contactId) {
+    public Result<String> blockContact(@NotEmpty(message = Constants.VALIDATE_EMPTY_CONTACT_ID) String contactId) {
         log.info("拉黑联系人 contactId: {}", contactId);
         userContactService.removeContact(contactId, UserContactStatusEnum.BLOCKED_THE_FRIEND);
         return Result.success();

@@ -17,12 +17,14 @@ import com.r.chat.utils.CopyUtils;
 import com.wf.captcha.ArithmeticCaptcha;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor

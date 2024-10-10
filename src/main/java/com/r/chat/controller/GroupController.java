@@ -20,16 +20,19 @@ import com.r.chat.service.IUserContactService;
 import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.Collections;
 import java.util.List;
 
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/group")
 @RequiredArgsConstructor
@@ -64,7 +67,7 @@ public class GroupController {
      * 获取群聊简介部分的详情
      */
     @GetMapping("/getGroupInfo")
-    public Result<GroupInfoVO> getGroupInfo(String groupId) {
+    public Result<GroupInfoVO> getGroupInfo(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
         GroupInfo groupInfo = getBasicGroupInfo(groupId);
         GroupInfoVO groupInfoVO = CopyUtils.copyBean(groupInfo, GroupInfoVO.class);
         initGroupMemberCounts(groupInfoVO);  // 计算群成员数
@@ -76,7 +79,7 @@ public class GroupController {
      * 获取群聊详情，包括群成员清单
      */
     @GetMapping("getGroupInfo4Chat")
-    public Result<GroupInfo4ChatVO> getGroupInfo4Chat(String groupId) {
+    public Result<GroupInfo4ChatVO> getGroupInfo4Chat(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
         log.info("获取群聊详情(包括群成员清单) groupId: {}", groupId);
         GroupInfo4ChatVO groupInfo4ChatVO = new GroupInfo4ChatVO();
 
