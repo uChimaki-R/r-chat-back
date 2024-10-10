@@ -25,11 +25,6 @@ public class GroupInfoDTO implements Serializable {
     private String groupName;
 
     /**
-     * 群主id
-     */
-    private String groupOwnerId;
-
-    /**
      * 群公告
      */
     private String groupNotice;
