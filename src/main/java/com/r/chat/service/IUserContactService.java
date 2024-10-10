@@ -2,6 +2,7 @@ package com.r.chat.service;
 
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.JoinTypeEnum;
+import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.po.UserContact;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -51,4 +52,9 @@ public interface IUserContactService extends IService<UserContact> {
      * 获取联系人详细信息
      */
     ContactDetailInfoDTO getContactDetailInfo(String contactId);
+
+    /**
+     * 根据status执行删除/拉黑联系人的逻辑
+     */
+    void removeContact(String contactId, UserContactStatusEnum status);
 }
