@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.JoinTypeEnum;
+import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.*;
@@ -12,10 +13,7 @@ import com.r.chat.service.IUserContactService;
 import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -114,6 +112,16 @@ public class ContactController {
         ContactDetailInfoDTO contactBasicInfoDTO = userContactService.getContactDetailInfo(contactId);
         ContactDetailInfoVO contactDetailInfoVO = CopyUtils.copyBean(contactBasicInfoDTO, ContactDetailInfoVO.class);
         return Result.success(contactDetailInfoVO);
+    }
+
+    /**
+     * 删除联系人
+     */
+    @PutMapping("/delContact")
+    public Result<String> delContact(String contactId) {
+        log.info("删除联系人 contactId: {}", contactId);
+        userContactService.removeContact(contactId, UserContactStatusEnum.DELETED_THE_FRIEND);
+        return Result.success();
     }
 
 }
