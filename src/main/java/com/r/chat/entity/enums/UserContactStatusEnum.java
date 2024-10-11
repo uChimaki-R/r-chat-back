@@ -1,7 +1,6 @@
 package com.r.chat.entity.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 @Getter
@@ -14,7 +13,6 @@ public enum UserContactStatusEnum {
     BLOCKED_THE_FRIEND(4, "已拉黑好友"),
     BLOCKED_BY_FRIEND(5, "被好友拉黑");
     @EnumValue
-    @JsonValue
     private final int value;
     private final String desc;
 
