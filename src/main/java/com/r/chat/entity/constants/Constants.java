@@ -49,6 +49,7 @@ public class Constants {
     public static final String VALIDATE_EMPTY_APPLY_ID = "申请id不能为空";
     public static final String VALIDATE_EMPTY_CONTACT_TYPE = "联系人类型不能为空";
     public static final String VALIDATE_EMPTY_CONTACT_APPLY_STATUS = "联系人申请状态不能为空";
+    public static final String VALIDATE_ILLEGAL_GENDER = "性别信息有误";
 
     // file
     public static final String FILE_FOLDER_AVATAR = "avatar";
