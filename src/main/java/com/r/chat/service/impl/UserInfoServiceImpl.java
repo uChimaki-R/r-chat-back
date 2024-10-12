@@ -1,9 +1,11 @@
 package com.r.chat.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
+import com.r.chat.entity.dto.UserInfoDTO;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
 import com.r.chat.entity.enums.UserInfoStatusEnum;
@@ -23,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.time.LocalDateTime;
 
 /**
@@ -114,5 +117,51 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         redisUtils.saveUserTokenInfo(userTokenInfoDTO);
         log.info("{}账号 [{}] 登录成功", isAdmin ? "管理员" : "", loginDTO.getEmail());
         return userTokenInfoDTO;
+    }
+
+    @Override
+    public void updateUserInfo(UserInfoDTO userInfoDTO) {
+        String userId = UserIdContext.getCurrentUserId();
+        String newContactName = userInfoDTO.getNickName();
+        // 查看是否更新了名字，更新了的话需要修改会话中的昵称
+        UserInfo userInfo = getById(userId);
+        if (userInfo.getNickName().equals(newContactName)) {
+            // 名字一样，不用更新
+            newContactName = null;
+        }
+        // todo 修改会话中的昵称
+        // 更新数据
+        UserInfo updateInfo = CopyUtils.copyBean(userInfoDTO, UserInfo.class);
+        updateInfo.setUserId(userId);
+        // 对UserInfo已经设置了为null/空字符不更新的注解，直接更新就行了
+        updateById(updateInfo);
+        log.info("更新用户信息成功");
+        // 头像文件的操作
+        if (userInfoDTO.getAvatarFile() == null) {
+            return;
+        }
+        // 保存到本地
+        String baseFolder = appProperties.getProjectFolder();
+        File targetFolder = new File(baseFolder, Constants.FILE_FOLDER_AVATAR);
+        if (!targetFolder.exists()) {
+            if (targetFolder.mkdirs()) {
+                log.debug("创建目录: {}", targetFolder.getAbsolutePath());
+            } else {
+                log.warn("创建目录失败: {}", targetFolder.getAbsolutePath());
+            }
+        }
+        // 使用用户id组成文件名
+        try {
+            File avatarFile = new File(targetFolder, userId + Constants.FILE_SUFFIX_AVATAR);
+            File coverFile = new File(targetFolder, userId + Constants.FILE_SUFFIX_COVER);
+            userInfoDTO.getAvatarFile().transferTo(avatarFile);
+            log.info("保存图片文件: {}", avatarFile.getAbsolutePath());
+            userInfoDTO.getAvatarCover().transferTo(coverFile);
+            log.info("保存图片文件: {}", coverFile.getAbsolutePath());
+        } catch (Exception e) {
+            // 保存文件失败
+            log.error("头像文件保存失败: {}", e.getMessage());
+            throw new FileSaveFailedException(Constants.MESSAGE_FAILED_TO_SAVE_AVATAR_FILE);
+        }
     }
 }
