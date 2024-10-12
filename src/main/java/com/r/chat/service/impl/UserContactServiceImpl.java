@@ -265,32 +265,9 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 throw new GroupMemberCountLimitException(String.format(Constants.MESSAGE_GROUP_MEMBER_COUNT_LIMIT, count));
             }
         }
-        // 添加好友
-        LocalDateTime now = LocalDateTime.now();
-        // 如果是加用户，则需要添加两条数据，群聊则只用添加用户到群聊的关系，使用批量插入
-        List<UserContact> contactList = new ArrayList<>();
-        UserContact uc1 = new UserContact();
-        uc1.setUserId(contactApplyAddDTO.getApplyUserId());
-        uc1.setContactId(contactApplyAddDTO.getContactId());
-        uc1.setContactType(contactApplyAddDTO.getContactType());
-        uc1.setStatus(UserContactStatusEnum.FRIENDS);
-        uc1.setCreateTime(now);
-        uc1.setLastUpdateTime(now);
-        contactList.add(uc1);
-        if (UserContactTypeEnum.USER.equals(contactApplyAddDTO.getContactType())) {
-            // 用户互相为朋友关系
-            UserContact uc2 = new UserContact();
-            uc2.setUserId(contactApplyAddDTO.getContactId());
-            uc2.setContactId(contactApplyAddDTO.getApplyUserId());
-            uc2.setContactType(contactApplyAddDTO.getContactType());
-            uc2.setStatus(UserContactStatusEnum.FRIENDS);
-            uc2.setCreateTime(now);
-            uc2.setLastUpdateTime(now);
-            contactList.add(uc2);
-        }
-        saveBatch(contactList);
+        // 添加相互关系
+        addMutualContact(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId(), UserContactStatusEnum.FRIENDS);
         log.info("添加好友/群聊成功 contactId: {}", contactApplyAddDTO.getContactId());
-
         // todo 添加缓存，创建会话等
     }
 
@@ -337,40 +314,108 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
         }
         // 更新二者的关系
-        UserContactStatusEnum anotherStatus;
-        if (UserContactStatusEnum.DELETED_THE_FRIEND.equals(status)) {
-            anotherStatus = UserContactStatusEnum.DELETED_BY_FRIEND;
-        }
-        else if (UserContactStatusEnum.BLOCKED_THE_FRIEND.equals(status)) {
-            anotherStatus = UserContactStatusEnum.BLOCKED_BY_FRIEND;
-        }
-        else {
-            log.warn("传递了错误的状态 {}", status);
-            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
-        }
-        LocalDateTime now = LocalDateTime.now();
-        // 对好友的关系
-        UpdateWrapper<UserContact> toFriend = new UpdateWrapper<>();
-        toFriend.lambda()
-                .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
-                .eq(UserContact::getContactId, contactId)
-                .set(UserContact::getStatus, status)
-                .set(UserContact::getLastUpdateTime, now);
-        update(toFriend);
-        // 好友对自己的关系
-        UpdateWrapper<UserContact> fromFriend = new UpdateWrapper<>();
-        fromFriend.lambda()
-                .eq(UserContact::getUserId, contactId)
-                .eq(UserContact::getContactId, UserIdContext.getCurrentUserId())
-                .set(UserContact::getStatus, anotherStatus)
-                .set(UserContact::getLastUpdateTime, now);
-        update(fromFriend);
+        addMutualContact(UserIdContext.getCurrentUserId(), contactId, status);
         // todo 从自己的好友列表缓存中删除联系人
         if (UserContactStatusEnum.DELETED_THE_FRIEND.equals(status)) {
             log.info("成功删除联系人 contactId: {}", contactId);
+        } else {
+            log.info("成功拉黑联系人 contactId: {}", contactId);
+        }
+    }
+
+    /**
+     * 为二者添加相互的联系人关系
+     */
+    @Override
+    public void addMutualContact(String fromId, String toId, UserContactStatusEnum status) {
+        // 查看contactType
+        UserContactTypeEnum c1 = Objects.requireNonNull(IdPrefixEnum.getByPrefix(fromId.charAt(0))).getUserContactTypeEnum();
+        UserContactTypeEnum c2 = Objects.requireNonNull(IdPrefixEnum.getByPrefix(toId.charAt(0))).getUserContactTypeEnum();
+        UserContactTypeEnum contactType;
+        if (UserContactTypeEnum.GROUP.equals(c1) || UserContactTypeEnum.GROUP.equals(c2)) {
+            // 两个id里有一个群聊就是群聊关系
+            contactType = UserContactTypeEnum.GROUP;
         }
         else {
-            log.info("成功拉黑联系人 contactId: {}", contactId);
+            // 否则是用户关系
+            contactType = UserContactTypeEnum.USER;
+        }
+        // 获取相对关系
+        UserContactStatusEnum anotherStatus;
+        log.info("新增/修改相互的联系人关系 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId,contactType, status);
+        switch (status) {
+            case FRIENDS:
+                anotherStatus = UserContactStatusEnum.FRIENDS;
+                break;
+            case NOT_FRIENDS:
+                anotherStatus = UserContactStatusEnum.NOT_FRIENDS;
+                break;
+            case BLOCKED_THE_FRIEND:
+                anotherStatus = UserContactStatusEnum.BLOCKED_BY_FRIEND;
+                break;
+            case DELETED_THE_FRIEND:
+                anotherStatus = UserContactStatusEnum.DELETED_BY_FRIEND;
+                break;
+            case BLOCKED_BY_FRIEND:
+                anotherStatus = UserContactStatusEnum.BLOCKED_THE_FRIEND;
+                break;
+            case DELETED_BY_FRIEND:
+                anotherStatus = UserContactStatusEnum.DELETED_THE_FRIEND;
+                break;
+            default:
+                log.warn("传递了错误的状态 {}", status);
+                throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        // 查看是否存在关系
+        QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(UserContact::getUserId, fromId)
+                .eq(UserContact::getContactId, toId);
+        UserContact userContact = userContactMapper.selectOne(queryWrapper);
+        // 除了群聊的好友关系只用写好友和群聊的关系以外，其他都是相互的关系，先把这个条件提取出来写了
+        boolean needAnotherContact = !(UserContactTypeEnum.GROUP.equals(contactType) && UserContactStatusEnum.FRIENDS.equals(status));
+        if (userContact == null) {
+            // 新增关系
+            // 对联系人的关系
+            UserContact newUserContact = new UserContact();
+            newUserContact.setUserId(fromId);
+            newUserContact.setContactId(toId);
+            newUserContact.setContactType(contactType);
+            newUserContact.setStatus(status);
+            newUserContact.setCreateTime(now);
+            newUserContact.setLastUpdateTime(now);
+            userContactMapper.insert(newUserContact);
+            // 联系人对自己的关系
+            if (needAnotherContact) {
+                newUserContact.setId(null);  // 这个对象在上面的insert里会回填自增的id，复用需要删掉这个id，否则插不进去
+                newUserContact.setUserId(toId);
+                newUserContact.setContactId(fromId);
+                newUserContact.setStatus(anotherStatus);
+                userContactMapper.insert(newUserContact);
+            }
+            log.info("新增相互的联系人关系成功 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId,contactType, status);
+        } else {
+            // 修改关系
+            // 对联系人的关系
+            UpdateWrapper<UserContact> toFriend = new UpdateWrapper<>();
+            toFriend.lambda()
+                    .eq(UserContact::getUserId, fromId)
+                    .eq(UserContact::getContactId, toId)
+                    .set(UserContact::getStatus, status)
+                    .set(UserContact::getLastUpdateTime, now);
+            update(toFriend);
+            // 联系人对自己的关系
+            if (needAnotherContact) {
+                UpdateWrapper<UserContact> fromFriend = new UpdateWrapper<>();
+                fromFriend.lambda()
+                        .eq(UserContact::getUserId, toId)
+                        .eq(UserContact::getContactId, fromId)
+                        .set(UserContact::getStatus, anotherStatus)
+                        .set(UserContact::getLastUpdateTime, now);
+                update(fromFriend);
+            }
+            log.info("修改相互的联系人关系成功 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId,contactType, status);
         }
     }
 
