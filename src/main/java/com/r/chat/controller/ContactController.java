@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class ContactController {
      * @return 返回添加类型的枚举，0为可以直接添加，1需要对方确认后才能添加
      */
     @PostMapping("/applyAdd")
-    public Result<JoinTypeEnum> applyAdd(ApplyDTO applyDTO) {
+    public Result<JoinTypeEnum> applyAdd(@Valid ApplyDTO applyDTO) {
         log.info("添加用户或群聊 {}", applyDTO);
         return Result.success(userContactService.applyAdd(applyDTO));
     }
@@ -78,7 +79,7 @@ public class ContactController {
      * 处理申请
      */
     @PostMapping("/dealWithApply")
-    public Result<String> dealWithApply(ApplyDealDTO applyDealDTO) {
+    public Result<String> dealWithApply(@Valid ApplyDealDTO applyDealDTO) {
         log.info("处理申请信息 {}", applyDealDTO);
         userContactApplyService.dealWithApply(applyDealDTO);
         return Result.success();
@@ -88,7 +89,7 @@ public class ContactController {
      * 加载好友或加入的群聊
      */
     @GetMapping("/loadContact")
-    public Result<List<BasicInfoVO>> loadContact(ContactTypeDTO contactTypeDTO) {
+    public Result<List<BasicInfoVO>> loadContact(@Valid ContactTypeDTO contactTypeDTO) {
         log.info("查询好友/加入的群聊 {}", contactTypeDTO);
         List<BasicInfoDTO> basicInfoDTOList = userContactService.loadContact(contactTypeDTO);
         List<BasicInfoVO> basicInfoVOList = CopyUtils.copyList(basicInfoDTOList, BasicInfoVO.class);
