@@ -131,7 +131,7 @@ public class ContactController {
     /**
      * 拉黑联系人
      */
-    @PostMapping("/blockContact")
+    @PutMapping("/blockContact")
     public Result<String> blockContact(@NotEmpty(message = Constants.VALIDATE_EMPTY_CONTACT_ID) String contactId) {
         log.info("拉黑联系人 contactId: {}", contactId);
         userContactService.removeContact(contactId, UserContactStatusEnum.BLOCKED_THE_FRIEND);
