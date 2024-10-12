@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 
 @Data
@@ -30,12 +31,15 @@ public class LoginDTO implements Serializable {
      * 邮箱
      */
     @NotEmpty(message = Constants.VALIDATE_EMPTY_EMAIL)
+    @Pattern(regexp = Constants.REGEX_EMAIL, message = Constants.VALIDATE_ILLEGAL_EMAIL)
     private String email;
 
     /**
      * 密码
      */
     @NotEmpty(message = Constants.VALIDATE_EMPTY_PASSWORD)
+    // 密码传过来的是加密过的
+    @Pattern(regexp = Constants.REGEX_MD5, message = Constants.VALIDATE_ILLEGAL_PASSWORD)
     private String password;
 
 }
