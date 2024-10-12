@@ -38,7 +38,7 @@ public class Constants {
     public static final String MESSAGE_NOT_IN_THE_GROUP = "不在此群聊";
     public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
 
-    // validate
+    // validate failure message
     public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
     public static final String VALIDATE_EMPTY_CHECK_CODE_KEY = "验证码唯一标识key不能为空";
     public static final String VALIDATE_EMPTY_EMAIL = "邮箱不能为空";
@@ -50,6 +50,15 @@ public class Constants {
     public static final String VALIDATE_EMPTY_CONTACT_TYPE = "联系人类型不能为空";
     public static final String VALIDATE_EMPTY_CONTACT_APPLY_STATUS = "联系人申请状态不能为空";
     public static final String VALIDATE_ILLEGAL_GENDER = "性别信息有误";
+    public static final String VALIDATE_ILLEGAL_NICK_NAME = "用户名信息有误";
+    public static final String VALIDATE_ILLEGAL_EMAIL = "邮箱信息有误";
+    public static final String VALIDATE_ILLEGAL_PASSWORD = "密码信息有误";
+
+    // regex
+    public static final String REGEX_NICK_NAME = "^[\\u4e00-\\u9fa5a-zA-Z0-9_-]{6,12}$";
+    public static final String REGEX_EMAIL = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
+    public static final String REGEX_PASSWORD = "^(?![a-zA-Z]+$)(?!\\d+$)(?![^\\da-zA-Z\\s]+$).{8,}$";
+    public static final String REGEX_MD5 = "^[a-fA-F0-9]{32}$";
 
     // file
     public static final String FILE_FOLDER_AVATAR = "avatar";
