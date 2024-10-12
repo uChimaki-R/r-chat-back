@@ -1,12 +1,12 @@
 package com.r.chat.entity.po;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
 import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -36,15 +36,18 @@ public class UserInfoBeauty implements Serializable {
     /**
      * 邮箱
      */
+    @TableField("email")
     private String email;
 
     /**
      * 用户id（靓号）
      */
+    @TableField("user_id")
     private String userId;
 
     /**
      * 靓号使用状态 0：未使用 1：已使用
      */
+    @TableField("status")
     private UserInfoBeautyStatusEnum status; // 使用枚举类型接收
 }
