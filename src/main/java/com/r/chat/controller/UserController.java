@@ -4,6 +4,7 @@ import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
+import com.r.chat.entity.dto.UserInfoDTO;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.entity.vo.CheckCodeVO;
 import com.r.chat.entity.vo.SysSettingVO;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -72,7 +74,7 @@ public class UserController {
      * 注册账号
      */
     @PostMapping("/register")
-    public Result<String> register(RegisterDTO registerDTO) {
+    public Result<String> register(@Valid RegisterDTO registerDTO) {
         log.info("用户注册 {}", registerDTO);
         // 先判断验证码是否正确
         checkCheckCode(registerDTO.getCheckCodeKey(), registerDTO.getCheckCode());
@@ -85,7 +87,7 @@ public class UserController {
      * 登录账号
      */
     @PostMapping("/login")
-    public Result<UserTokenInfoVO> login(LoginDTO loginDTO) {
+    public Result<UserTokenInfoVO> login(@Valid LoginDTO loginDTO) {
         log.info("用户登录 {}", loginDTO);
         // 先判断验证码是否正确
         checkCheckCode(loginDTO.getCheckCodeKey(), loginDTO.getCheckCode());
@@ -113,5 +115,15 @@ public class UserController {
         UserTokenInfoVO userTokenInfoVO = CopyUtils.copyBean(UserTokenInfoContext.getCurrentUserTokenInfo(), UserTokenInfoVO.class);
         log.info("获取用户信息 {}", userTokenInfoVO);
         return Result.success(userTokenInfoVO);
+    }
+
+    /**
+     * 修改个人信息
+     */
+    @PutMapping("/saveUserInfo")
+    public Result<String> saveUserInfo(@Valid UserInfoDTO userInfoDTO) {
+        log.info("更新用户信息 {}", userInfoDTO);
+        userInfoService.updateUserInfo(userInfoDTO);
+        return Result.success();
     }
 }
