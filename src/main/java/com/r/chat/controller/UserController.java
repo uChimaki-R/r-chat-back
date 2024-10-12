@@ -149,4 +149,15 @@ public class UserController {
         // todo 强制退出，重新登陆
         return Result.success();
     }
+
+    /**
+     * 退出登录
+     */
+    @DeleteMapping("/logout")
+    public Result<String> logout() {
+        String userId = UserIdContext.getCurrentUserId();
+        log.info("退出登录");
+        // todo 关闭ws连接
+        return Result.success();
+    }
 }
