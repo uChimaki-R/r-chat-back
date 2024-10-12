@@ -1,6 +1,5 @@
 package com.r.chat.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
@@ -8,13 +7,11 @@ import com.r.chat.entity.dto.ApplyDealDTO;
 import com.r.chat.entity.dto.ContactApplyAddDTO;
 import com.r.chat.entity.enums.UserContactApplyStatusEnum;
 import com.r.chat.entity.enums.UserContactStatusEnum;
-import com.r.chat.entity.po.UserContact;
 import com.r.chat.entity.po.UserContactApply;
 import com.r.chat.entity.vo.ContactApplyVO;
 import com.r.chat.exception.IllegalOperationException;
 import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.mapper.UserContactApplyMapper;
-import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.service.IUserContactApplyService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.service.IUserContactService;
@@ -42,7 +39,6 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
     private final IUserContactService userContactService;
 
     private final UserContactApplyMapper userContactApplyMapper;
-    private final UserContactMapper userContactMapper;
 
     @Override
     public Page<ContactApplyVO> getApplyInfoPage(Page<ContactApplyVO> page) {
@@ -74,45 +70,22 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
         }
         // 修改申请状态
         userContactApply.setStatus(status);
-        userContactApply.setLastApplyTime(now);
         updateById(userContactApply);
         switch (status) {
             case AGREED:
                 // 添加联系人
+                log.info("同意该申请 {}", userContactApply);
                 ContactApplyAddDTO contactApplyAddDTO = CopyUtils.copyBean(userContactApply, ContactApplyAddDTO.class);
                 userContactService.addContact(contactApplyAddDTO);
                 break;
             case REJECTED:
                 // 拒绝无需处理
-                log.info("拒绝该申请");
+                log.info("拒绝该申请 {}", userContactApply);
                 break;
             case BLOCKED:
-                // 拉黑，需要把联系人的状态也设置为拉黑
-                // 先查一下有没有关系
-                log.info("拉黑申请人 {}", userContactApply.getApplyUserId());
-                QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
-                queryWrapper.lambda()
-                        .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())  // 自己
-                        .eq(UserContact::getContactId, userContactApply.getApplyUserId());  // 和申请人
-                UserContact userContact = userContactMapper.selectOne(queryWrapper);
-                if (userContact == null) {
-                    // 新增拉黑关系
-                    UserContact blockContact = new UserContact();
-                    blockContact.setUserId(UserIdContext.getCurrentUserId());
-                    blockContact.setContactId(userContactApply.getApplyUserId());
-                    blockContact.setContactType(userContactApply.getContactType());
-                    blockContact.setStatus(UserContactStatusEnum.BLOCKED_THE_FRIEND);
-                    blockContact.setCreateTime(now);
-                    blockContact.setLastUpdateTime(now);
-                    log.info("新增拉黑关系 {}", blockContact);
-                    userContactMapper.insert(blockContact);
-                } else {
-                    // 修改为拉黑
-                    userContact.setStatus(UserContactStatusEnum.BLOCKED_THE_FRIEND);
-                    userContact.setLastUpdateTime(now);
-                    log.info("修改联系人状态为拉黑 {}", userContact);
-                    userContactMapper.updateById(userContact);
-                }
+                // 设置对应的拉黑关系
+                log.info("拒绝该申请并拉黑申请人 {}", userContactApply);
+                userContactService.addMutualContact(userContactApply.getContactId(), userContactApply.getApplyUserId(), UserContactStatusEnum.BLOCKED_THE_FRIEND);
                 break;
             default:
                 log.warn(Constants.IN_SWITCH_DEFAULT);
