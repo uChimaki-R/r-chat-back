@@ -57,4 +57,9 @@ public interface IUserContactService extends IService<UserContact> {
      * 根据status执行删除/拉黑联系人的逻辑
      */
     void removeContact(String contactId, UserContactStatusEnum status);
+
+    /**
+     * 为二者添加相互的联系人关系
+     */
+    void addMutualContact(String fromId, String toId, UserContactStatusEnum status);
 }
