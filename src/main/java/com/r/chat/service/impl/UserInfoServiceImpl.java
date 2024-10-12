@@ -120,6 +120,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateUserInfo(UserInfoDTO userInfoDTO) {
         String userId = UserIdContext.getCurrentUserId();
         String newContactName = userInfoDTO.getNickName();
