@@ -40,6 +40,16 @@ public class RedisUtils {
     }
 
     /**
+     * 根据用户id移除用户登录信息token
+     */
+    public void removeTokenByUserId(String userId) {
+        String token = getUserIdByToken(userId);
+        if (token != null) {
+            redisOperation.delete(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
+        }
+    }
+
+    /**
      * 获取系统设置信息，如果没有则从配置文件中获取默认系统设置信息
      */
     public SysSettingDTO getSysSetting() {
