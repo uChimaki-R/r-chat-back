@@ -2,10 +2,7 @@ package com.r.chat.controller;
 
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
-import com.r.chat.entity.dto.LoginDTO;
-import com.r.chat.entity.dto.RegisterDTO;
-import com.r.chat.entity.dto.UserInfoDTO;
-import com.r.chat.entity.dto.UserTokenInfoDTO;
+import com.r.chat.entity.dto.*;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.vo.CheckCodeVO;
 import com.r.chat.entity.vo.SysSettingVO;
@@ -17,7 +14,6 @@ import com.r.chat.entity.result.Result;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserInfoService;
 import com.r.chat.utils.CopyUtils;
-import com.r.chat.utils.StringUtils;
 import com.wf.captcha.ArithmeticCaptcha;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +21,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -137,17 +131,9 @@ public class UserController {
      * 修改密码（密码是明文）
      */
     @PutMapping("/updatePassword")
-    public Result<String> updatePassword(@NotEmpty(message = Constants.VALIDATE_EMPTY_PASSWORD)
-                                         @Pattern(regexp = Constants.REGEX_PASSWORD, message = Constants.VALIDATE_ILLEGAL_PASSWORD)
-                                         String password) {
-        log.info("更新密码 password: {}", password);
-        String newPassword = StringUtils.encodeMd5(password);
-        userInfoService.lambdaUpdate()
-                .eq(UserInfo::getUserId, UserIdContext.getCurrentUserId())
-                .set(UserInfo::getPassword, newPassword)  // 需要加密
-                .update();
-        log.info("更新密码成功 md5password: {}", newPassword);
-        // todo 强制退出，重新登陆
+    public Result<String> updatePassword(@Valid PasswordUpdateDTO passwordUpdateDTO) {
+        log.info("更新密码 {}", passwordUpdateDTO);
+        userInfoService.updatePassword(passwordUpdateDTO);
         return Result.success();
     }
 
