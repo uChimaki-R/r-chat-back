@@ -33,4 +33,9 @@ public interface IUserInfoService extends IService<UserInfo> {
      * 更新密码
      */
     void updatePassword(PasswordUpdateDTO passwordUpdateDTO);
+
+    /**
+     * 退出登录
+     */
+    void logout();
 }
