@@ -2,11 +2,11 @@ package com.r.chat.entity.constants;
 
 public class Constants {
     // redis
-    public static final String REDIS_KEY_PREFIX_CHECK_CODE = "rchat:checkcode:";  // 验证码结果保存路径前缀
-    public static final String REDIS_KEY_PREFIX_WS_HEART_BEAT = "rchat:ws:heartbeat:";  // ws的心跳保存路径前缀
-    public static final String REDIS_KEY_PREFIX_USER_TOKEN = "rchat:user:token:";  // 用户token保存路径前缀
-    public static final String REDIS_KEY_PREFIX_USER_ID = "rchat:user:id:";  // 用户id保存路径前缀
-    public static final String REDIS_KEY_SYS_SETTINGS = "rchat:sys:settings";  // 系统设置保存路径
+    public static final String REDIS_KEY_PREFIX = "rchat:";
+    public static final String REDIS_KEY_PREFIX_CHECK_CODE = REDIS_KEY_PREFIX + "checkcode:";  // 验证码结果保存路径前缀
+    public static final String REDIS_KEY_PREFIX_WS_HEART_BEAT = REDIS_KEY_PREFIX + "ws:heartbeat:";  // ws的心跳保存路径前缀
+    public static final String REDIS_KEY_PREFIX_USER_TOKEN = REDIS_KEY_PREFIX + "user:token:";  // 用户token保存路径前缀
+    public static final String REDIS_KEY_SYS_SETTINGS = REDIS_KEY_PREFIX + "sys:settings";  // 系统设置保存路径
 
     // length
     public static final Integer LENGTH_ID = 11;  // 用户id及群聊id的长度
