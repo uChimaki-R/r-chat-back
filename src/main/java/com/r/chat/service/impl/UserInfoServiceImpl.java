@@ -3,10 +3,7 @@ package com.r.chat.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
-import com.r.chat.entity.dto.LoginDTO;
-import com.r.chat.entity.dto.RegisterDTO;
-import com.r.chat.entity.dto.UserInfoDTO;
-import com.r.chat.entity.dto.UserTokenInfoDTO;
+import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
 import com.r.chat.entity.enums.UserInfoStatusEnum;
 import com.r.chat.entity.po.UserInfo;
@@ -164,5 +161,21 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             log.error("头像文件保存失败: {}", e.getMessage());
             throw new FileSaveFailedException(Constants.MESSAGE_FAILED_TO_SAVE_AVATAR_FILE);
         }
+    }
+
+    @Override
+    public void updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
+        // 检查旧密码是否正确
+        UserInfo userInfo = getById(UserIdContext.getCurrentUserId());
+        if (!userInfo.getPassword().equals(StringUtils.encodeMd5(passwordUpdateDTO.getOldPassword()))) {
+            log.warn("更新密码失败: 密码错误");
+            throw new PasswordErrorException(Constants.MESSAGE_PASSWORD_ERROR);
+        }
+        // 更新密码
+        String newPassword = StringUtils.encodeMd5(passwordUpdateDTO.getNewPassword());
+        userInfo.setPassword(newPassword);
+        updateById(userInfo);
+        log.info("更新密码成功 md5password: {}", newPassword);
+        // todo 强制退出，重新登陆
     }
 }
