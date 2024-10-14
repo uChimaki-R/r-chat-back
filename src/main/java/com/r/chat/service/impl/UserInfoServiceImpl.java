@@ -113,8 +113,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 设置并保存token
         String token = StringUtils.generateToken(userInfo.getUserId());
         userTokenInfoDTO.setToken(token);
-        // 保存到redis
-        redisUtils.saveUserTokenInfo(userTokenInfoDTO);
+        // 保存用户token到id的映射到redis，以后登录就可以从上下文里获取用户id
+        redisUtils.saveToken2UserId(token, userInfo.getUserId());
         log.info("{}账号 [{}] 登录成功", isAdmin ? "管理员" : "", loginDTO.getEmail());
         return userTokenInfoDTO;
     }
