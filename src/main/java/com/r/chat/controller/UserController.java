@@ -142,9 +142,8 @@ public class UserController {
      */
     @DeleteMapping("/logout")
     public Result<String> logout() {
-        String userId = UserIdContext.getCurrentUserId();
         log.info("退出登录");
-        // todo 关闭ws连接
+        userInfoService.logout();
         return Result.success();
     }
 }
