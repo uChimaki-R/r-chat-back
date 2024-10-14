@@ -50,6 +50,9 @@ public class TokenInterceptor implements HandlerInterceptor {
         try {
             // 用token从redis中获取用户id
             String userId = redisUtils.getUserIdByToken(token);
+            if (userId == null) {
+                throw new LoginTimeOutException(Constants.MESSAGE_NOT_LOGIN);
+            }
             log.info("获取用户id: {}", userId);
             UserIdContext.setCurrentUserId(userId);
             // 保存自定义的日志输出标识
