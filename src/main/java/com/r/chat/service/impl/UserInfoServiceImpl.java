@@ -178,4 +178,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         log.info("更新密码成功 md5password: {}", newPassword);
         // todo 强制退出，重新登陆
     }
+
+    @Override
+    public void logout() {
+        // 移除用户登录token
+        redisUtils.removeTokenByUserId(UserIdContext.getCurrentUserId());
+        // todo 关闭ws连接
+    }
 }
