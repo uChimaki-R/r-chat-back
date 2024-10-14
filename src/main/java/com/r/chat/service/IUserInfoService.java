@@ -1,11 +1,8 @@
 package com.r.chat.service;
 
-import com.r.chat.entity.dto.LoginDTO;
-import com.r.chat.entity.dto.RegisterDTO;
-import com.r.chat.entity.dto.UserInfoDTO;
+import com.r.chat.entity.dto.*;
 import com.r.chat.entity.po.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.r.chat.entity.dto.UserTokenInfoDTO;
 
 /**
  * <p>
@@ -31,4 +28,9 @@ public interface IUserInfoService extends IService<UserInfo> {
      * 更新用户信息，包括头像等
      */
     void updateUserInfo(UserInfoDTO userInfoDTO);
+
+    /**
+     * 更新密码
+     */
+    void updatePassword(PasswordUpdateDTO passwordUpdateDTO);
 }
