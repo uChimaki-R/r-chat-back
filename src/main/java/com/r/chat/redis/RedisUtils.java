@@ -2,7 +2,6 @@ package com.r.chat.redis;
 
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.SysSettingDTO;
-import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.properties.DefaultSysSettingProperties;
 import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
@@ -27,27 +26,17 @@ public class RedisUtils {
     }
 
     /**
-     * 保存用户token信息
+     * 保存token到id的映射，设置一天的过期时间
      */
-    public void saveUserTokenInfo(UserTokenInfoDTO userTokenInfoDTO) {
-        // 保存两份信息，一份是用token找到用户信息，一份是userId找到token
-        // 保存一天的登录信息
-        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_TOKEN + userTokenInfoDTO.getToken(), userTokenInfoDTO, 1, TimeUnit.DAYS);
-        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_ID + userTokenInfoDTO.getUserId(), userTokenInfoDTO.getToken(), 1, TimeUnit.DAYS);
+    public void saveToken2UserId(String token, String userId) {
+        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token, userId, 1, TimeUnit.DAYS);
     }
 
     /**
-     * 根据token获取用户信息
+     * 根据用户token获取id
      */
-    public UserTokenInfoDTO getUserTokenInfo(String token) {
-        return (UserTokenInfoDTO) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
-    }
-
-    /**
-     * 根据用户id获取token
-     */
-    public String getUserToken(String userId) {
-        return (String) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_ID + userId);
+    public String getUserIdByToken(String token) {
+        return (String) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
     }
 
     /**
