@@ -1,7 +1,6 @@
 package com.r.chat.controller;
 
 import com.r.chat.context.UserIdContext;
-import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.LoginDTO;
 import com.r.chat.entity.dto.RegisterDTO;
@@ -10,6 +9,7 @@ import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.vo.CheckCodeVO;
 import com.r.chat.entity.vo.SysSettingVO;
+import com.r.chat.entity.vo.UserInfoVO;
 import com.r.chat.entity.vo.UserTokenInfoVO;
 import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
@@ -116,10 +116,11 @@ public class UserController {
      * 获取用户信息
      */
     @GetMapping("/getUserInfo")
-    public Result<UserTokenInfoVO> getUserInfo() {
-        UserTokenInfoVO userTokenInfoVO = CopyUtils.copyBean(UserTokenInfoContext.getCurrentUserTokenInfo(), UserTokenInfoVO.class);
-        log.info("获取用户信息 {}", userTokenInfoVO);
-        return Result.success(userTokenInfoVO);
+    public Result<UserInfoVO> getUserInfo() {
+        UserInfo userInfo = userInfoService.getById(UserIdContext.getCurrentUserId());
+        UserInfoVO userInfoVO = CopyUtils.copyBean(userInfo, UserInfoVO.class);
+        log.info("获取用户信息 {}", userInfoVO);
+        return Result.success(userInfoVO);
     }
 
     /**
@@ -138,7 +139,7 @@ public class UserController {
     @PutMapping("/updatePassword")
     public Result<String> updatePassword(@NotEmpty(message = Constants.VALIDATE_EMPTY_PASSWORD)
                                          @Pattern(regexp = Constants.REGEX_PASSWORD, message = Constants.VALIDATE_ILLEGAL_PASSWORD)
-                                         String password){
+                                         String password) {
         log.info("更新密码 password: {}", password);
         String newPassword = StringUtils.encodeMd5(password);
         userInfoService.lambdaUpdate()
