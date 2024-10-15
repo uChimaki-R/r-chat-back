@@ -202,4 +202,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         update(updateWrapper);
         log.info("更新用户状态成功 {}", userStatusDTO);
     }
+
+    @Override
+    public void forceOffLine(String userId) {
+        // todo 发送消息让用户强制下线
+    }
 }
