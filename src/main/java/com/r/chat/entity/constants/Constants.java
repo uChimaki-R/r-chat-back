@@ -37,6 +37,7 @@ public class Constants {
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
     public static final String MESSAGE_NOT_IN_THE_GROUP = "不在此群聊";
     public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
+    public static final String MESSAGE_NOT_ADMIN = "非管理员账号操作";
 
     // validate failure message
     public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
