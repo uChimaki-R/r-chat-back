@@ -13,7 +13,7 @@ public class AppProperties {
     // ws端口
     private Integer wsPort;
     // 管理员邮箱
-    private List<String> adminEmails;
+    private List<String> adminUserIds;
     // 项目文件夹
     private String projectFolder;
 }
