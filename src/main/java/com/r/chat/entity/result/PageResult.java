@@ -1,5 +1,6 @@
 package com.r.chat.entity.result;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -33,4 +34,17 @@ public class PageResult<T> implements Serializable {
      * 数据
      */
     private List<T> data;
+
+    /**
+     * 将mybatis-plus的Page对象转为PageResult对象
+     */
+    public static <E> PageResult<E> fromPage(Page<E> page) {
+        PageResult<E> pageResult = new PageResult<>();
+        pageResult.setPageNo(page.getCurrent());
+        pageResult.setPageSize(page.getSize());
+        pageResult.setTotalCount(page.getTotal());
+        pageResult.setPageTotal(page.getPages());
+        pageResult.setData(page.getRecords());
+        return pageResult;
+    }
 }
