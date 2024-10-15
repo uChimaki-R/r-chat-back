@@ -1,7 +1,7 @@
 package com.r.chat.entity.vo;
 
 import com.r.chat.entity.enums.JoinTypeEnum;
-import com.r.chat.entity.enums.UserInfoStatusEnum;
+import com.r.chat.entity.enums.UserStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -54,7 +54,7 @@ public class UserInfoVO implements Serializable {
     /**
      * 账号状态
      */
-    private UserInfoStatusEnum status;
+    private UserStatusEnum status;
 
     /**
      * 创建时间

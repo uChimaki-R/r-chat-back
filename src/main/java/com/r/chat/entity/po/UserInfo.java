@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.r.chat.entity.enums.JoinTypeEnum;
-import com.r.chat.entity.enums.UserInfoStatusEnum;
+import com.r.chat.entity.enums.UserStatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -75,7 +75,7 @@ public class UserInfo implements Serializable {
      * 账号状态
      */
     @TableField("status")
-    private UserInfoStatusEnum status; // 使用枚举类型接收
+    private UserStatusEnum status; // 使用枚举类型接收
 
     /**
      * 创建时间
