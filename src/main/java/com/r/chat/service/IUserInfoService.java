@@ -43,4 +43,9 @@ public interface IUserInfoService extends IService<UserInfo> {
      * 更新用户状态
      */
     void updateUserStatus(UserStatusDTO userStatusDTO);
+
+    /**
+     * 强制用户下线
+     */
+    void forceOffLine(String userId);
 }
