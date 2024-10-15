@@ -21,6 +21,6 @@ public class ApplyDealDTO {
     /**
      * 用户设置的处理状态
      */
-    @NotNull(message = Constants.VALIDATE_EMPTY_CONTACT_APPLY_STATUS)
+    @NotNull(message = Constants.VALIDATE_EMPTY_STATUS)
     private UserContactApplyStatusEnum status;
 }
