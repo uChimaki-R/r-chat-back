@@ -220,8 +220,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     }
 
     @Override
-    public List<BasicInfoDTO> loadContact(ContactTypeDTO contactTypeDTO) {
-        UserContactTypeEnum contactType = contactTypeDTO.getContactType();
+    public List<BasicInfoDTO> loadContact(UserContactTypeEnum contactType) {
         if (contactType == null) {
             log.warn("查询失败: 传入的联系人类型为null");
             throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
