@@ -1,11 +1,12 @@
 package com.r.chat.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
-import com.r.chat.entity.enums.UserInfoStatusEnum;
+import com.r.chat.entity.enums.UserStatusEnum;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.po.UserInfoBeauty;
 import com.r.chat.exception.*;
@@ -70,7 +71,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfo = CopyUtils.copyBean(registerDTO, UserInfo.class);
         userInfo.setUserId(userId);
         userInfo.setPassword(StringUtils.encodeMd5(registerDTO.getPassword())); // 使用md5加密后再存储
-        userInfo.setStatus(UserInfoStatusEnum.ENABLE);
+        userInfo.setStatus(UserStatusEnum.ENABLE);
         userInfo.setCreateTime(now);
         userInfo.setLastOffTime(System.currentTimeMillis());
         userInfoMapper.insert(userInfo);
@@ -99,7 +100,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             throw new UserAlreadyLoginException(Constants.MESSAGE_ACCOUNT_ALREADY_LOGIN);
         }
         // 检测账号是否被禁用
-        if (UserInfoStatusEnum.DISABLED == userInfo.getStatus()) {
+        if (UserStatusEnum.DISABLED == userInfo.getStatus()) {
             log.warn("拒绝登录: 账号 [{}] 已被锁定", loginDTO.getEmail());
             throw new UserDisableException(Constants.MESSAGE_ACCOUNT_DISABLE);
         }
@@ -184,5 +185,21 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 移除用户登录token
         redisUtils.removeTokenByUserId(UserIdContext.getCurrentUserId());
         // todo 关闭ws连接
+    }
+
+    @Override
+    public void updateUserStatus(UserStatusDTO userStatusDTO) {
+        // status已用valid验证，只用验证用户是否存在
+        UserInfo userInfo = getById(userStatusDTO.getUserId());
+        if (userInfo == null) {
+            log.warn("更新用户状态失败 用户不存在");
+            throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
+        }
+        UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.lambda()
+                .eq(UserInfo::getUserId, userStatusDTO.getUserId())
+                .set(UserInfo::getStatus, userStatusDTO.getStatus());
+        update(updateWrapper);
+        log.info("更新用户状态成功 {}", userStatusDTO);
     }
 }
