@@ -5,6 +5,7 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.JoinTypeEnum;
 import com.r.chat.entity.enums.UserContactStatusEnum;
+import com.r.chat.entity.enums.UserContactTypeEnum;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.*;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Slf4j
@@ -55,22 +57,16 @@ public class ContactController {
      * 加载申请信息
      */
     @GetMapping("/loadApply")
-    public Result<PageResult<ContactApplyVO>> loadApply(Long pageNo, Long pageSize) {
+    public Result<PageResult<ContactApplyVO>> loadApply(@RequestParam(defaultValue = "1") Long pageNo,
+                                                        @RequestParam(defaultValue = "15") Long pageSize) {
         // 加人的申请返回申请人的信息，加群申请不仅返回申请人的信息，还要返回是想加入哪个群的信息
         // 这里和下面的loadContact不同，loadContact是加载自己的好友/群聊信息，这里是加载别人申请的信息，如果自己是群主的话还会接收到加群的申请
         // 作为群主的自己，想看到的肯定是"谁"想加入我的"哪一个群聊"两个信息，所以统一一起返回
-        pageNo = pageNo == null ? 1 : pageNo;
-        pageSize = pageSize == null ? Constants.SIZE_DEFAULT_PAGE_SIZE : pageSize;
         log.info("加载申请信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
         // 涉及用户名称/群聊名称的填充，需要多表联查
         Page<ContactApplyVO> page = userContactApplyService.getApplyInfoPage(new Page<>(pageNo, pageSize));
         // 包装成自己的pageResult对象
-        PageResult<ContactApplyVO> pageResult = new PageResult<>();
-        pageResult.setPageSize(pageSize);
-        pageResult.setPageNo(pageNo);
-        pageResult.setPageTotal(page.getPages());
-        pageResult.setTotalCount(page.getTotal());
-        pageResult.setData(page.getRecords());
+        PageResult<ContactApplyVO> pageResult = PageResult.fromPage(page);
         log.info("获取到申请信息 {}", pageResult);
         return Result.success(pageResult);
     }
@@ -89,9 +85,9 @@ public class ContactController {
      * 加载好友或加入的群聊
      */
     @GetMapping("/loadContact")
-    public Result<List<BasicInfoVO>> loadContact(@Valid ContactTypeDTO contactTypeDTO) {
-        log.info("查询好友/加入的群聊 {}", contactTypeDTO);
-        List<BasicInfoDTO> basicInfoDTOList = userContactService.loadContact(contactTypeDTO);
+    public Result<List<BasicInfoVO>> loadContact(@NotNull(message = Constants.VALIDATE_EMPTY_STATUS) UserContactTypeEnum contactType) {
+        log.info("查询好友/加入的群聊 {}", contactType);
+        List<BasicInfoDTO> basicInfoDTOList = userContactService.loadContact(contactType);
         List<BasicInfoVO> basicInfoVOList = CopyUtils.copyList(basicInfoDTOList, BasicInfoVO.class);
         return Result.success(basicInfoVOList);
     }
