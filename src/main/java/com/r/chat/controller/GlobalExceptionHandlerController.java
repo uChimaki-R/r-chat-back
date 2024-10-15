@@ -5,6 +5,7 @@ import com.r.chat.entity.enums.ResponseCodeEnum;
 import com.r.chat.entity.result.Result;
 import com.r.chat.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -25,6 +26,11 @@ public class GlobalExceptionHandlerController {
             BusinessException be = (BusinessException) e;
             Result<String> result = Result.error(be.getCode(), be.getMessage());
             log.warn("BusinessException | {}", result);
+            return result;
+        } else if (e instanceof BindException) {
+            // 绑定错误，可能是枚举没匹配到，或者是Long传了String等
+            Result<String> result = Result.error(ResponseCodeEnum.PARAMETERS_ERROR.getCode(), Constants.MESSAGE_PARAMETER_ERROR);
+            log.warn("BindException | {}", result);
             return result;
         } else if (e.getClass().getPackage().getName().startsWith("org.springframework.validation") ||
                 e.getClass().getPackage().getName().startsWith("javax.validation")) {
