@@ -14,9 +14,6 @@ r:
       database: 9
     ws-port: 5051
     project-folder: D:/Code/JavaCode/r-chat/r-chat-data
-    admin-emails:
-      - 1259864733@qq.com
-      - test@tt.com
     default-settings:
       max-group-count: 5
       max-group-member-count: 200
@@ -26,3 +23,5 @@ r:
       robot-id: robot@robot.com
       robot-nick-name: Robot-Chat
       robot-welcome-msg: 欢迎使用R-Chat!
+    admin-user-ids:
+      - U62029850169
