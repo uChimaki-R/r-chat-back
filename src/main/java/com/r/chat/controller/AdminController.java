@@ -1,6 +1,7 @@
 package com.r.chat.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.UserStatusDTO;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.result.PageResult;
@@ -12,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
 @Slf4j
 @Validated
@@ -43,6 +45,16 @@ public class AdminController {
     public Result<String> updateUserStatus(@Valid UserStatusDTO userStatusDTO) {
         log.info("更新用户状态 {}", userStatusDTO);
         userInfoService.updateUserStatus(userStatusDTO);
+        return Result.success();
+    }
+
+    /**
+     * 强制用户下线
+     */
+    @DeleteMapping("/forceOffLine")
+    public Result<String> forceOffLine(@NotEmpty(message = Constants.VALIDATE_EMPTY_USER_ID) String userId) {
+        log.info("强制下线 userId: {}", userId);
+        userInfoService.forceOffLine(userId);
         return Result.success();
     }
 }
