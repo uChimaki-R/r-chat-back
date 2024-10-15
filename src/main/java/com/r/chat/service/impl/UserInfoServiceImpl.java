@@ -105,7 +105,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
         UserTokenInfoDTO userTokenInfoDTO = CopyUtils.copyBean(userInfo, UserTokenInfoDTO.class);
         // 查看是否管理员账号
-        boolean isAdmin = appProperties.getAdminEmails().contains(userInfo.getEmail());
+        boolean isAdmin = appProperties.getAdminUserIds().contains(userInfo.getUserId());
         userTokenInfoDTO.setAdmin(isAdmin);
         // 设置并保存token
         String token = StringUtils.generateToken(userInfo.getUserId());
