@@ -11,8 +11,6 @@ public class Constants {
     // length
     public static final Integer LENGTH_ID = 11;  // 用户id及群聊id的长度
     public static final Integer LENGTH_TOKEN_RANDOM_CHARS = 20;  // token中拼接的随机字符串的长度
-    // size
-    public static final Integer SIZE_DEFAULT_PAGE_SIZE = 15;
 
     // exception message
     public static final String MESSAGE_SUCCESS = "请求成功";
@@ -48,8 +46,7 @@ public class Constants {
     public static final String VALIDATE_EMPTY_CONTACT_ID = "联系人id不能为空";
     public static final String VALIDATE_EMPTY_GROUP_ID = "群聊id不能为空";
     public static final String VALIDATE_EMPTY_APPLY_ID = "申请id不能为空";
-    public static final String VALIDATE_EMPTY_CONTACT_TYPE = "联系人类型不能为空";
-    public static final String VALIDATE_EMPTY_CONTACT_APPLY_STATUS = "联系人申请状态不能为空";
+    public static final String VALIDATE_EMPTY_STATUS = "状态信息不能为空";
     public static final String VALIDATE_ILLEGAL_GENDER = "性别信息有误";
     public static final String VALIDATE_ILLEGAL_NICK_NAME = "用户名信息有误";
     public static final String VALIDATE_ILLEGAL_EMAIL = "邮箱信息有误";
