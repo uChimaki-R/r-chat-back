@@ -45,6 +45,9 @@ public class TokenInterceptor implements HandlerInterceptor {
             log.warn("拒绝请求: 未携带token 请求uri: {}", request.getRequestURI());
             throw new LoginTimeOutException(Constants.MESSAGE_NOT_LOGIN);
         }
+        if (token.startsWith("Bearer")) {
+            token = token.substring(7);
+        }
         log.info("获取token: {}", token);
 
         try {
