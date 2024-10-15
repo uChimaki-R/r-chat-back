@@ -56,8 +56,9 @@ public class TokenInterceptor implements HandlerInterceptor {
             log.info("获取用户id: {}", userId);
             UserIdContext.setCurrentUserId(userId);
             // 保存自定义的日志输出标识
-            MDC.put("userId", userId);
+            MDC.put("userId", " " + userId);
             // 放行
+            log.info("放行请求 匹配token成功");
             return true;
         } catch (Exception ex) {
             log.warn("拒绝请求: 无法获取该token对应的用户信息");
