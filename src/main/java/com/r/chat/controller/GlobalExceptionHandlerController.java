@@ -6,6 +6,7 @@ import com.r.chat.entity.result.Result;
 import com.r.chat.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -20,6 +21,10 @@ public class GlobalExceptionHandlerController {
             // 404
             Result<String> result = Result.error(ResponseCodeEnum.NOT_FOUND.getCode(), Constants.MESSAGE_NOT_FOUND);
             log.warn("NoHandlerFoundException | {}", result);
+            return result;
+        } else if (e instanceof HttpRequestMethodNotSupportedException) {
+            Result<String> result = Result.error(ResponseCodeEnum.REJECTED.getCode(), Constants.MESSAGE_REQUEST_METHOD_ERROR);
+            log.warn("HttpRequestMethodNotSupportedException | {}", result);
             return result;
         } else if (e instanceof BusinessException) {
             // 业务异常
