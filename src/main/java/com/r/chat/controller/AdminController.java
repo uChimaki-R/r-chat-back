@@ -3,6 +3,7 @@ package com.r.chat.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.BeautyUserInfoDTO;
+import com.r.chat.entity.dto.BeautyUserInfoQueryDTO;
 import com.r.chat.entity.dto.UserInfoQueryDTO;
 import com.r.chat.entity.dto.UserStatusDTO;
 import com.r.chat.entity.enums.IdPrefixEnum;
@@ -71,11 +72,14 @@ public class AdminController {
     /**
      * 加载靓号信息
      */
-    @GetMapping("/loadBeautyUserInfoList")
-    public Result<PageResult<BeautyUserInfo>> loadBeautyAccountList(@RequestParam(defaultValue = "1") Long pageNo,
+    @GetMapping("/loadBeauty")
+    public Result<PageResult<BeautyUserInfo>> loadBeauty(BeautyUserInfoQueryDTO beautyUserInfoQueryDTO,
+                                                                    @RequestParam(defaultValue = "1") Long pageNo,
                                                                     @RequestParam(defaultValue = "15") Long pageSize) {
-        log.info("获取靓号信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
+        log.info("获取靓号信息 pageNo: {}, pageSize: {}, {}", pageNo, pageSize, beautyUserInfoQueryDTO);
         Page<BeautyUserInfo> page = userInfoBeautyService.lambdaQuery()
+                .like(!StringUtils.isEmpty(beautyUserInfoQueryDTO.getUserId()), BeautyUserInfo::getUserId, beautyUserInfoQueryDTO.getUserId())  // 靓号前端和数据库都是没有用户前缀的
+                .like(!StringUtils.isEmpty(beautyUserInfoQueryDTO.getEmail()), BeautyUserInfo::getEmail, beautyUserInfoQueryDTO.getEmail())
                 .orderBy(true, false, BeautyUserInfo::getId)
                 .page(new Page<>(pageNo, pageSize));
         PageResult<BeautyUserInfo> pageResult = PageResult.fromPage(page);
@@ -97,7 +101,7 @@ public class AdminController {
      * 新增或更新靓号信息
      */
     @PostMapping("/saveBeautyUserInfo")
-    public Result<String> saveBeautyAccount(@Valid BeautyUserInfoDTO beautyUserInfoDTO) {
+    public Result<String> saveBeautyUserInfo(@Valid BeautyUserInfoDTO beautyUserInfoDTO) {
         log.info("新增或更新靓号信息 {}", beautyUserInfoDTO);
         userInfoBeautyService.saveOrUpdateBeautyAccount(beautyUserInfoDTO);
         return Result.success();
@@ -107,7 +111,7 @@ public class AdminController {
      * 删除靓号信息
      */
     @DeleteMapping("/delBeautyUserInfo")
-    public Result<String> delBeautyAccount(@NotNull(message = Constants.VALIDATE_EMPTY_ID) Integer id) {
+    public Result<String> delBeautyUserInfo(@NotNull(message = Constants.VALIDATE_EMPTY_ID) Integer id) {
         log.info("删除靓号信息 id: {}", id);
         boolean isRemove = userInfoBeautyService.removeById(id);
         if (isRemove) {
