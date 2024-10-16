@@ -37,6 +37,11 @@ public class GroupDetailInfoVO implements Serializable {
     private String groupOwnerId;
 
     /**
+     * 群主名
+     */
+    private String groupOwnerNickName;
+
+    /**
      * 群公告
      */
     private String groupNotice;
