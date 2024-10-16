@@ -11,5 +11,6 @@
         from r_chat.group_info gi,
              r_chat.user_info ui
         where gi.group_owner_id = ui.user_id
+        order by gi.create_time desc
     </select>
 </mapper>
