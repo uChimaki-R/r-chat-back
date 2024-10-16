@@ -1,5 +1,6 @@
 package com.r.chat.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
@@ -9,9 +10,9 @@ import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.enums.UserContactTypeEnum;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
+import com.r.chat.entity.vo.GroupDetailInfoVO;
 import com.r.chat.exception.FileSaveFailedException;
 import com.r.chat.exception.GroupCountLimitException;
-import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.properties.AppProperties;
@@ -20,7 +21,6 @@ import com.r.chat.service.IGroupInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
 import com.r.chat.utils.StringUtils;
-import com.r.chat.utils.VerifyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +44,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     private final RedisUtils redisUtils;
     private final UserContactMapper userContactMapper;
     private final AppProperties appProperties;
+    private final GroupInfoMapper groupInfoMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -118,5 +119,10 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             log.error("头像文件保存失败: {}", e.getMessage());
             throw new FileSaveFailedException(Constants.MESSAGE_FAILED_TO_SAVE_AVATAR_FILE);
         }
+    }
+
+    @Override
+    public Page<GroupDetailInfoVO> loadGroupDetailInfo(Page<GroupDetailInfoVO> page) {
+        return groupInfoMapper.selectGroupDetailInfoPage(page);
     }
 }
