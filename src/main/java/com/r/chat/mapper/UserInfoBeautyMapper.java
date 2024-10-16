@@ -1,6 +1,6 @@
 package com.r.chat.mapper;
 
-import com.r.chat.entity.po.UserInfoBeauty;
+import com.r.chat.entity.po.BeautyUserInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,6 +13,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2024-09-21
  */
 @Mapper
-public interface UserInfoBeautyMapper extends BaseMapper<UserInfoBeauty> {
+public interface UserInfoBeautyMapper extends BaseMapper<BeautyUserInfo> {
 
 }
