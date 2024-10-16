@@ -1,5 +1,6 @@
 package com.r.chat.interceptor;
 
+import com.r.chat.context.AdminContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.exception.IllegalOperationException;
 import com.r.chat.properties.AppProperties;
@@ -41,6 +42,8 @@ public class AdminInterceptor implements HandlerInterceptor {
         }
         // 保存自定义的日志输出标识
         MDC.put("admin", " [Admin]");
+        // 保存是管理员的信息
+        AdminContext.setAdmin(true);
         // 放行
         log.info("放行请求 匹配管理员账号成功");
         return true;
@@ -50,5 +53,7 @@ public class AdminInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         // 移除自定义的日志输出标识
         MDC.remove("admin");
+        // 释放上下文对象
+        AdminContext.remove();
     }
 }
