@@ -1,6 +1,8 @@
 package com.r.chat.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.r.chat.context.AdminContext;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
@@ -13,6 +15,8 @@ import com.r.chat.entity.po.UserContact;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
 import com.r.chat.exception.FileSaveFailedException;
 import com.r.chat.exception.GroupCountLimitException;
+import com.r.chat.exception.GroupNotExistException;
+import com.r.chat.exception.IllegalOperationException;
 import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.properties.AppProperties;
@@ -124,5 +128,35 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     @Override
     public Page<GroupDetailInfoVO> loadGroupDetailInfo(Page<GroupDetailInfoVO> page) {
         return groupInfoMapper.selectGroupDetailInfoPage(page);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void dissolutionGroup(String groupId) {
+        GroupInfo groupInfo = lambdaQuery().eq(GroupInfo::getGroupId, groupId).one();
+        if (groupInfo == null) {
+            log.warn("解散群聊失败: 群聊不存在 groupId: {}", groupId);
+            throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
+        }
+        // 有两种情况可以解散群聊：1、群主本人解散 2、管理员强制解散
+        if (!groupInfo.getGroupOwnerId().equals(UserIdContext.getCurrentUserId()) || !AdminContext.isAdmin()) {
+            log.warn("解散群聊失败: 非群主或管理员操作 操作人id: {}, groupId: {}, 群主id: {}", UserIdContext.getCurrentUserId(), groupId, groupInfo.getGroupOwnerId());
+            throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
+        }
+        // 更新群聊状态为解散
+        groupInfo.setStatus(GroupInfoStatusEnum.DISBAND);
+        updateById(groupInfo);
+        // 将所有群成员对群聊的关系设置为被删除
+        UpdateWrapper<UserContact> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.lambda()
+                .eq(UserContact::getContactId, groupInfo.getGroupId())
+                .eq(UserContact::getContactType, UserContactTypeEnum.GROUP)
+                .set(UserContact::getStatus, UserContactStatusEnum.DELETED_BY_FRIEND)
+                .set(UserContact::getLastUpdateTime, LocalDateTime.now());
+        userContactMapper.update(null, updateWrapper);
+        log.info("解散群聊成功 groupId: {}", groupId);
+
+        // todo 移除群成员的联系人缓存
+        // todo 发送群聊被解散的信息
     }
 }
