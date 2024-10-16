@@ -60,7 +60,7 @@ public interface IUserContactService extends IService<UserContact> {
     void removeContact(String contactId, UserContactStatusEnum status);
 
     /**
-     * 为二者添加相互的联系人关系
+     * 为二者添加/更新相互的联系人关系
      */
-    void addMutualContact(String fromId, String toId, UserContactStatusEnum status);
+    void saveOrUpdateMutualContact(String fromId, String toId, UserContactStatusEnum status);
 }

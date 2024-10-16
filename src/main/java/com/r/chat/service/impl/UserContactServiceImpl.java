@@ -265,7 +265,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             }
         }
         // 添加相互关系
-        addMutualContact(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId(), UserContactStatusEnum.FRIENDS);
+        saveOrUpdateMutualContact(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId(), UserContactStatusEnum.FRIENDS);
         log.info("添加好友/群聊成功 contactId: {}", contactApplyAddDTO.getContactId());
         // todo 添加缓存，创建会话等
     }
@@ -313,7 +313,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
         }
         // 更新二者的关系
-        addMutualContact(UserIdContext.getCurrentUserId(), contactId, status);
+        saveOrUpdateMutualContact(UserIdContext.getCurrentUserId(), contactId, status);
         // todo 从自己的好友列表缓存中删除联系人
         if (UserContactStatusEnum.DELETED_THE_FRIEND.equals(status)) {
             log.info("成功删除联系人 contactId: {}", contactId);
@@ -326,7 +326,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
      * 为二者添加相互的联系人关系
      */
     @Override
-    public void addMutualContact(String fromId, String toId, UserContactStatusEnum status) {
+    public void saveOrUpdateMutualContact(String fromId, String toId, UserContactStatusEnum status) {
         // 查看contactType
         UserContactTypeEnum c1 = Objects.requireNonNull(IdPrefixEnum.getByPrefix(fromId.charAt(0))).getUserContactTypeEnum();
         UserContactTypeEnum c2 = Objects.requireNonNull(IdPrefixEnum.getByPrefix(toId.charAt(0))).getUserContactTypeEnum();

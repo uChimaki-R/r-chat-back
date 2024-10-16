@@ -85,7 +85,7 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
             case BLOCKED:
                 // 设置对应的拉黑关系
                 log.info("拒绝该申请并拉黑申请人 {}", userContactApply);
-                userContactService.addMutualContact(userContactApply.getContactId(), userContactApply.getApplyUserId(), UserContactStatusEnum.BLOCKED_THE_FRIEND);
+                userContactService.saveOrUpdateMutualContact(userContactApply.getContactId(), userContactApply.getApplyUserId(), UserContactStatusEnum.BLOCKED_THE_FRIEND);
                 break;
             default:
                 log.warn(Constants.IN_SWITCH_DEFAULT);
