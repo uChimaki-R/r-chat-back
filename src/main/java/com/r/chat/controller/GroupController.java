@@ -9,7 +9,7 @@ import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
 import com.r.chat.entity.vo.GroupInfo4ChatVO;
-import com.r.chat.entity.vo.GroupInfoVO;
+import com.r.chat.entity.vo.GroupDetailInfoVO;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.BasicInfoVO;
 import com.r.chat.exception.GroupDisbandException;
@@ -54,25 +54,25 @@ public class GroupController {
      * 获取自己创建的群聊
      */
     @GetMapping("/loadMyGroup")
-    public Result<List<GroupInfoVO>> loadMyGroup() {
+    public Result<List<GroupDetailInfoVO>> loadMyGroup() {
         String ownerId = UserIdContext.getCurrentUserId();
         List<GroupInfo> list = groupInfoService.lambdaQuery().eq(GroupInfo::getGroupOwnerId, ownerId).list();
-        List<GroupInfoVO> groupInfoVOList = CopyUtils.copyList(list, GroupInfoVO.class);
-        initGroupMemberCounts(groupInfoVOList);  // 计算群成员数
-        log.info("获取创建的群聊 {}", groupInfoVOList);
-        return Result.success(groupInfoVOList);
+        List<GroupDetailInfoVO> groupDetailInfoVOList = CopyUtils.copyList(list, GroupDetailInfoVO.class);
+        initGroupMemberCounts(groupDetailInfoVOList);  // 计算群成员数
+        log.info("获取创建的群聊 {}", groupDetailInfoVOList);
+        return Result.success(groupDetailInfoVOList);
     }
 
     /**
      * 获取群聊简介部分的详情
      */
     @GetMapping("/getGroupInfo")
-    public Result<GroupInfoVO> getGroupInfo(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
+    public Result<GroupDetailInfoVO> getGroupInfo(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
         GroupInfo groupInfo = getBasicGroupInfo(groupId);
-        GroupInfoVO groupInfoVO = CopyUtils.copyBean(groupInfo, GroupInfoVO.class);
-        initGroupMemberCounts(groupInfoVO);  // 计算群成员数
-        log.info("获取群聊简介部分的详情 {}", groupInfoVO);
-        return Result.success(groupInfoVO);
+        GroupDetailInfoVO groupDetailInfoVO = CopyUtils.copyBean(groupInfo, GroupDetailInfoVO.class);
+        initGroupMemberCounts(groupDetailInfoVO);  // 计算群成员数
+        log.info("获取群聊简介部分的详情 {}", groupDetailInfoVO);
+        return Result.success(groupDetailInfoVO);
     }
 
     /**
@@ -85,14 +85,14 @@ public class GroupController {
 
         // 群聊信息
         GroupInfo groupInfo = getBasicGroupInfo(groupId);
-        GroupInfoVO groupInfoVO = CopyUtils.copyBean(groupInfo, GroupInfoVO.class);
-        initGroupMemberCounts(groupInfoVO);
+        GroupDetailInfoVO groupDetailInfoVO = CopyUtils.copyBean(groupInfo, GroupDetailInfoVO.class);
+        initGroupMemberCounts(groupDetailInfoVO);
 
         // 获取群成员信息
         List<BasicInfoDTO> basicInfoDTOList = userContactService.getGroupMemberInfo(groupId);
         List<BasicInfoVO> userContactList = CopyUtils.copyList(basicInfoDTOList, BasicInfoVO.class);
 
-        groupInfo4ChatVO.setGroupInfo(groupInfoVO);
+        groupInfo4ChatVO.setGroupInfo(groupDetailInfoVO);
         groupInfo4ChatVO.setUserContactList(userContactList);
         log.info("获取群聊详情(包括群成员清单) {}", groupInfo4ChatVO);
         return Result.success(groupInfo4ChatVO);
@@ -101,17 +101,17 @@ public class GroupController {
     /**
      * 给GroupInfoVO计算成员数量
      */
-    private void initGroupMemberCounts(List<GroupInfoVO> groupInfoVOList) {
-        groupInfoVOList.forEach(groupInfoVO -> {
+    private void initGroupMemberCounts(List<GroupDetailInfoVO> groupDetailInfoVOList) {
+        groupDetailInfoVOList.forEach(groupDetailInfoVO -> {
             Long count = userContactService.lambdaQuery()
-                    .eq(UserContact::getContactId, groupInfoVO.getGroupId())
+                    .eq(UserContact::getContactId, groupDetailInfoVO.getGroupId())
                     .count();
-            groupInfoVO.setMemberCount(count);
+            groupDetailInfoVO.setMemberCount(count);
         });
     }
 
-    private void initGroupMemberCounts(GroupInfoVO groupInfoVO) {
-        initGroupMemberCounts(Collections.singletonList(groupInfoVO));
+    private void initGroupMemberCounts(GroupDetailInfoVO groupDetailInfoVO) {
+        initGroupMemberCounts(Collections.singletonList(groupDetailInfoVO));
     }
 
     /**
