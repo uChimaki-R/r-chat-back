@@ -2,11 +2,13 @@ package com.r.chat.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.constants.Constants;
+import com.r.chat.entity.dto.BeautyUserInfoDTO;
 import com.r.chat.entity.dto.UserStatusDTO;
 import com.r.chat.entity.po.UserInfo;
-import com.r.chat.entity.po.UserInfoBeauty;
+import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
+import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.service.IUserInfoBeautyService;
 import com.r.chat.service.IUserInfoService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Slf4j
 @Validated
@@ -44,14 +47,14 @@ public class AdminController {
     /**
      * 加载靓号信息
      */
-    @GetMapping("/loadBeautyAccountList")
-    public Result<PageResult<UserInfoBeauty>> loadBeautyAccountList(@RequestParam(defaultValue = "1") Long pageNo,
+    @GetMapping("/loadBeautyUserInfoList")
+    public Result<PageResult<BeautyUserInfo>> loadBeautyAccountList(@RequestParam(defaultValue = "1") Long pageNo,
                                                                     @RequestParam(defaultValue = "15") Long pageSize) {
         log.info("获取靓号信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
-        Page<UserInfoBeauty> page = userInfoBeautyService.lambdaQuery()
-                .orderBy(true, true, UserInfoBeauty::getId)
+        Page<BeautyUserInfo> page = userInfoBeautyService.lambdaQuery()
+                .orderBy(true, true, BeautyUserInfo::getId)
                 .page(new Page<>(pageNo, pageSize));
-        PageResult<UserInfoBeauty> pageResult = PageResult.fromPage(page);
+        PageResult<BeautyUserInfo> pageResult = PageResult.fromPage(page);
         log.info("获取到靓号信息 {}", pageResult);
         return Result.success(pageResult);
     }
@@ -64,6 +67,33 @@ public class AdminController {
         log.info("更新用户状态 {}", userStatusDTO);
         userInfoService.updateUserStatus(userStatusDTO);
         return Result.success();
+    }
+
+    /**
+     * 新增或更新靓号信息
+     */
+    @PostMapping("/saveBeautyUserInfo")
+    public Result<String> saveBeautyAccount(@Valid BeautyUserInfoDTO beautyUserInfoDTO) {
+        log.info("新增或更新靓号信息 {}", beautyUserInfoDTO);
+        userInfoBeautyService.saveOrUpdateBeautyAccount(beautyUserInfoDTO);
+        return Result.success();
+    }
+
+    /**
+     * 删除靓号信息
+     */
+    @DeleteMapping("/delBeautyUserInfo")
+    public Result<String> delBeautyAccount(@NotNull(message = Constants.VALIDATE_EMPTY_ID) Integer id) {
+        log.info("删除靓号信息 id: {}", id);
+        boolean isRemove = userInfoBeautyService.removeById(id);
+        if (isRemove) {
+            log.info("成功删除靓号信息 id: {}", id);
+            return Result.success();
+        }
+        else {
+            log.warn("删除靓号信息失败 id: {}", id);
+            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+        }
     }
 
     /**
