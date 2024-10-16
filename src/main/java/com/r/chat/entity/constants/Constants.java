@@ -16,12 +16,16 @@ public class Constants {
     public static final String MESSAGE_SUCCESS = "请求成功";
     public static final String MESSAGE_INTERNAL_ERROR = "服务器内部错误";
     public static final String MESSAGE_NOT_FOUND = "请求地址不存在";
+    public static final String MESSAGE_REQUEST_METHOD_ERROR = "请求方式错误";
     public static final String MESSAGE_ILLEGAL_OPERATION = "非法操作";
     public static final String MESSAGE_CAN_NOT_SEE_THE_FRIEND = "非法操作 与用户 [{}] 非好友(状态非: 好友/被删除/被拉黑)";
     public static final String MESSAGE_REPETITIVE_OPERATION = "重复操作";
     public static final String MESSAGE_PARAMETER_ERROR = "参数错误";
     public static final String MESSAGE_CHECK_CODE_ERROR = "验证码错误";
     public static final String MESSAGE_EMAIL_ALREADY_REGISTERED = "邮箱已注册";
+    public static final String MESSAGE_BEAUTY_USER_ID_ALREADY_EXISTED = "靓号已存在";
+    public static final String MESSAGE_ALREADY_HAVE_BEAUTY_ACCOUNT = "账号已经绑定过靓号了";
+    public static final String MESSAGE_BEAUTY_USER_INFO_NOT_EXIST = "靓号信息不存在";
     public static final String MESSAGE_USER_NOT_EXIST = "用户不存在";
     public static final String MESSAGE_PASSWORD_ERROR = "密码错误";
     public static final String MESSAGE_ACCOUNT_ALREADY_LOGIN = "账号已在别处登录";
@@ -48,6 +52,7 @@ public class Constants {
     public static final String VALIDATE_EMPTY_GROUP_ID = "群聊id不能为空";
     public static final String VALIDATE_EMPTY_APPLY_ID = "申请id不能为空";
     public static final String VALIDATE_EMPTY_STATUS = "状态信息不能为空";
+    public static final String VALIDATE_EMPTY_ID = "id不能为空";
     public static final String VALIDATE_ILLEGAL_GENDER = "性别信息有误";
     public static final String VALIDATE_ILLEGAL_NICK_NAME = "用户名信息有误";
     public static final String VALIDATE_ILLEGAL_EMAIL = "邮箱信息有误";
