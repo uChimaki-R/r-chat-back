@@ -8,7 +8,9 @@ import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
+import com.r.chat.entity.vo.GroupDetailInfoVO;
 import com.r.chat.exception.ParameterErrorException;
+import com.r.chat.service.IGroupInfoService;
 import com.r.chat.service.IUserInfoBeautyService;
 import com.r.chat.service.IUserInfoService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import javax.validation.constraints.NotNull;
 @RequiredArgsConstructor
 public class AdminController {
     private final IUserInfoService userInfoService;
+    private final IGroupInfoService groupInfoService;
     private final IUserInfoBeautyService userInfoBeautyService;
 
     /**
@@ -41,6 +44,20 @@ public class AdminController {
                 .page(new Page<>(pageNo, pageSize));
         PageResult<UserInfo> pageResult = PageResult.fromPage(page);
         log.info("获取到用户信息 {}", pageResult);
+        return Result.success(pageResult);
+    }
+
+    /**
+     * 加载群聊信息
+     */
+    @GetMapping("/loadGroup")
+    public Result<PageResult<GroupDetailInfoVO>> loadGroup(@RequestParam(defaultValue = "1") Long pageNo,
+                                                           @RequestParam(defaultValue = "15") Long pageSize) {
+        log.info("获取群聊信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
+        // 群聊信息需要联查群主名称和群聊成员数量
+        Page<GroupDetailInfoVO> page = groupInfoService.loadGroupDetailInfo(new Page<>(pageNo, pageSize));
+        PageResult<GroupDetailInfoVO> pageResult = PageResult.fromPage(page);
+        log.info("获取到群聊信息 {}", pageResult);
         return Result.success(pageResult);
     }
 
@@ -89,8 +106,7 @@ public class AdminController {
         if (isRemove) {
             log.info("成功删除靓号信息 id: {}", id);
             return Result.success();
-        }
-        else {
+        } else {
             log.warn("删除靓号信息失败 id: {}", id);
             throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
         }
