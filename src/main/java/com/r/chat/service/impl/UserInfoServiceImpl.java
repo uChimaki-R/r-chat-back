@@ -8,7 +8,7 @@ import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
 import com.r.chat.entity.enums.UserStatusEnum;
 import com.r.chat.entity.po.UserInfo;
-import com.r.chat.entity.po.UserInfoBeauty;
+import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.UserInfoBeautyMapper;
 import com.r.chat.mapper.UserInfoMapper;
@@ -58,14 +58,14 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 随机获取一个userId
         String userId = StringUtils.getRandomUserId();
         // 判断是否可以使用靓号注册，可以的话需要替换为靓号
-        UserInfoBeauty userInfoBeauty = userInfoBeautyMapper.selectOne(new QueryWrapper<UserInfoBeauty>().lambda()
-                .eq(UserInfoBeauty::getEmail, registerDTO.getEmail()));
-        if (null != userInfoBeauty && userInfoBeauty.getStatus() != UserInfoBeautyStatusEnum.USED) {
+        BeautyUserInfo beautyUserInfo = userInfoBeautyMapper.selectOne(new QueryWrapper<BeautyUserInfo>().lambda()
+                .eq(BeautyUserInfo::getEmail, registerDTO.getEmail()));
+        if (null != beautyUserInfo && beautyUserInfo.getStatus() != UserInfoBeautyStatusEnum.USED) {
             // 换成靓号
-            userId = userInfoBeauty.getUserId();
+            userId = beautyUserInfo.getUserId();
             // 修改靓号为已使用
-            userInfoBeauty.setStatus(UserInfoBeautyStatusEnum.USED);
-            userInfoBeautyMapper.updateById(userInfoBeauty);
+            beautyUserInfo.setStatus(UserInfoBeautyStatusEnum.USED);
+            userInfoBeautyMapper.updateById(beautyUserInfo);
         }
         LocalDateTime now = LocalDateTime.now();
         userInfo = CopyUtils.copyBean(registerDTO, UserInfo.class);
