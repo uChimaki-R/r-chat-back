@@ -40,7 +40,7 @@ public class AdminController {
                                                  @RequestParam(defaultValue = "15") Long pageSize) {
         log.info("获取用户信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
         Page<UserInfo> page = userInfoService.lambdaQuery()
-                .orderBy(true, true, UserInfo::getCreateTime)
+                .orderBy(true, false, UserInfo::getCreateTime)
                 .page(new Page<>(pageNo, pageSize));
         PageResult<UserInfo> pageResult = PageResult.fromPage(page);
         log.info("获取到用户信息 {}", pageResult);
@@ -69,7 +69,7 @@ public class AdminController {
                                                                     @RequestParam(defaultValue = "15") Long pageSize) {
         log.info("获取靓号信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
         Page<BeautyUserInfo> page = userInfoBeautyService.lambdaQuery()
-                .orderBy(true, true, BeautyUserInfo::getId)
+                .orderBy(true, false, BeautyUserInfo::getId)
                 .page(new Page<>(pageNo, pageSize));
         PageResult<BeautyUserInfo> pageResult = PageResult.fromPage(page);
         log.info("获取到靓号信息 {}", pageResult);
