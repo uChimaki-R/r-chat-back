@@ -16,7 +16,7 @@ public class GroupInfo4ChatVO implements Serializable {
     /**
      * 群聊信息
      */
-    private GroupInfoVO groupInfo;
+    private GroupDetailInfoVO groupInfo;
 
     /**
      * 群成员信息
