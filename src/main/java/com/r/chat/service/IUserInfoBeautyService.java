@@ -1,6 +1,7 @@
 package com.r.chat.service;
 
-import com.r.chat.entity.po.UserInfoBeauty;
+import com.r.chat.entity.dto.BeautyUserInfoDTO;
+import com.r.chat.entity.po.BeautyUserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +12,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author r-pocky
  * @since 2024-09-21
  */
-public interface IUserInfoBeautyService extends IService<UserInfoBeauty> {
+public interface IUserInfoBeautyService extends IService<BeautyUserInfo> {
 
+    /**
+     * 新增或更新靓号信息
+     */
+    void saveOrUpdateBeautyAccount(BeautyUserInfoDTO beautyUserInfoDTO);
 }
