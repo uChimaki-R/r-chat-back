@@ -3,7 +3,9 @@ package com.r.chat.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.BeautyUserInfoDTO;
+import com.r.chat.entity.dto.UserInfoQueryDTO;
 import com.r.chat.entity.dto.UserStatusDTO;
+import com.r.chat.entity.enums.IdPrefixEnum;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.entity.result.PageResult;
@@ -13,6 +15,7 @@ import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.service.IGroupInfoService;
 import com.r.chat.service.IUserInfoBeautyService;
 import com.r.chat.service.IUserInfoService;
+import com.r.chat.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -36,10 +39,14 @@ public class AdminController {
      * 加载用户的信息
      */
     @GetMapping("/loadUser")
-    public Result<PageResult<UserInfo>> loadUser(@RequestParam(defaultValue = "1") Long pageNo,
+    public Result<PageResult<UserInfo>> loadUser(UserInfoQueryDTO userInfoQueryDTO,
+                                                 @RequestParam(defaultValue = "1") Long pageNo,
                                                  @RequestParam(defaultValue = "15") Long pageSize) {
-        log.info("获取用户信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
+        log.info("获取用户信息 pageNo: {}, pageSize: {}, {}", pageNo, pageSize, userInfoQueryDTO);
         Page<UserInfo> page = userInfoService.lambdaQuery()
+                // 下面两个是可以选择传递的查询条件
+                .eq(!StringUtils.isEmpty(userInfoQueryDTO.getUserId()), UserInfo::getUserId, IdPrefixEnum.USER.getPrefix() + userInfoQueryDTO.getUserId())  // 前端传递的只有数字，需要加上用户id前缀
+                .like(!StringUtils.isEmpty(userInfoQueryDTO.getNickName()), UserInfo::getNickName, userInfoQueryDTO.getNickName())
                 .orderBy(true, false, UserInfo::getCreateTime)
                 .page(new Page<>(pageNo, pageSize));
         PageResult<UserInfo> pageResult = PageResult.fromPage(page);
