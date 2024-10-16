@@ -25,4 +25,9 @@ public interface IGroupInfoService extends IService<GroupInfo> {
      * 分页多表联查查询群聊信息，包括群主的名称和群成员数量
      */
     Page<GroupDetailInfoVO> loadGroupDetailInfo(Page<GroupDetailInfoVO> page);
+
+    /**
+     * 解散群聊
+     */
+    void dissolutionGroup(String groupId);
 }
