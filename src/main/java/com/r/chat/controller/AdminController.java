@@ -2,10 +2,7 @@ package com.r.chat.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.constants.Constants;
-import com.r.chat.entity.dto.BeautyUserInfoDTO;
-import com.r.chat.entity.dto.BeautyUserInfoQueryDTO;
-import com.r.chat.entity.dto.UserInfoQueryDTO;
-import com.r.chat.entity.dto.UserStatusDTO;
+import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.IdPrefixEnum;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.po.BeautyUserInfo;
@@ -59,11 +56,12 @@ public class AdminController {
      * 加载群聊信息
      */
     @GetMapping("/loadGroup")
-    public Result<PageResult<GroupDetailInfoVO>> loadGroup(@RequestParam(defaultValue = "1") Long pageNo,
+    public Result<PageResult<GroupDetailInfoVO>> loadGroup(GroupInfoQueryDTO groupInfoQueryDTO,
+                                                           @RequestParam(defaultValue = "1") Long pageNo,
                                                            @RequestParam(defaultValue = "15") Long pageSize) {
         log.info("获取群聊信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
         // 群聊信息需要联查群主名称和群聊成员数量
-        Page<GroupDetailInfoVO> page = groupInfoService.loadGroupDetailInfo(new Page<>(pageNo, pageSize));
+        Page<GroupDetailInfoVO> page = groupInfoService.loadGroupDetailInfo(new Page<>(pageNo, pageSize), groupInfoQueryDTO);
         PageResult<GroupDetailInfoVO> pageResult = PageResult.fromPage(page);
         log.info("获取到群聊信息 {}", pageResult);
         return Result.success(pageResult);
@@ -74,8 +72,8 @@ public class AdminController {
      */
     @GetMapping("/loadBeauty")
     public Result<PageResult<BeautyUserInfo>> loadBeauty(BeautyUserInfoQueryDTO beautyUserInfoQueryDTO,
-                                                                    @RequestParam(defaultValue = "1") Long pageNo,
-                                                                    @RequestParam(defaultValue = "15") Long pageSize) {
+                                                         @RequestParam(defaultValue = "1") Long pageNo,
+                                                         @RequestParam(defaultValue = "15") Long pageSize) {
         log.info("获取靓号信息 pageNo: {}, pageSize: {}, {}", pageNo, pageSize, beautyUserInfoQueryDTO);
         Page<BeautyUserInfo> page = userInfoBeautyService.lambdaQuery()
                 .like(!StringUtils.isEmpty(beautyUserInfoQueryDTO.getUserId()), BeautyUserInfo::getUserId, beautyUserInfoQueryDTO.getUserId())  // 靓号前端和数据库都是没有用户前缀的
