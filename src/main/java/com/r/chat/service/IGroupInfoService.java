@@ -2,6 +2,7 @@ package com.r.chat.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.dto.GroupInfoDTO;
+import com.r.chat.entity.dto.GroupInfoQueryDTO;
 import com.r.chat.entity.po.GroupInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
@@ -24,7 +25,7 @@ public interface IGroupInfoService extends IService<GroupInfo> {
     /**
      * 分页多表联查查询群聊信息，包括群主的名称和群成员数量
      */
-    Page<GroupDetailInfoVO> loadGroupDetailInfo(Page<GroupDetailInfoVO> page);
+    Page<GroupDetailInfoVO> loadGroupDetailInfo(Page<GroupDetailInfoVO> page, GroupInfoQueryDTO groupInfoQueryDTO);
 
     /**
      * 解散群聊
