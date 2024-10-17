@@ -6,8 +6,10 @@ import com.r.chat.context.AdminContext;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
+import com.r.chat.entity.dto.GroupInfoQueryDTO;
 import com.r.chat.entity.dto.SysSettingDTO;
 import com.r.chat.entity.enums.GroupInfoStatusEnum;
+import com.r.chat.entity.enums.IdPrefixEnum;
 import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.enums.UserContactTypeEnum;
 import com.r.chat.entity.po.GroupInfo;
@@ -126,8 +128,17 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     }
 
     @Override
-    public Page<GroupDetailInfoVO> loadGroupDetailInfo(Page<GroupDetailInfoVO> page) {
-        return groupInfoMapper.selectGroupDetailInfoPage(page);
+    public Page<GroupDetailInfoVO> loadGroupDetailInfo(Page<GroupDetailInfoVO> page, GroupInfoQueryDTO groupInfoQueryDTO) {
+        // 前端发送的id是不带前缀的，如果传递了id的查询条件的话需要补充前缀
+        if (!StringUtils.isEmpty(groupInfoQueryDTO.getGroupId())) {
+            // 补充groupId的前缀
+            groupInfoQueryDTO.setGroupId(IdPrefixEnum.GROUP.getPrefix() + groupInfoQueryDTO.getGroupId());
+        }
+        if (!StringUtils.isEmpty(groupInfoQueryDTO.getGroupOwnerId())) {
+            // 补充群主id的前缀
+            groupInfoQueryDTO.setGroupOwnerId(IdPrefixEnum.USER.getPrefix() + groupInfoQueryDTO.getGroupOwnerId());
+        }
+        return groupInfoMapper.selectGroupDetailInfoPage(page, groupInfoQueryDTO);
     }
 
     @Override
