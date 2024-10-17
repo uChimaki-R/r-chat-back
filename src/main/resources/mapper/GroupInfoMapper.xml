@@ -4,13 +4,24 @@
 
     <select id="selectGroupDetailInfoPage" resultType="com.r.chat.entity.vo.GroupDetailInfoVO">
         select gi.*,
-               ui.nick_name                                          groupOwnerNickName,
-               (select count(*)
-                from r_chat.user_contact uc
-                where uc.contact_id = gi.group_id and uc.status = 1) memberCount
+        ui.nick_name groupOwnerNickName,
+        (select count(*)
+        from r_chat.user_contact uc
+        where uc.contact_id = gi.group_id and uc.status = 1) memberCount
         from r_chat.group_info gi,
-             r_chat.user_info ui
-        where gi.group_owner_id = ui.user_id
+        r_chat.user_info ui
+        <where>
+            gi.group_owner_id = ui.user_id
+            <if test="query.groupId != null and query.groupId != ''">
+                and gi.group_id = #{query.groupId}
+            </if>
+            <if test="query.groupName != null and query.groupName != ''">
+                and gi.group_name like concat("%", #{query.groupName}, "%")
+            </if>
+            <if test="query.groupOwnerId != null and query.groupOwnerId != ''">
+                and gi.group_owner_id = #{query.groupOwnerId}
+            </if>
+        </where>
         order by gi.create_time desc
     </select>
 </mapper>
