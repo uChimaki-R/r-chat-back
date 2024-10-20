@@ -1,6 +1,7 @@
 package com.r.chat.utils;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +14,7 @@ public class CopyUtils extends BeanUtil {
     /**
      * 将原对象转换成目标对象，对于字段不匹配的字段可以使用转换器处理
      *
-     * @param source  原对象
+     * @param source  源对象
      * @param clazz   目标对象的class
      * @param convert 转换器
      * @param <R>     原对象类型
@@ -31,7 +32,7 @@ public class CopyUtils extends BeanUtil {
     /**
      * 将原对象转换成目标对象，对于字段不匹配的字段可以使用转换器处理
      *
-     * @param source 原对象
+     * @param source 源对象
      * @param clazz  目标对象的class
      * @param <R>    原对象类型
      * @param <T>    目标对象类型
@@ -42,6 +43,18 @@ public class CopyUtils extends BeanUtil {
             return null;
         }
         return toBean(source, clazz);
+    }
+
+    /**
+     * 将源对象中的属性拷贝到目标对象中，对于源对象中为null的属性，保留目标对象中的值
+     * @param source 源对象
+     * @param target 目标对象
+     */
+    public static void copyPropertiesIgnoreNull(Object source, Object target) {
+        if (source == null || target == null) {
+            return;
+        }
+        BeanUtil.copyProperties(source, target, CopyOptions.create().setIgnoreNullValue(true).setIgnoreError(true));
     }
 
     public static <R, T> List<T> copyList(List<R> list, Class<T> clazz) {
