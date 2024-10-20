@@ -97,16 +97,6 @@ public class UserController {
     }
 
     /**
-     * 获取系统设置
-     */
-    @GetMapping("/getSysSetting")
-    public Result<SysSettingVO> getSysSetting() {
-        SysSettingVO sysSettingVO = CopyUtils.copyBean(redisUtils.getSysSetting(), SysSettingVO.class);
-        log.info("获取系统设置 {}", sysSettingVO);
-        return Result.success(sysSettingVO);
-    }
-
-    /**
      * 获取用户信息
      */
     @GetMapping("/getUserInfo")
