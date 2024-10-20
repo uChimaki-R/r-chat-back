@@ -15,17 +15,16 @@ import com.r.chat.entity.enums.UserContactTypeEnum;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
-import com.r.chat.exception.FileSaveFailedException;
 import com.r.chat.exception.GroupCountLimitException;
 import com.r.chat.exception.GroupNotExistException;
 import com.r.chat.exception.IllegalOperationException;
 import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactMapper;
-import com.r.chat.properties.AppProperties;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IGroupInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
+import com.r.chat.utils.FileUtils;
 import com.r.chat.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +48,6 @@ import java.time.LocalDateTime;
 public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo> implements IGroupInfoService {
     private final RedisUtils redisUtils;
     private final UserContactMapper userContactMapper;
-    private final AppProperties appProperties;
     private final GroupInfoMapper groupInfoMapper;
 
     @Override
@@ -102,29 +100,8 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         if (groupInfoDTO.getAvatarFile() == null) {
             return;
         }
-        // 保存到本地
-        String baseFolder = appProperties.getProjectFolder();
-        File targetFolder = new File(baseFolder, Constants.FILE_FOLDER_AVATAR);
-        if (!targetFolder.exists()) {
-            if (targetFolder.mkdirs()) {
-                log.debug("创建目录: {}", targetFolder.getAbsolutePath());
-            } else {
-                log.warn("创建目录失败: {}", targetFolder.getAbsolutePath());
-            }
-        }
-        // 使用群号当文件名
-        try {
-            File avatarFile = new File(targetFolder, groupInfo.getGroupId() + Constants.FILE_SUFFIX_AVATAR);
-            File coverFile = new File(targetFolder, groupInfo.getGroupId() + Constants.FILE_SUFFIX_COVER);
-            groupInfoDTO.getAvatarFile().transferTo(avatarFile);
-            log.info("保存图片文件: {}", avatarFile.getAbsolutePath());
-            groupInfoDTO.getAvatarCover().transferTo(coverFile);
-            log.info("保存图片文件: {}", coverFile.getAbsolutePath());
-        } catch (Exception e) {
-            // 保存文件失败
-            log.error("头像文件保存失败: {}", e.getMessage());
-            throw new FileSaveFailedException(Constants.MESSAGE_FAILED_TO_SAVE_AVATAR_FILE);
-        }
+        // 头像保存到本地
+        FileUtils.saveAvatarFile(groupInfoDTO);
     }
 
     @Override
