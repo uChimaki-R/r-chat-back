@@ -56,6 +56,8 @@ r:
     ws-port: ${r.chat.ws-port}
     project-folder: ${r.chat.project-folder}
     admin-emails: ${r.chat.admin-emails}
+    id-length: ${r.chat.id-length}
+    token-random-chars-length: ${r.chat.token-random-chars-length}
     default-settings:
       max-group-count: ${r.chat.default-settings.max-group-member-count}
       max-group-member-count: ${r.chat.default-settings.max-group-member-count}
