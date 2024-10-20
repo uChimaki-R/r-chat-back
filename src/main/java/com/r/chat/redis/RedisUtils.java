@@ -28,7 +28,7 @@ public class RedisUtils {
     /**
      * 保存token到id的映射，设置一天的过期时间
      */
-    public void saveToken2UserId(String token, String userId) {
+    public void setToken2UserId(String token, String userId) {
         redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token, userId, 1, TimeUnit.DAYS);
     }
 
@@ -59,5 +59,12 @@ public class RedisUtils {
             sysSettingDTO = CopyUtils.copyBean(defaultSysSettingProperties, SysSettingDTO.class);
         }
         return sysSettingDTO;
+    }
+
+    /**
+     * 保存系统设置缓存
+     */
+    public void setSysSetting(SysSettingDTO sysSettingDTO) {
+        redisOperation.set(Constants.REDIS_KEY_SYS_SETTINGS, sysSettingDTO);
     }
 }
