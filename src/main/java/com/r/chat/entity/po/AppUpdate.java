@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.r.chat.entity.enums.AppUpdateMethodTypeEnum;
+import com.r.chat.entity.enums.AppUpdateStatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -60,7 +62,7 @@ public class AppUpdate implements Serializable {
      * 发布状态 0：未发布 1：灰度发布 2：全网发布
      */
     @TableField("status")
-    private Integer status;
+    private AppUpdateStatusEnum status;
 
     /**
      * 灰度发布的用户id
@@ -72,7 +74,7 @@ public class AppUpdate implements Serializable {
      * 更新手段 0：文件 1：外链
      */
     @TableField("method_type")
-    private Integer methodType;
+    private AppUpdateMethodTypeEnum methodType;
 
     /**
      * 外链地址
