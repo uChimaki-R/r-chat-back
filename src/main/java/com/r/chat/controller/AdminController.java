@@ -9,10 +9,14 @@ import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
+import com.r.chat.entity.vo.SysSettingVO;
 import com.r.chat.exception.ParameterErrorException;
+import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IGroupInfoService;
 import com.r.chat.service.IUserInfoBeautyService;
 import com.r.chat.service.IUserInfoService;
+import com.r.chat.utils.CopyUtils;
+import com.r.chat.utils.FileUtils;
 import com.r.chat.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +33,34 @@ import javax.validation.constraints.NotNull;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
+    private final RedisUtils redisUtils;
+
     private final IUserInfoService userInfoService;
     private final IGroupInfoService groupInfoService;
     private final IUserInfoBeautyService userInfoBeautyService;
+
+    /**
+     * 获取系统设置
+     */
+    @GetMapping("/getSysSetting")
+    public Result<SysSettingVO> getSysSetting() {
+        SysSettingVO sysSettingVO = CopyUtils.copyBean(redisUtils.getSysSetting(), SysSettingVO.class);
+        log.info("获取系统设置 {}", sysSettingVO);
+        return Result.success(sysSettingVO);
+    }
+
+    /**
+     * 保存系统设置
+     */
+    @PutMapping("/saveSysSetting")
+    public Result<String> saveSysSetting(SysSettingDTO sysSettingDTO) {
+        log.info("保存系统设置 {}", sysSettingDTO);
+        // 保存机器人头像文件
+        FileUtils.saveAvatarFile(sysSettingDTO);
+        // 保存配置缓存
+        redisUtils.setSysSetting(sysSettingDTO);
+        return Result.success();
+    }
 
     /**
      * 加载用户的信息
