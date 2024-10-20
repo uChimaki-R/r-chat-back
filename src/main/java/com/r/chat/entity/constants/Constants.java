@@ -8,10 +8,6 @@ public class Constants {
     public static final String REDIS_KEY_PREFIX_USER_TOKEN = REDIS_KEY_PREFIX + "user:token:";  // 用户token保存路径前缀
     public static final String REDIS_KEY_SYS_SETTINGS = REDIS_KEY_PREFIX + "sys:settings";  // 系统设置保存路径
 
-    // length
-    public static final Integer LENGTH_ID = 11;  // 用户id及群聊id的长度
-    public static final Integer LENGTH_TOKEN_RANDOM_CHARS = 20;  // token中拼接的随机字符串的长度
-
     // exception message
     public static final String MESSAGE_SUCCESS = "请求成功";
     public static final String MESSAGE_INTERNAL_ERROR = "服务器内部错误";
