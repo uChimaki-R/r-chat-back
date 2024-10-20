@@ -1,7 +1,7 @@
 package com.r.chat.utils;
 
-import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.IdPrefixEnum;
+import com.r.chat.properties.AppProperties;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -17,7 +17,7 @@ public class StringUtils {
      * 随机获取一个id
      */
     public static String getRandomId() {
-        return RandomStringUtils.random(Constants.LENGTH_ID, false, true);
+        return RandomStringUtils.random(AppProperties.idLength, false, true);
     }
 
     /**
@@ -45,7 +45,7 @@ public class StringUtils {
      * 获取token
      */
     public static String generateToken(String userId) {
-        return encodeMd5(userId + getRandomChars(Constants.LENGTH_TOKEN_RANDOM_CHARS));
+        return encodeMd5(userId + getRandomChars(AppProperties.tokenRandomCharsLength));
     }
 
     /**
