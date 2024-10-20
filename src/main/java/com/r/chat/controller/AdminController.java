@@ -74,7 +74,7 @@ public class AdminController {
                 // 下面两个是可以选择传递的查询条件
                 .eq(!StringUtils.isEmpty(userInfoQueryDTO.getUserId()), UserInfo::getUserId, IdPrefixEnum.USER.getPrefix() + userInfoQueryDTO.getUserId())  // 前端传递的只有数字，需要加上用户id前缀
                 .like(!StringUtils.isEmpty(userInfoQueryDTO.getNickName()), UserInfo::getNickName, userInfoQueryDTO.getNickName())
-                .orderBy(true, false, UserInfo::getCreateTime)
+                .orderByDesc(UserInfo::getCreateTime)
                 .page(new Page<>(pageNo, pageSize));
         PageResult<UserInfo> pageResult = PageResult.fromPage(page);
         log.info("获取到用户信息 {}", pageResult);
@@ -107,7 +107,7 @@ public class AdminController {
         Page<BeautyUserInfo> page = userInfoBeautyService.lambdaQuery()
                 .like(!StringUtils.isEmpty(beautyUserInfoQueryDTO.getUserId()), BeautyUserInfo::getUserId, beautyUserInfoQueryDTO.getUserId())  // 靓号前端和数据库都是没有用户前缀的
                 .like(!StringUtils.isEmpty(beautyUserInfoQueryDTO.getEmail()), BeautyUserInfo::getEmail, beautyUserInfoQueryDTO.getEmail())
-                .orderBy(true, false, BeautyUserInfo::getId)
+                .orderByDesc(BeautyUserInfo::getId)
                 .page(new Page<>(pageNo, pageSize));
         PageResult<BeautyUserInfo> pageResult = PageResult.fromPage(page);
         log.info("获取到靓号信息 {}", pageResult);
