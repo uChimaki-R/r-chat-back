@@ -1,6 +1,7 @@
 package com.r.chat.entity.dto;
 
 import com.r.chat.entity.enums.JoinTypeEnum;
+import com.r.chat.utils.AvatarOwner;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupInfoDTO implements Serializable {
+public class GroupInfoDTO implements Serializable, AvatarOwner {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -40,4 +41,8 @@ public class GroupInfoDTO implements Serializable {
     private MultipartFile avatarFile;
     private MultipartFile avatarCover;
 
+    @Override
+    public String getIdentityName() {
+        return groupId;
+    }
 }

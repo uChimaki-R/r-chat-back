@@ -1,7 +1,9 @@
 package com.r.chat.entity.dto;
 
+import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.JoinTypeEnum;
+import com.r.chat.utils.AvatarOwner;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +15,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInfoDTO implements Serializable {
+public class UserInfoDTO implements Serializable, AvatarOwner {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -52,4 +54,9 @@ public class UserInfoDTO implements Serializable {
      */
     private MultipartFile avatarFile;
     private MultipartFile avatarCover;
+
+    @Override
+    public String getIdentityName() {
+        return UserIdContext.getCurrentUserId();
+    }
 }
