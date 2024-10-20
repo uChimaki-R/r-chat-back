@@ -65,6 +65,9 @@ public class RedisUtils {
      * 保存系统设置缓存
      */
     public void setSysSetting(SysSettingDTO sysSettingDTO) {
-        redisOperation.set(Constants.REDIS_KEY_SYS_SETTINGS, sysSettingDTO);
+        // 只更新非空的信息
+        SysSettingDTO target = getSysSetting();  // 原来的信息作为target
+        CopyUtils.copyPropertiesIgnoreNull(sysSettingDTO, target);  // 把新的信息中非null值拷贝到target
+        redisOperation.set(Constants.REDIS_KEY_SYS_SETTINGS, target);
     }
 }
