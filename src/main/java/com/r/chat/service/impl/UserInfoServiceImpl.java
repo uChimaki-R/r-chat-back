@@ -10,7 +10,7 @@ import com.r.chat.entity.enums.UserStatusEnum;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.exception.*;
-import com.r.chat.mapper.UserInfoBeautyMapper;
+import com.r.chat.mapper.BeautyUserInfoMapper;
 import com.r.chat.mapper.UserInfoMapper;
 import com.r.chat.properties.AppProperties;
 import com.r.chat.redis.RedisUtils;
@@ -39,7 +39,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements IUserInfoService {
     private final UserInfoMapper userInfoMapper;
-    private final UserInfoBeautyMapper userInfoBeautyMapper;
+    private final BeautyUserInfoMapper beautyUserInfoMapper;
     private final AppProperties appProperties;
     private final RedisUtils redisUtils;
 
@@ -58,7 +58,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 随机获取一个userId
         String userId = StringUtils.getRandomUserId();
         // 判断是否可以使用靓号注册，可以的话需要替换为靓号
-        BeautyUserInfo beautyUserInfo = userInfoBeautyMapper.selectOne(new QueryWrapper<BeautyUserInfo>().lambda()
+        BeautyUserInfo beautyUserInfo = beautyUserInfoMapper.selectOne(new QueryWrapper<BeautyUserInfo>().lambda()
                 .eq(BeautyUserInfo::getEmail, registerDTO.getEmail()));
         if (null != beautyUserInfo && beautyUserInfo.getStatus() != UserInfoBeautyStatusEnum.USED) {
             // 换成靓号
@@ -66,7 +66,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             log.info("该注册邮箱可以获得靓号: {}", userId);
             // 修改靓号为已使用
             beautyUserInfo.setStatus(UserInfoBeautyStatusEnum.USED);
-            userInfoBeautyMapper.updateById(beautyUserInfo);
+            beautyUserInfoMapper.updateById(beautyUserInfo);
         }
         LocalDateTime now = LocalDateTime.now();
         userInfo = CopyUtils.copyBean(registerDTO, UserInfo.class);
