@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/setting")
 @RequiredArgsConstructor
 public class AdminSettingController {
     private final RedisUtils redisUtils;
