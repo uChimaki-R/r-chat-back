@@ -16,7 +16,8 @@ public class Constants {
     public static final String MESSAGE_ILLEGAL_OPERATION = "非法操作";
     public static final String MESSAGE_CAN_NOT_SEE_THE_FRIEND = "非法操作 与用户 [{}] 非好友(状态非: 好友/被删除/被拉黑)";
     public static final String MESSAGE_REPETITIVE_OPERATION = "重复操作";
-    public static final String MESSAGE_PARAMETER_ERROR = "参数错误";  // 枚举类型为null统一返回参数错误
+    public static final String MESSAGE_PARAMETER_ERROR = "参数错误";
+    public static final String MESSAGE_STATUS_ERROR = "状态信息错误";
     public static final String MESSAGE_CHECK_CODE_ERROR = "验证码错误";
     public static final String MESSAGE_EMAIL_ALREADY_REGISTERED = "邮箱已注册";
     public static final String MESSAGE_BEAUTY_USER_ID_ALREADY_EXISTED = "靓号已存在";
@@ -34,6 +35,7 @@ public class Constants {
     public static final String MESSAGE_GROUP_MEMBER_COUNT_LIMIT = "群聊成员数量达到上限: %d";
     public static final String MESSAGE_MISSING_FILE = "缺少文件";
     public static final String MESSAGE_MISSING_OUTER_LINK = "缺少外链信息";
+    public static final String MESSAGE_MISSING_GRAYSCALE_IDS = "缺少灰度用户列表信息";
     public static final String MESSAGE_FAILED_TO_SAVE_FILE = "文件保存失败";
     public static final String MESSAGE_GROUP_NOT_EXIST = "群聊不存在";
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
