@@ -3,13 +3,11 @@ package com.r.chat.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.AppUpdateDTO;
+import com.r.chat.entity.dto.AppUpdateReleaseDTO;
 import com.r.chat.entity.enums.AppUpdateMethodTypeEnum;
 import com.r.chat.entity.enums.AppUpdateStatusEnum;
 import com.r.chat.entity.po.AppUpdate;
-import com.r.chat.exception.AppUpdateNotExistException;
-import com.r.chat.exception.AppVersionAlreadyExistedException;
-import com.r.chat.exception.AppVersionLTOriginException;
-import com.r.chat.exception.ParameterErrorException;
+import com.r.chat.exception.*;
 import com.r.chat.mapper.AppUpdateMapper;
 import com.r.chat.service.IAppUpdateService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -41,7 +39,7 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
     public void saveOrUpdateAppUpdate(AppUpdateDTO appUpdateDTO) {
         if (appUpdateDTO.getMethodType() == null) {
             log.warn("新增或修改app更新信息失败: 更新手段信息错误 {}", appUpdateDTO);
-            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+            throw new EnumIsNullException(Constants.MESSAGE_STATUS_ERROR);
         }
         // 不能新增或修改为已经有的版本号
         QueryWrapper<AppUpdate> queryWrapper = new QueryWrapper<>();
@@ -93,5 +91,36 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             updateById(update);
             log.info("修改app更新信息成功 {}", origin);
         }
+    }
+
+    @Override
+    public void releaseUpdate(AppUpdateReleaseDTO appUpdateReleaseDTO) {
+        AppUpdateStatusEnum status = appUpdateReleaseDTO.getStatus();
+        if (status == null) {
+            log.warn("发布app更新失败: 状态信息为空 {}", appUpdateReleaseDTO);
+            throw new EnumIsNullException(Constants.MESSAGE_STATUS_ERROR);
+        }
+        // 查找原来的app更新信息
+        AppUpdate dbInfo = appUpdateMapper.selectById(appUpdateReleaseDTO.getId());
+        if (dbInfo == null) {
+            log.warn("发布app更新失败: 信息不存在 {}", appUpdateReleaseDTO);
+            throw new AppUpdateNotExistException(Constants.MESSAGE_APP_UPDATE_NOT_EXIST);
+        }
+        if (!AppUpdateStatusEnum.UNPUBLISHED.equals(dbInfo.getStatus()) && AppUpdateStatusEnum.UNPUBLISHED.equals(status)) {
+            log.warn("发布app更新失败: 试图将已发布的版本修改为未发布 原已发布版本: {}", dbInfo);
+            throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
+        }
+        if (AppUpdateStatusEnum.GRAYSCALE_RELEASE.equals(status) && StringUtils.isEmpty(appUpdateReleaseDTO.getGrayscaleIds())) {
+            log.warn("发布app更新失败: 选择灰度发布而灰度用户列表为空 {}", appUpdateReleaseDTO);
+            throw new ParameterErrorException(Constants.MESSAGE_MISSING_GRAYSCALE_IDS);
+        }
+        if (AppUpdateStatusEnum.FULL_RELEASE.equals(status)) {
+            // 全网发布不需要保存灰度用户列表
+            // 设置为空字符串而不设置为null，null的话不会更新数据库中的数据，如果从灰度发布改为全网发布，需要清空灰度用户列表（已设置列表更新模式为非null更新）
+            appUpdateReleaseDTO.setGrayscaleIds("");
+        }
+        AppUpdate appUpdate = CopyUtils.copyBean(appUpdateReleaseDTO, AppUpdate.class);
+        updateById(appUpdate);
+        log.info("发布app更新成功 {}", appUpdate);
     }
 }
