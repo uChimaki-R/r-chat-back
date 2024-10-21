@@ -133,4 +133,20 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
                 throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
         }
     }
+
+    @Override
+    public void delUpdate(Integer id) {
+        AppUpdate appUpdate = getById(id);
+        if (appUpdate == null) {
+            log.warn("删除app更新信息失败: 信息不存在 id: {}", id);
+            throw new AppUpdateNotExistException(Constants.MESSAGE_APP_UPDATE_NOT_EXIST);
+        }
+        // 发布的更新不能删除
+        if (!AppUpdateStatusEnum.UNPUBLISHED.equals(appUpdate.getStatus())) {
+            log.warn("删除app更新信息失败: 更新已经发布 {}", appUpdate);
+            throw new IllegalOperationException(Constants.MESSAGE_APP_ALREADY_RELEASED);
+        }
+        removeById(id);
+        log.info("删除app更新信息成功 {}", appUpdate);
+    }
 }
