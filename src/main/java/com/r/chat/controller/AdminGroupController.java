@@ -17,7 +17,7 @@ import javax.validation.constraints.NotEmpty;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/group")
 @RequiredArgsConstructor
 public class AdminGroupController {
     private final IGroupInfoService groupInfoService;
