@@ -89,7 +89,7 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             update.setId(appUpdateDTO.getId());
             // 更新信息
             updateById(update);
-            log.info("修改app更新信息成功 {}", origin);
+            log.info("修改app更新信息成功 {}", appUpdateDTO);
         }
     }
 
@@ -106,21 +106,31 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             log.warn("发布app更新失败: 信息不存在 {}", appUpdateReleaseDTO);
             throw new AppUpdateNotExistException(Constants.MESSAGE_APP_UPDATE_NOT_EXIST);
         }
-        if (!AppUpdateStatusEnum.UNPUBLISHED.equals(dbInfo.getStatus()) && AppUpdateStatusEnum.UNPUBLISHED.equals(status)) {
-            log.warn("发布app更新失败: 试图将已发布的版本修改为未发布 原已发布版本: {}", dbInfo);
-            throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
-        }
         if (AppUpdateStatusEnum.GRAYSCALE_RELEASE.equals(status) && StringUtils.isEmpty(appUpdateReleaseDTO.getGrayscaleIds())) {
             log.warn("发布app更新失败: 选择灰度发布而灰度用户列表为空 {}", appUpdateReleaseDTO);
             throw new ParameterErrorException(Constants.MESSAGE_MISSING_GRAYSCALE_IDS);
         }
-        if (AppUpdateStatusEnum.FULL_RELEASE.equals(status)) {
-            // 全网发布不需要保存灰度用户列表
-            // 设置为空字符串而不设置为null，null的话不会更新数据库中的数据，如果从灰度发布改为全网发布，需要清空灰度用户列表（已设置列表更新模式为非null更新）
-            appUpdateReleaseDTO.setGrayscaleIds("");
+        if (!AppUpdateStatusEnum.GRAYSCALE_RELEASE.equals(status)) {
+            // 除了灰度发布，取消发布和全网发布都不需要保存灰度用户列表
+            // 已设置不检查grayscaleIds字段的值，直接更新，所以置为null就可以。
+            // 在灰度更新改为全网更新的时候也可以将该字段置为null
+            appUpdateReleaseDTO.setGrayscaleIds(null);
         }
         AppUpdate appUpdate = CopyUtils.copyBean(appUpdateReleaseDTO, AppUpdate.class);
         updateById(appUpdate);
-        log.info("发布app更新成功 {}", appUpdate);
+        switch (status) {
+            case UNPUBLISHED:
+                log.info("取消发布app更新 {}", appUpdateReleaseDTO);
+                break;
+            case GRAYSCALE_RELEASE:
+                log.info("灰度发布app更新 {}", appUpdateReleaseDTO);
+                break;
+            case FULL_RELEASE:
+                log.info("全网发布app更新 {}", appUpdateReleaseDTO);
+                break;
+            default:
+                log.warn(Constants.IN_SWITCH_DEFAULT);
+                throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
+        }
     }
 }
