@@ -4,7 +4,9 @@ import com.r.chat.interceptor.AdminInterceptor;
 import com.r.chat.interceptor.TokenInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.filter.FormContentFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -15,6 +17,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 public class WebMvcConfig extends WebMvcConfigurationSupport {
     private final TokenInterceptor tokenInterceptor;
     private final AdminInterceptor adminInterceptor;
+
+    /**
+     * 解决Spring不解析PUT请求的x-www-form-urlencoded参数的问题
+     */
+    @Bean
+    public FormContentFilter formContentFilter() {
+        return new FormContentFilter();
+    }
 
     /**
      * 注册自定义拦截器
