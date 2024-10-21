@@ -27,7 +27,6 @@ public class AppUpdateDTO implements Serializable {
     /**
      * 版本号
      */
-    @NotEmpty(message = Constants.VALIDATE_EMPTY_VERSION)
     @Pattern(regexp = Constants.REGEX_VERSION, message = Constants.VALIDATE_ILLEGAL_VERSION)
     private String version;
 
