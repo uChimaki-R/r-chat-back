@@ -12,7 +12,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author r-pocky
  * @since 2024-09-21
  */
-public interface IUserInfoBeautyService extends IService<BeautyUserInfo> {
+public interface IBeautyUserInfoService extends IService<BeautyUserInfo> {
 
     /**
      * 新增或更新靓号信息
