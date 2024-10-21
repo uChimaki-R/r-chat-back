@@ -9,9 +9,9 @@ import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.exception.BeautyUserIdAlreadyExistedException;
 import com.r.chat.exception.BeautyUserInfoNotExistException;
 import com.r.chat.exception.EmailAlreadyRegisteredException;
-import com.r.chat.mapper.UserInfoBeautyMapper;
+import com.r.chat.mapper.BeautyUserInfoMapper;
 import com.r.chat.mapper.UserInfoMapper;
-import com.r.chat.service.IUserInfoBeautyService;
+import com.r.chat.service.IBeautyUserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserInfoBeautyServiceImpl extends ServiceImpl<UserInfoBeautyMapper, BeautyUserInfo> implements IUserInfoBeautyService {
+public class BeautyUserInfoServiceImpl extends ServiceImpl<BeautyUserInfoMapper, BeautyUserInfo> implements IBeautyUserInfoService {
     private final UserInfoMapper userInfoMapper;
 
     @Override
