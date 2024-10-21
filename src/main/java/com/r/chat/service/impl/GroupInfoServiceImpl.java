@@ -70,7 +70,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
 //            // 没有携带群头像
 //            if (groupInfoDTO.getAvatarFile() == null) {
 //                log.warn("拒绝新增群聊: 未指定群头像");
-//                throw new ParameterErrorException(Constants.MESSAGE_MISSING_AVATAR_FILE);
+//                throw new ParameterErrorException(Constants.MESSAGE_MISSING_FILE);
 //            }
 
             // 添加群聊到数据库

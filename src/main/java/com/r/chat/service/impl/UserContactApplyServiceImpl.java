@@ -59,7 +59,7 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
         UserContactApply userContactApply = userContactApplyMapper.selectById(applyId);
         if (userContactApply == null) {
             log.warn("不存在该申请 applyId: {}", applyId);
-            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+            throw new ParameterErrorException(Constants.MESSAGE_CONTACT_APPLY_NOT_EXIST);
         }
         // 需要是本人操作
         VerifyUtils.assertIsCurrentUser(userContactApply.getReceiveUserId());

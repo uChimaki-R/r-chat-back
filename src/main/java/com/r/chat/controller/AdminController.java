@@ -146,7 +146,7 @@ public class AdminController {
             return Result.success();
         } else {
             log.warn("删除靓号信息失败 id: {}", id);
-            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+            throw new ParameterErrorException(Constants.MESSAGE_BEAUTY_USER_INFO_NOT_EXIST);
         }
     }
 
