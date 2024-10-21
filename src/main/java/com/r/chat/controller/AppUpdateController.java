@@ -2,6 +2,7 @@ package com.r.chat.controller;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.r.chat.entity.dto.AppUpdateDTO;
 import com.r.chat.entity.dto.AppUpdateQueryDTO;
 import com.r.chat.entity.po.AppUpdate;
 import com.r.chat.entity.result.PageResult;
@@ -9,11 +10,10 @@ import com.r.chat.entity.result.Result;
 import com.r.chat.service.IAppUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import javax.validation.Valid;
 
 /**
  * <p>
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Slf4j
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/admin/app")
 public class AppUpdateController {
@@ -46,5 +47,15 @@ public class AppUpdateController {
         PageResult<AppUpdate> pageResult = PageResult.fromPage(page);
         log.info("获取到app版本信息 {}", pageResult);
         return Result.success(pageResult);
+    }
+
+    /**
+     * 新增或更新app更新信息
+     */
+    @PostMapping("/saveUpdate")
+    public Result<String> saveUpdate(@Valid AppUpdateDTO appUpdateDTO) {
+        log.info("新增或修改app更新信息 {}", appUpdateDTO);
+        appUpdateService.saveOrUpdateAppUpdate(appUpdateDTO);
+        return Result.success();
     }
 }
