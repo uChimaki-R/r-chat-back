@@ -21,7 +21,6 @@ public class Constants {
     public static final String MESSAGE_CHECK_CODE_ERROR = "验证码错误";
     public static final String MESSAGE_EMAIL_ALREADY_REGISTERED = "邮箱已注册";
     public static final String MESSAGE_BEAUTY_USER_ID_ALREADY_EXISTED = "靓号已存在";
-    public static final String MESSAGE_APP_VERSION_ALREADY_EXISTED = "该app版本已存在";
     public static final String MESSAGE_ALREADY_HAVE_BEAUTY_ACCOUNT = "账号已经绑定过靓号了";
     public static final String MESSAGE_BEAUTY_USER_INFO_NOT_EXIST = "靓号信息不存在";
     public static final String MESSAGE_APP_UPDATE_NOT_EXIST = "app更新信息不存在";
@@ -36,14 +35,16 @@ public class Constants {
     public static final String MESSAGE_MISSING_FILE = "缺少文件";
     public static final String MESSAGE_MISSING_OUTER_LINK = "缺少外链信息";
     public static final String MESSAGE_MISSING_GRAYSCALE_IDS = "缺少灰度用户列表信息";
+    public static final String MESSAGE_MISSING_VERSION = "缺少版本信息";
     public static final String MESSAGE_FAILED_TO_SAVE_FILE = "文件保存失败";
     public static final String MESSAGE_GROUP_NOT_EXIST = "群聊不存在";
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
     public static final String MESSAGE_NOT_IN_THE_GROUP = "不在此群聊";
     public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
     public static final String MESSAGE_NOT_ADMIN = "非管理员账号操作";
-    public static final String MESSAGE_VERSION_LESS_THAN_ORIGIN = "版本号不可低于原版本号";
     public static final String MESSAGE_APP_ALREADY_RELEASED = "无法删除已发布的更新";
+    public static final String MESSAGE_VERSION_TOO_LOW = "新增版本低于最新版本";
+    public static final String MESSAGE_CANNOT_CHANGE_VERSION = "不允许修改版本";
 
     // validate failure message
     public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
