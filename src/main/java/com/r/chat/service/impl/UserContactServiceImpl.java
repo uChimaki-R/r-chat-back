@@ -92,7 +92,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 break;
             default:
                 log.warn(Constants.IN_SWITCH_DEFAULT);
-                return null;  // return null后前端会处理显示无结果
+                throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
         }
         // 自己查自己的话就直接返回
         if (Objects.equals(UserIdContext.getCurrentUserId(), contactId)) {
@@ -167,7 +167,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 break;
             default:
                 log.warn(Constants.IN_SWITCH_DEFAULT);
-                throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
+                throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
         }
         // 如果可以直接添加，则直接添加，不用发送申请
         if (JoinTypeEnum.JOIN_DIRECTLY.equals(joinType)) {
@@ -239,7 +239,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 break;
             default:
                 log.warn(Constants.IN_SWITCH_DEFAULT);
-                throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+                throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
         }
         // 设置联系人类型
         basicInfoDTOList.forEach(basicInfoDTO -> {

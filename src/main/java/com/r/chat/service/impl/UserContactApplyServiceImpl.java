@@ -90,7 +90,7 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
                 break;
             default:
                 log.warn(Constants.IN_SWITCH_DEFAULT);
-                throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+                throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
         }
     }
 }
