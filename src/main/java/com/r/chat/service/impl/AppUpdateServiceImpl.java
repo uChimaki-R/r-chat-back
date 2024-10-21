@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * <p>
@@ -41,22 +40,13 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             log.warn("新增或修改app更新信息失败: 更新手段信息错误 {}", appUpdateDTO);
             throw new EnumIsNullException(Constants.MESSAGE_STATUS_ERROR);
         }
-        // 不能新增或修改为已经有的版本号
-        QueryWrapper<AppUpdate> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(AppUpdate::getVersion, appUpdateDTO.getVersion());
-        AppUpdate sameVersionDbInfo = getOne(queryWrapper);
-        if (sameVersionDbInfo != null && !Objects.equals(sameVersionDbInfo.getId(), appUpdateDTO.getId())) {
-            // 有相同的版本号了，并且不是修改前的自己
-            log.warn("新增或修改app更新信息失败: 该版本号已存在 {}", appUpdateDTO);
-            throw new AppVersionAlreadyExistedException(Constants.MESSAGE_APP_VERSION_ALREADY_EXISTED);
-        }
         if (AppUpdateMethodTypeEnum.FILE.equals(appUpdateDTO.getMethodType())) {
             // 文件更新方式需要保存文件
             if (appUpdateDTO.getFile() == null) {
                 log.warn("新增或修改app更新信息失败: 未上传文件 {}", appUpdateDTO);
                 throw new ParameterErrorException(Constants.MESSAGE_MISSING_FILE);
             }
-            FileUtils.saveExeFile(appUpdateDTO.getFile(), appUpdateDTO.getVersion());
+            // 新增文件的操作放到最后面，因为后面可能判断出请求有错误信息，那这里就会冗余保存
             // 文件更新方式不能有外链信息
             appUpdateDTO.setOuterLink(null);
         } else if (appUpdateDTO.getOuterLink() == null) {
@@ -66,11 +56,29 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
         }
         if (appUpdateDTO.getId() == null) {
             // 新增
+            if (appUpdateDTO.getVersion() == null) {
+                log.warn("新增app更新信息失败: 版本信息为空 {}", appUpdateDTO);
+                throw new ParameterErrorException(Constants.MESSAGE_MISSING_VERSION);
+            }
+            // 这里要求新增的版本必须比所有版本都高，这样才满足id最大的那个版本最高
+            // 找到最新的版本，即id最大那个版本
+            QueryWrapper<AppUpdate> latestWrapper = new QueryWrapper<>();
+            latestWrapper.lambda().orderByDesc(AppUpdate::getId).last("limit 1");
+            AppUpdate latest = appUpdateMapper.selectOne(latestWrapper);
+            if (latest != null && StringUtils.versionGTE(latest.getVersion(), appUpdateDTO.getVersion())) {
+                // 数据库里的最高version >= 新增的version，不予添加
+                log.warn("新增app更新信息失败: 新增的版本低于最新版本 最新版本: {}", latest.getVersion());
+                throw new AppVersionLTLatestException(Constants.MESSAGE_VERSION_TOO_LOW);
+            }
             AppUpdate appUpdate = CopyUtils.copyBean(appUpdateDTO, AppUpdate.class);
             appUpdate.setCreateTime(LocalDateTime.now());
             appUpdate.setStatus(AppUpdateStatusEnum.UNPUBLISHED);
             save(appUpdate);
             log.info("新增app更新信息成功 {}", appUpdate);
+            if (AppUpdateMethodTypeEnum.FILE.equals(appUpdateDTO.getMethodType())) {
+                // 保存文件，版本从传入的数据中获取
+                FileUtils.saveExeFile(appUpdateDTO.getFile(), appUpdateDTO.getVersion());
+            }
         } else {
             // 修改
             // 查找原来的信息
@@ -79,10 +87,10 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
                 log.warn("修改app更新信息失败: 原app更新信息不存在 {}", appUpdateDTO);
                 throw new AppUpdateNotExistException(Constants.MESSAGE_APP_UPDATE_NOT_EXIST);
             }
-            // 修改的版本号不能低于原来的版本号
-            if (!StringUtils.versionGTE(appUpdateDTO.getVersion(), origin.getVersion())) {
-                log.warn("修改app更新信息失败: 修改的版本号小于原来的版本号 {}", appUpdateDTO);
-                throw new AppVersionLTOriginException(Constants.MESSAGE_VERSION_LESS_THAN_ORIGIN);
+            // 不允许修改版本号，否则无法保证id越大版本越高（理论上也可以保证，不过要加很多判断逻辑，且会有隐患），整个更新系统会乱套
+            if (appUpdateDTO.getVersion() != null) {
+                log.warn("修改app更新信息失败: 不允许修改版本号 {}", appUpdateDTO);
+                throw new IllegalOperationException(Constants.MESSAGE_CANNOT_CHANGE_VERSION);
             }
             // 拷贝要修改的信息
             AppUpdate update = CopyUtils.copyBean(appUpdateDTO, AppUpdate.class);
@@ -90,6 +98,10 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             // 更新信息
             updateById(update);
             log.info("修改app更新信息成功 {}", appUpdateDTO);
+            if (AppUpdateMethodTypeEnum.FILE.equals(appUpdateDTO.getMethodType())) {
+                // 保存文件，版本从原数据中获取
+                FileUtils.saveExeFile(appUpdateDTO.getFile(), origin.getVersion());
+            }
         }
     }
 
