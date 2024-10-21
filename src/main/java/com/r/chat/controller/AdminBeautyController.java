@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/beauty")
 @RequiredArgsConstructor
 public class AdminBeautyController {
     private final IBeautyUserInfoService beautyUserInfoService;
