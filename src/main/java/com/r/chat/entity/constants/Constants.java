@@ -43,6 +43,7 @@ public class Constants {
     public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
     public static final String MESSAGE_NOT_ADMIN = "非管理员账号操作";
     public static final String MESSAGE_VERSION_LESS_THAN_ORIGIN = "版本号不可低于原版本号";
+    public static final String MESSAGE_APP_ALREADY_RELEASED = "无法删除已发布的更新";
 
     // validate failure message
     public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
