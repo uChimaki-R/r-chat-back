@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 @Slf4j
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/admin/update")
 public class AdminAppUpdateController {
     private final IAppUpdateService appUpdateService;
 
