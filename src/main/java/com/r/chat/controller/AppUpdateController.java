@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.AppUpdateDTO;
 import com.r.chat.entity.dto.AppUpdateQueryDTO;
+import com.r.chat.entity.dto.AppUpdateReleaseDTO;
 import com.r.chat.entity.po.AppUpdate;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
@@ -72,6 +73,16 @@ public class AppUpdateController {
             log.warn("删除app更新信息失败: 信息不存在 id: {}", id);
             throw new AppUpdateNotExistException(Constants.MESSAGE_APP_UPDATE_NOT_EXIST);
         }
+        return Result.success();
+    }
+
+    /**
+     * 发布app更新
+     */
+    @PutMapping("/releaseUpdate")
+    public Result<String> releaseUpdate(@Valid AppUpdateReleaseDTO appUpdateReleaseDTO) {
+        log.info("发布app更新 {}", appUpdateReleaseDTO);
+        appUpdateService.releaseUpdate(appUpdateReleaseDTO);
         return Result.success();
     }
 }
