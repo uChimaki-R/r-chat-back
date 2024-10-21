@@ -140,14 +140,13 @@ public class AdminController {
     @DeleteMapping("/delBeautyUserInfo")
     public Result<String> delBeautyUserInfo(@NotNull(message = Constants.VALIDATE_EMPTY_ID) Integer id) {
         log.info("删除靓号信息 id: {}", id);
-        boolean isRemove = userInfoBeautyService.removeById(id);
-        if (isRemove) {
+        if (userInfoBeautyService.removeById(id)) {
             log.info("成功删除靓号信息 id: {}", id);
-            return Result.success();
         } else {
-            log.warn("删除靓号信息失败 id: {}", id);
+            log.warn("删除靓号信息失败: 信息不存在 id: {}", id);
             throw new ParameterErrorException(Constants.MESSAGE_BEAUTY_USER_INFO_NOT_EXIST);
         }
+        return Result.success();
     }
 
     /**
