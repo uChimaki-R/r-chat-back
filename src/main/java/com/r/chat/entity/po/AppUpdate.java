@@ -64,7 +64,7 @@ public class AppUpdate implements Serializable {
     /**
      * 灰度发布的用户id
      */
-    @TableField(value = "grayscale_ids", updateStrategy = FieldStrategy.NOT_NULL)  // 可以用空字符串更新，在灰度发布改为全网发布的时候需要清空该列表（用空字符串更新）
+    @TableField(value = "grayscale_ids", updateStrategy = FieldStrategy.IGNORED)  // null也可以更新覆盖（灰度发布改全网发布的时候会置为null）
     private String grayscaleIds;
 
     /**
