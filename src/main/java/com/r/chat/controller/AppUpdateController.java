@@ -1,12 +1,13 @@
 package com.r.chat.controller;
 
-
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.AppUpdateDTO;
 import com.r.chat.entity.dto.AppUpdateQueryDTO;
 import com.r.chat.entity.po.AppUpdate;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
+import com.r.chat.exception.AppUpdateNotExistException;
 import com.r.chat.service.IAppUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * <p>
@@ -56,6 +58,20 @@ public class AppUpdateController {
     public Result<String> saveUpdate(@Valid AppUpdateDTO appUpdateDTO) {
         log.info("新增或修改app更新信息 {}", appUpdateDTO);
         appUpdateService.saveOrUpdateAppUpdate(appUpdateDTO);
+        return Result.success();
+    }
+
+    /**
+     * 删除app更新信息
+     */
+    @DeleteMapping("/delUpdate")
+    public Result<String> delUpdate(@NotNull Integer id) {
+        if (appUpdateService.removeById(id)) {
+            log.info("删除app更新信息 id: {}", id);
+        } else {
+            log.warn("删除app更新信息失败: 信息不存在 id: {}", id);
+            throw new AppUpdateNotExistException(Constants.MESSAGE_APP_UPDATE_NOT_EXIST);
+        }
         return Result.success();
     }
 }
