@@ -21,7 +21,7 @@ import javax.validation.constraints.NotEmpty;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/user")
 @RequiredArgsConstructor
 public class AdminUserController {
     private final IUserInfoService userInfoService;
