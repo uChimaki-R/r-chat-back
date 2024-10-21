@@ -13,6 +13,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2024-09-21
  */
 @Mapper
-public interface UserInfoBeautyMapper extends BaseMapper<BeautyUserInfo> {
+public interface BeautyUserInfoMapper extends BaseMapper<BeautyUserInfo> {
 
 }
