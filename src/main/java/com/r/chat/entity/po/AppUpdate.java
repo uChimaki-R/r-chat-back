@@ -1,9 +1,6 @@
 package com.r.chat.entity.po;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
@@ -67,7 +64,7 @@ public class AppUpdate implements Serializable {
     /**
      * 灰度发布的用户id
      */
-    @TableField("grayscale_ids")
+    @TableField(value = "grayscale_ids", updateStrategy = FieldStrategy.NOT_NULL)  // 可以用空字符串更新，在灰度发布改为全网发布的时候需要清空该列表（用空字符串更新）
     private String grayscaleIds;
 
     /**
