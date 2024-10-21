@@ -23,6 +23,7 @@ public class GlobalExceptionHandlerController {
             log.warn("NoHandlerFoundException | {}", result);
             return result;
         } else if (e instanceof HttpRequestMethodNotSupportedException) {
+            // 请求方式不支持
             Result<String> result = Result.error(ResponseCodeEnum.REJECTED.getCode(), Constants.MESSAGE_REQUEST_METHOD_ERROR);
             log.warn("HttpRequestMethodNotSupportedException | {}", result);
             return result;
@@ -31,11 +32,6 @@ public class GlobalExceptionHandlerController {
             BusinessException be = (BusinessException) e;
             Result<String> result = Result.error(be.getCode(), be.getMessage());
             log.warn("BusinessException | {}", result);
-            return result;
-        } else if (e instanceof BindException) {
-            // 绑定错误，可能是枚举没匹配到，或者是Long传了String等
-            Result<String> result = Result.error(ResponseCodeEnum.PARAMETERS_ERROR.getCode(), Constants.MESSAGE_PARAMETER_ERROR);
-            log.warn("BindException | {}", result);
             return result;
         } else if (e.getClass().getPackage().getName().startsWith("org.springframework.validation") ||
                 e.getClass().getPackage().getName().startsWith("javax.validation")) {
@@ -46,6 +42,11 @@ public class GlobalExceptionHandlerController {
             if (message.endsWith("]")) message = message.substring(0, message.length() - 1);
             Result<String> result = Result.error(ResponseCodeEnum.PARAMETERS_ERROR.getCode(), message);
             log.warn("ValidationException | {}", result);
+            return result;
+        } else if (e instanceof BindException) {
+            // 绑定错误，可能是枚举没匹配到，或者是Long传了String等
+            Result<String> result = Result.error(ResponseCodeEnum.PARAMETERS_ERROR.getCode(), Constants.MESSAGE_PARAMETER_ERROR);
+            log.warn("BindException | {}", result);
             return result;
         } else {
             // 内部错误
