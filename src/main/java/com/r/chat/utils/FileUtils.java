@@ -15,6 +15,7 @@ public class FileUtils {
      */
     public static void saveAvatarFile(AvatarOwner avatarOwner) {
         if (avatarOwner.getAvatarFile() == null || avatarOwner.getAvatarCover() == null) {
+            log.warn("尝试保存为null的文件 {}", avatarOwner);
             return;
         }
         saveFile(
@@ -37,6 +38,10 @@ public class FileUtils {
      * 保存app的exe文件
      */
     public static void saveExeFile(MultipartFile file, String version) {
+        if (file == null || version == null) {
+            log.warn("尝试保存为null的文件/文件名可能为null file: {}, version: {}", file, version);
+            return;
+        }
         saveFile(
                 AppProperties.projectFolder,
                 Constants.FILE_FOLDER_EXE,
