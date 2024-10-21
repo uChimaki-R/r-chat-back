@@ -24,4 +24,9 @@ public interface IAppUpdateService extends IService<AppUpdate> {
      * 发布app更新
      */
     void releaseUpdate(AppUpdateReleaseDTO appUpdateReleaseDTO);
+
+    /**
+     * 删除app更新信息
+     */
+    void delUpdate(Integer id);
 }
