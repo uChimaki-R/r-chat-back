@@ -54,4 +54,25 @@ public class StringUtils {
     public static String getRandomChars(Integer length) {
         return RandomStringUtils.random(length, true, false);
     }
+
+    /**
+     * 判断v1版本号是否大于等于v2版本号
+     */
+    public static Boolean versionGTE(String v1, String v2) {
+        // 一者为空另一者大
+        if (isEmpty(v2)) return true;
+        if (isEmpty(v1)) return false;
+        // 根据.划分成数组，然后逐个比较
+        String[] v1s = v1.split("\\.");
+        String[] v2s = v2.split("\\.");
+        int len = Math.min(v1s.length, v2s.length);
+        for (int i = 0; i < len; i++) {
+            // 一样就继续比
+            if (v1s[i].equals(v2s[i])) continue;
+            // 不一样就可以得出结果
+            return Integer.parseInt(v1s[i]) >= Integer.parseInt(v2s[i]);
+        }
+        // 前缀相同看长度
+        return v1s.length >= v2s.length;
+    }
 }
