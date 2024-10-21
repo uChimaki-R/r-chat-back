@@ -223,7 +223,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     public List<BasicInfoDTO> loadContact(UserContactTypeEnum contactType) {
         if (contactType == null) {
             log.warn("查询失败: 传入的联系人类型为null");
-            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+            throw new EnumIsNullException(Constants.MESSAGE_STATUS_ERROR);
         }
         // 因为还要查出用户名/群聊名，所以需要联查
         // 而如果是用户，则联查用户信息表，群聊则联查群聊信息表
@@ -363,7 +363,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 break;
             default:
                 log.warn("传递了错误的状态 {}", status);
-                throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+                throw new EnumIsNullException(Constants.MESSAGE_STATUS_ERROR);
         }
         LocalDateTime now = LocalDateTime.now();
         // 查看是否存在关系

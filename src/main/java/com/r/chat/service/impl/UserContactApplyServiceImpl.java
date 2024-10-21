@@ -9,6 +9,7 @@ import com.r.chat.entity.enums.UserContactApplyStatusEnum;
 import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.po.UserContactApply;
 import com.r.chat.entity.vo.ContactApplyVO;
+import com.r.chat.exception.EnumIsNullException;
 import com.r.chat.exception.IllegalOperationException;
 import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.mapper.UserContactApplyMapper;
@@ -53,7 +54,7 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
         UserContactApplyStatusEnum status = applyDealDTO.getStatus();
         if (status == null || UserContactApplyStatusEnum.PENDING.equals(status)) {
             log.warn("传入的申请状态不合法 {}", status);
-            throw new ParameterErrorException(Constants.MESSAGE_PARAMETER_ERROR);
+            throw new EnumIsNullException(Constants.MESSAGE_STATUS_ERROR);
         }
         // 查询这个申请
         UserContactApply userContactApply = userContactApplyMapper.selectById(applyId);
