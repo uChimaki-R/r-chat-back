@@ -8,7 +8,6 @@ import com.r.chat.entity.dto.AppUpdateReleaseDTO;
 import com.r.chat.entity.po.AppUpdate;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
-import com.r.chat.exception.AppUpdateNotExistException;
 import com.r.chat.service.IAppUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,13 +65,9 @@ public class AppUpdateController {
      * 删除app更新信息
      */
     @DeleteMapping("/delUpdate")
-    public Result<String> delUpdate(@NotNull Integer id) {
-        if (appUpdateService.removeById(id)) {
-            log.info("删除app更新信息 id: {}", id);
-        } else {
-            log.warn("删除app更新信息失败: 信息不存在 id: {}", id);
-            throw new AppUpdateNotExistException(Constants.MESSAGE_APP_UPDATE_NOT_EXIST);
-        }
+    public Result<String> delUpdate(@NotNull(message = Constants.VALIDATE_EMPTY_ID) Integer id) {
+        log.info("删除app更新信息 id: {}", id);
+        appUpdateService.delUpdate(id);
         return Result.success();
     }
 
