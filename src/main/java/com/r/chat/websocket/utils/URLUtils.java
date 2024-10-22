@@ -1,4 +1,4 @@
-package com.r.chat.utils;
+package com.r.chat.websocket.utils;
 
 import java.util.HashMap;
 import java.util.Map;
