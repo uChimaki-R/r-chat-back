@@ -2,6 +2,7 @@ package com.r.chat.redis;
 
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.SysSettingDTO;
+import com.r.chat.properties.AppProperties;
 import com.r.chat.properties.DefaultSysSettingProperties;
 import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +18,21 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtils {
     private final RedisOperation redisOperation;
     private final DefaultSysSettingProperties defaultSysSettingProperties;
+    private final AppProperties appProperties;
 
     /**
      * 获取用户心跳
      */
     public Long getUserHeartBeat(String userId) {
         return (Long) redisOperation.get(Constants.REDIS_KEY_PREFIX_WS_HEART_BEAT + userId);
+    }
+
+    /**
+     * 保存用户心跳
+     */
+    public void setUserHeartBeat(String userId) {
+        // 值为当前系统时间
+        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_WS_HEART_BEAT + userId, System.currentTimeMillis(), appProperties.getHeartbeatInterval(), TimeUnit.SECONDS);
     }
 
     /**
