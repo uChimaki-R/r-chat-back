@@ -4,6 +4,7 @@ import com.r.chat.entity.dto.AppUpdateDTO;
 import com.r.chat.entity.dto.AppUpdateReleaseDTO;
 import com.r.chat.entity.po.AppUpdate;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.r.chat.entity.vo.AppUpdateVO;
 
 /**
  * <p>
@@ -29,4 +30,9 @@ public interface IAppUpdateService extends IService<AppUpdate> {
      * 删除app更新信息
      */
     void delUpdate(Integer id);
+
+    /**
+     * 检查版本更新，获取用户可用的最高版本信息
+     */
+    AppUpdateVO checkVersion(String version);
 }
