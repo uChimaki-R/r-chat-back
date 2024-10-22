@@ -1,14 +1,17 @@
 package com.r.chat.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.AppUpdateDTO;
 import com.r.chat.entity.dto.AppUpdateReleaseDTO;
 import com.r.chat.entity.enums.AppUpdateMethodTypeEnum;
 import com.r.chat.entity.enums.AppUpdateStatusEnum;
 import com.r.chat.entity.po.AppUpdate;
+import com.r.chat.entity.vo.AppUpdateVO;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.AppUpdateMapper;
+import com.r.chat.properties.AppProperties;
 import com.r.chat.service.IAppUpdateService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
@@ -18,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.time.LocalDateTime;
 
 /**
@@ -32,6 +36,8 @@ import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
 public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate> implements IAppUpdateService {
+    private final AppProperties appProperties;
+
     private final AppUpdateMapper appUpdateMapper;
 
     @Override
@@ -160,5 +166,28 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
         }
         removeById(id);
         log.info("删除app更新信息成功 {}", appUpdate);
+    }
+
+    @Override
+    public AppUpdateVO checkVersion(String version) {
+        // 需要根据用户是否是灰度用户来寻找适合该用户的最新版本
+        AppUpdate latest = appUpdateMapper.selectLatestForUser(UserIdContext.getCurrentUserId());
+        if (latest == null || StringUtils.versionGTE(version, latest.getVersion())) {
+            // 无最新版本或当前版本等于最新版本，无需更新版本
+            log.info("当前已是最新版本, 无需更新");
+            return null;
+        }
+        AppUpdateVO appUpdateVO = CopyUtils.copyBean(latest, AppUpdateVO.class);
+        // 外链直接返回
+        if (AppUpdateMethodTypeEnum.OUTER_LINK.equals(appUpdateVO.getMethodType())) {
+            log.info("获取到最新版本 {}", appUpdateVO);
+            return appUpdateVO;
+        }
+        // 如果是文件下载方式，需要补充文件名和文件大小
+        File file = FileUtils.getExeFile(latest.getVersion());
+        appUpdateVO.setFileName(appProperties.getAppName() + "_" + file.getName());
+        appUpdateVO.setSize(file.length());
+        log.info("获取到最新版本 {}", appUpdateVO);
+        return appUpdateVO;
     }
 }
