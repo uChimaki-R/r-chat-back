@@ -11,9 +11,19 @@ import java.util.List;
 @Data
 public class AppProperties {
     /**
+     * 应用名
+     */
+    private String appName;
+
+    /**
      * ws端口
      */
     private Integer wsPort;
+
+    /**
+     * 心跳间隔时间
+     */
+    private Integer heartbeatInterval;
 
     /**
      * 管理员邮箱
