@@ -12,7 +12,9 @@ r:
       port: 6379
       password: 123456
       database: 9
+    app-name: r_chat
     ws-port: 5051
+    heartbeat-interval: 60
     project-folder: D:/Code/JavaCode/r-chat/r-chat-data
     default-settings:
       max-group-count: 5
