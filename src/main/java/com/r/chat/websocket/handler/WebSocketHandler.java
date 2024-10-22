@@ -1,7 +1,8 @@
 package com.r.chat.websocket.handler;
 
 import com.r.chat.redis.RedisUtils;
-import com.r.chat.utils.URLUtils;
+import com.r.chat.websocket.utils.ChannelUtils;
+import com.r.chat.websocket.utils.URLUtils;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -20,7 +21,10 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame textWebSocketFrame) throws Exception {
-        log.info("收到消息: {}", textWebSocketFrame.text());
+        String userId = ChannelUtils.getUserId(channelHandlerContext.channel());
+        log.info("收到来自 {} 的消息: {}", userId, textWebSocketFrame.text());
+        // 保存用户的心跳
+        redisUtils.setUserHeartBeat(userId);
     }
 
     @Override
@@ -57,6 +61,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
             }
             log.info("ws连接成功 userId: {}", userId);
             // 将userId和channel绑定
+            ChannelUtils.addContext(userId, ctx.channel());
         }
     }
 }
