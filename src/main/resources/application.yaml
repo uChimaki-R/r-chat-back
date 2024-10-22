@@ -53,7 +53,9 @@ mybatis-plus:
       update-strategy: not_empty
 r:
   chat:
+    app-name: ${r.chat.app-name}
     ws-port: ${r.chat.ws-port}
+    heartbeat-interval: ${r.chat.heartbeat-interval}
     project-folder: ${r.chat.project-folder}
     admin-emails: ${r.chat.admin-emails}
     id-length: ${r.chat.id-length}
