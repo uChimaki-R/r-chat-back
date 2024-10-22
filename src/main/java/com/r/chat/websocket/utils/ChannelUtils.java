@@ -3,9 +3,11 @@ package com.r.chat.websocket.utils;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ChannelUtils {
     /**
      * userId->channel
@@ -67,5 +70,29 @@ public class ChannelUtils {
      */
     public static String getUserId(Channel channel) {
         return (String) channel.attr(AttributeKey.valueOf(channel.id().asLongText())).get();
+    }
+
+    /**
+     * 发送消息给用户
+     */
+    public static void sendMessage2User(String userId, String message) {
+        Channel channel = USER_CHANNEL_MAP.get(userId);
+        if (channel == null) {
+            return;
+        }
+        log.info("发送消息给用户 {}, message: {}", userId, message);
+        channel.writeAndFlush(new TextWebSocketFrame(message));
+    }
+
+    /**
+     * 发送消息到群聊
+     */
+    public static void sendMessage2Group(String groupId, String message) {
+        ChannelGroup group = GROUP_CHANNEL_MAP.get(groupId);
+        if (group == null) {
+            return;
+        }
+        log.info("发送消息到群聊 {}, message: {}", groupId, message);
+        group.writeAndFlush(new TextWebSocketFrame(message));
     }
 }
