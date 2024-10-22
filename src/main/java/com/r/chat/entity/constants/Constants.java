@@ -37,6 +37,8 @@ public class Constants {
     public static final String MESSAGE_MISSING_GRAYSCALE_IDS = "缺少灰度用户列表信息";
     public static final String MESSAGE_MISSING_VERSION = "缺少版本信息";
     public static final String MESSAGE_FAILED_TO_SAVE_FILE = "文件保存失败";
+    public static final String MESSAGE_FAILED_TO_CREATE_FOLDER = "创建目录失败";
+    public static final String MESSAGE_FILE_NOT_EXIST = "文件不存在";
     public static final String MESSAGE_GROUP_NOT_EXIST = "群聊不存在";
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
     public static final String MESSAGE_NOT_IN_THE_GROUP = "不在此群聊";
