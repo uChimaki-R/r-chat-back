@@ -13,4 +13,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface AppUpdateMapper extends BaseMapper<AppUpdate> {
 
+    /**
+     * 根据用户id获取该用户所能获取的最高app版本
+     */
+    AppUpdate selectLatestForUser(String userId);
 }
