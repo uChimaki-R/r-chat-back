@@ -64,7 +64,7 @@ public class AppUpdate implements Serializable {
     /**
      * 灰度发布的用户id
      */
-    @TableField(value = "grayscale_ids", updateStrategy = FieldStrategy.IGNORED)  // null也可以更新覆盖（灰度发布改全网发布的时候会置为null）
+    @TableField(value = "grayscale_ids", updateStrategy = FieldStrategy.IGNORED)  // null也可以更新覆盖，灰度发布改全网发布的时候会置为null
     private String grayscaleIds;
 
     /**
@@ -76,7 +76,7 @@ public class AppUpdate implements Serializable {
     /**
      * 外链地址
      */
-    @TableField("outer_link")
+    @TableField(value = "outer_link", updateStrategy = FieldStrategy.IGNORED)  // null也可以更新覆盖，外链发布改文件发布的时候会置为null
     private String outerLink;
 
 }
