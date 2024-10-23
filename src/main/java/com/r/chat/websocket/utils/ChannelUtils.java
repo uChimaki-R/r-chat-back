@@ -27,11 +27,12 @@ public class ChannelUtils {
      */
     private static final ConcurrentMap<String, ChannelGroup> GROUP_CHANNEL_MAP = new ConcurrentHashMap<>();
 
+    // 工具类的方法却不使用静态的原因: 需要用到其他bean对象（redisUtils、mapper等），静态注入比较麻烦，把工具类也交给IOC管理，要用再注入就行了（因为也只有netty用，不算麻烦）
 
     /**
      * 双向绑定channel<->userId
      */
-    public static void addContext(String userId, Channel channel) {
+    public void addContext(String userId, Channel channel) {
         // 由于channel序列化之后后续无法使用，所以无法保存到redis中，只能直接保存到内存中
         // 这里使用附件绑定userId（channel->userId），使用线程安全的map通过userId找到channel（userId->channel）
         // （理论上channel->userId也可以用一个channelId到userId的map来保存，但是不够优雅）
@@ -53,7 +54,7 @@ public class ChannelUtils {
     /**
      * 双向绑定channel<->userId，并将用户的channel加入到groupId对应的channelGroup中
      */
-    public static void addContext(String userId, String groupId, Channel channel) {
+    public void addContext(String userId, String groupId, Channel channel) {
         addContext(userId, channel);
         // 添加进群聊channelGroup
         ChannelGroup channelGroup = GROUP_CHANNEL_MAP.get(groupId);
@@ -68,14 +69,14 @@ public class ChannelUtils {
     /**
      * 获取channel绑定的userId
      */
-    public static String getUserId(Channel channel) {
+    public String getUserId(Channel channel) {
         return (String) channel.attr(AttributeKey.valueOf(channel.id().asLongText())).get();
     }
 
     /**
      * 发送消息给用户
      */
-    public static void sendMessage2User(String userId, String message) {
+    public void sendMessage2User(String userId, String message) {
         Channel channel = USER_CHANNEL_MAP.get(userId);
         if (channel == null) {
             return;
@@ -87,7 +88,7 @@ public class ChannelUtils {
     /**
      * 发送消息到群聊
      */
-    public static void sendMessage2Group(String groupId, String message) {
+    public void sendMessage2Group(String groupId, String message) {
         ChannelGroup group = GROUP_CHANNEL_MAP.get(groupId);
         if (group == null) {
             return;
