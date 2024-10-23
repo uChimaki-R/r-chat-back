@@ -18,15 +18,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
     private final RedisUtils redisUtils;
+    private final ChannelUtils channelUtils;
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame textWebSocketFrame) throws Exception {
-        String userId = ChannelUtils.getUserId(channelHandlerContext.channel());
+        String userId = channelUtils.getUserId(channelHandlerContext.channel());
         log.info("收到来自 {} 的消息: {}", userId, textWebSocketFrame.text());
         // 保存用户的心跳
         redisUtils.setUserHeartBeat(userId);
         // 测试发送到群聊
-        ChannelUtils.sendMessage2Group("111", textWebSocketFrame.text());
+        channelUtils.sendMessage2Group("111", textWebSocketFrame.text());
     }
 
     @Override
@@ -63,7 +64,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
             }
             log.info("ws连接成功 userId: {}", userId);
             // 将userId和channel绑定
-            ChannelUtils.addContext(userId, "111", ctx.channel());
+            channelUtils.addContext(userId, "111", ctx.channel());
         }
     }
 }

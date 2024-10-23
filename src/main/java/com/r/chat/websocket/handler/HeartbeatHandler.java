@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class HeartbeatHandler extends ChannelDuplexHandler {
+    private final ChannelUtils channelUtils;
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -21,10 +22,10 @@ public class HeartbeatHandler extends ChannelDuplexHandler {
             IdleStateEvent event = (IdleStateEvent) evt;
             switch (event.state()) {
                 case READER_IDLE:
-                    log.debug("{} 心跳间隔过长, 关闭连接", ChannelUtils.getUserId(ctx.channel()));
+                    log.debug("{} 心跳间隔过长, 关闭连接", channelUtils.getUserId(ctx.channel()));
                     ctx.close();
                 case WRITER_IDLE:
-                    log.debug("到达发送心跳间隔, 向 {} 发送心跳", ChannelUtils.getUserId(ctx.channel()));
+                    log.debug("到达发送心跳间隔, 向 {} 发送心跳", channelUtils.getUserId(ctx.channel()));
                     ctx.writeAndFlush("heartbeat");
                     break;
             }
