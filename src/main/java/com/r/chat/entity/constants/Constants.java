@@ -7,6 +7,7 @@ public class Constants {
     public static final String REDIS_KEY_PREFIX_WS_HEART_BEAT = REDIS_KEY_PREFIX + "ws:heartbeat:";  // ws的心跳保存路径前缀
     public static final String REDIS_KEY_PREFIX_USER_TOKEN = REDIS_KEY_PREFIX + "user:token:";  // 用户token保存路径前缀
     public static final String REDIS_KEY_SYS_SETTINGS = REDIS_KEY_PREFIX + "sys:settings";  // 系统设置保存路径
+    public static final String REDIS_KEY_PREFIX_USER_CONTACT_IDS = REDIS_KEY_PREFIX + "ws:contact:";  // 用户联系人列表保存路径前缀
 
     // exception message
     public static final String MESSAGE_SUCCESS = "请求成功";
