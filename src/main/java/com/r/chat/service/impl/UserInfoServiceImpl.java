@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
+import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
 import com.r.chat.entity.enums.UserStatusEnum;
+import com.r.chat.entity.po.UserContact;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.BeautyUserInfoMapper;
+import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.mapper.UserInfoMapper;
 import com.r.chat.properties.AppProperties;
 import com.r.chat.redis.RedisUtils;
@@ -25,6 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -42,6 +47,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     private final BeautyUserInfoMapper beautyUserInfoMapper;
     private final AppProperties appProperties;
     private final RedisUtils redisUtils;
+    private final UserContactMapper userContactMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)  // 多次数据库操作，需要事务管理
@@ -74,7 +80,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfo.setPassword(StringUtils.encodeMd5(registerDTO.getPassword())); // 使用md5加密后再存储
         userInfo.setStatus(UserStatusEnum.ENABLE);
         userInfo.setCreateTime(now);
-        userInfo.setLastOffTime(System.currentTimeMillis());
+        userInfo.setLastOffTime(LocalDateTime.now());
         userInfoMapper.insert(userInfo);
         log.info("注册新账号: {}", userInfo);
     }
@@ -115,6 +121,23 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 保存用户token到id的映射到redis，以后登录就可以从上下文里获取用户id
         redisUtils.setToken2UserId(token, userInfo.getUserId());
         log.info("{}账号 [{}] 登录成功", isAdmin ? "管理员" : "", loginDTO.getEmail());
+
+        // 查询联系人信息并保存到redis中，供后续netty聊天功能使用
+        QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(UserContact::getUserId, userInfo.getUserId())
+                .eq(UserContact::getStatus, UserContactStatusEnum.FRIENDS);
+        List<UserContact> contacts = userContactMapper.selectList(queryWrapper);
+        // 清空原有的id列表
+        redisUtils.removeUserContactIds(userInfo.getUserId());
+        if (contacts != null && !contacts.isEmpty()) {
+            // 只取联系人的id
+            List<String> contactIds = contacts.stream().map(UserContact::getContactId).collect(Collectors.toList());
+            // 保存新的id列表到redis
+            redisUtils.setUserContactIds(userInfo.getUserId(), contactIds);
+            log.info("保存用户联系人id列表到redis userId: {}, {}", userInfo.getUserId(), contactIds);
+        }
+
         return userTokenInfoDTO;
     }
 
