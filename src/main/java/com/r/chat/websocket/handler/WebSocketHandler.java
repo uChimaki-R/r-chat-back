@@ -64,7 +64,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
             }
             log.info("ws连接成功 userId: {}", userId);
             // 将userId和channel绑定
-            channelUtils.addContext(userId, "111", ctx.channel());
+            channelUtils.initChannel(userId, ctx.channel());
         }
     }
 }
