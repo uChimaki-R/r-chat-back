@@ -4,10 +4,12 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.SysSettingDTO;
 import com.r.chat.properties.AppProperties;
 import com.r.chat.properties.DefaultSysSettingProperties;
+import com.r.chat.utils.CastUtils;
 import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,6 +49,34 @@ public class RedisUtils {
      */
     public String getUserIdByToken(String token) {
         return (String) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
+    }
+
+    /**
+     * 保存用户的联系人id列表
+     */
+    public void setUserContactIds(String userId, List<String> contactIds) {
+        redisOperation.lLeftPushAll(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, contactIds);
+    }
+
+    /**
+     * 获取用户的联系人id列表
+     */
+    public List<String> getUserContactIds(String userId) {
+//        // 为了避免Unchecked cast: 'java.lang.Object' to 'java.util.List<java.lang.String>'的警告，采用了下面的写法
+//        Object o = redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId);
+//        if (o instanceof List<?>) {
+//            List<?> list = (List<?>) o;
+//            return list.stream().map(oo -> (String) oo).collect(Collectors.toList());
+//        }
+        // 改用工具类来执行上面的逻辑
+        return CastUtils.castList(redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId), String.class);
+    }
+
+    /**
+     * 清空用户的联系人id列表
+     */
+    public void removeUserContactIds(String userId) {
+        redisOperation.delete(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId);
     }
 
     /**
