@@ -38,6 +38,13 @@ public class RedisUtils {
     }
 
     /**
+     * 移除用户心跳缓存
+     */
+    public void removeUserHeartBeat(String userId) {
+        redisOperation.delete(Constants.REDIS_KEY_PREFIX_WS_HEART_BEAT + userId);
+    }
+
+    /**
      * 保存token到id的映射，设置一天的过期时间
      */
     public void setToken2UserId(String token, String userId) {
