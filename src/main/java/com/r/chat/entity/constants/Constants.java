@@ -48,6 +48,7 @@ public class Constants {
     public static final String MESSAGE_APP_ALREADY_RELEASED = "无法删除已发布的更新";
     public static final String MESSAGE_VERSION_TOO_LOW = "新增版本低于最新版本";
     public static final String MESSAGE_CANNOT_CHANGE_VERSION = "不允许修改版本";
+    public static final String MESSAGE_JSON_PARSE_ERROR = "json字符串解析失败";
 
     // validate failure message
     public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
