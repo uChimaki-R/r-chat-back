@@ -4,14 +4,11 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
-import java.io.Serializable;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -69,9 +66,7 @@ public class ChatMessage implements Serializable {
      * 发送时间
      */
     @TableField("send_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime sendTime;
+    private Long sendTime;
 
     /**
      * 接收人id
@@ -108,6 +103,5 @@ public class ChatMessage implements Serializable {
      */
     @TableField("status")
     private Integer status;
-
 
 }
