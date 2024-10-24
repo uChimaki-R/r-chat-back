@@ -70,13 +70,15 @@ public class RedisUtils {
      */
     public List<String> getUserContactIds(String userId) {
 //        // 为了避免Unchecked cast: 'java.lang.Object' to 'java.util.List<java.lang.String>'的警告，采用了下面的写法
-//        Object o = redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId);
+//        Object o = redisOperation.lRange(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, 0, -1).get(0);
 //        if (o instanceof List<?>) {
 //            List<?> list = (List<?>) o;
 //            return list.stream().map(oo -> (String) oo).collect(Collectors.toList());
 //        }
         // 改用工具类来执行上面的逻辑
-        return CastUtils.castList(redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId), String.class);
+        // get(0) 是因为jackson在反序列化列表时第一个元素是类型，后面才是数据，如（["java.util.ArrayList",["U00000000002"]]）
+        // 序列化回列表的时候返回的是[["U00000000002"]]，要get(0)才能获取到列表内容
+        return CastUtils.castList(redisOperation.lRange(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, 0, -1).get(0), String.class);
     }
 
     /**
