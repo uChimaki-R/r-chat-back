@@ -23,7 +23,7 @@ r:
       max-image-size: 2
       max-video-size: 5
       max-file-size: 5
-      robot-id: robot@robot.com
+      robot-id: U00000000002
       robot-nick-name: Robot-Chat
       robot-welcome-msg: 欢迎使用R-Chat!
     admin-user-ids:
