@@ -2,13 +2,15 @@ package com.r.chat.entity.result;
 
 import com.r.chat.entity.enums.MessageTypeEnum;
 import com.r.chat.entity.enums.UserContactTypeEnum;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -59,7 +61,7 @@ public class Message implements Serializable {
     /**
      * 消息类型
      */
-    private final MessageTypeEnum messageType;
+    private MessageTypeEnum messageType;
 
     /**
      * 发送时间
