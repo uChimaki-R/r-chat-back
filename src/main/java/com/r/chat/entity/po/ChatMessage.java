@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.r.chat.entity.enums.MessageStatusEnum;
+import com.r.chat.entity.enums.MessageTypeEnum;
+import com.r.chat.entity.enums.UserContactTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -42,7 +45,7 @@ public class ChatMessage implements Serializable {
      * 消息类型
      */
     @TableField("message_type")
-    private Integer messageType;
+    private MessageTypeEnum messageType;
 
     /**
      * 消息内容
@@ -78,7 +81,7 @@ public class ChatMessage implements Serializable {
      * 联系人类型
      */
     @TableField("contact_type")
-    private Integer contactType;
+    private UserContactTypeEnum contactType;
 
     /**
      * 文件大小
@@ -102,6 +105,6 @@ public class ChatMessage implements Serializable {
      * 状态 0：正在发送 1：已发送
      */
     @TableField("status")
-    private Integer status;
+    private MessageStatusEnum status;
 
 }
