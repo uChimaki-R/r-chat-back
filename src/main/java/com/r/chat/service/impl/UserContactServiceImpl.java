@@ -58,7 +58,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     public ContactSearchResultDTO search(String contactId) {
         ContactSearchResultDTO contactSearchResultDTO = new ContactSearchResultDTO();
         // 先根据传入的id前缀判断是打算加用户还是加群聊
-        IdPrefixEnum prefix = IdPrefixEnum.getByPrefix(contactId.charAt(0));
+        IdPrefixEnum prefix = IdPrefixEnum.getPrefix(contactId);
         if (prefix == null) {
             log.warn("搜索id前缀错误");
             return null;  // return null后前端会处理显示无结果
@@ -125,7 +125,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             throw new BeingBlockedException(Constants.MESSAGE_BING_BLOCKED);
         }
         // 根据联系人类型处理请求
-        IdPrefixEnum prefix = IdPrefixEnum.getByPrefix(contactId.charAt(0));
+        IdPrefixEnum prefix = IdPrefixEnum.getPrefix(contactId);
         if (prefix == null) {
             log.warn("联系人id前缀错误");
             // 默认提示用户不存在
@@ -189,7 +189,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 .eq(UserContactApply::getContactId, contactId)
                 .eq(UserContactApply::getReceiveUserId, receiveUserId);
         UserContactApply userContactApply = userContactApplyMapper.selectOne(userContactApplyQueryWrapper);
-        LocalDateTime now = LocalDateTime.now();
+        Long now = System.currentTimeMillis();
         if (userContactApply == null) {
             // 没申请过，添加申请
             log.info("未申请添加过该联系人, 添加申请数据");
@@ -328,8 +328,8 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     @Override
     public void saveOrUpdateMutualContact(String fromId, String toId, UserContactStatusEnum status) {
         // 查看contactType
-        UserContactTypeEnum c1 = Objects.requireNonNull(IdPrefixEnum.getByPrefix(fromId.charAt(0))).getUserContactTypeEnum();
-        UserContactTypeEnum c2 = Objects.requireNonNull(IdPrefixEnum.getByPrefix(toId.charAt(0))).getUserContactTypeEnum();
+        UserContactTypeEnum c1 = Objects.requireNonNull(IdPrefixEnum.getPrefix(fromId)).getUserContactTypeEnum();
+        UserContactTypeEnum c2 = Objects.requireNonNull(IdPrefixEnum.getPrefix(toId)).getUserContactTypeEnum();
         UserContactTypeEnum contactType;
         if (UserContactTypeEnum.GROUP.equals(c1) || UserContactTypeEnum.GROUP.equals(c2)) {
             // 两个id里有一个群聊就是群聊关系
