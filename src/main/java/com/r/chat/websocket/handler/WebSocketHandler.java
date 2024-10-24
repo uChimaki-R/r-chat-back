@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -23,11 +24,8 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame textWebSocketFrame) throws Exception {
         String userId = channelUtils.getUserId(channelHandlerContext.channel());
-        log.info("收到来自 {} 的消息: {}", userId, textWebSocketFrame.text());
-        // 保存用户的心跳
+        // 更新保存用户的心跳
         redisUtils.setUserHeartBeat(userId);
-        // 测试发送到群聊
-        channelUtils.sendMessage2Group("111", textWebSocketFrame.text());
     }
 
     @Override
@@ -37,7 +35,9 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        log.info("有连接断开");
+        log.info("断开连接");
+        channelUtils.removeChannel(ctx.channel());
+        MDC.remove("ws");
     }
 
     @Override
@@ -63,6 +63,8 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
                 return;
             }
             log.info("ws连接成功 userId: {}", userId);
+            // 保存自定义的日志输出标识
+            MDC.put("ws", " WS:" + userId);
             // 将userId和channel绑定
             channelUtils.initChannel(userId, ctx.channel());
         }
