@@ -2,17 +2,19 @@ package com.r.chat.entity.result;
 
 import com.r.chat.entity.enums.MessageTypeEnum;
 import com.r.chat.entity.enums.UserContactTypeEnum;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Message<T> implements Serializable {
+@Getter
+@Setter
+public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    public Message(MessageTypeEnum type) {
+        this.messageType = type;
+    }
 
     /**
      * 消息id
@@ -55,14 +57,9 @@ public class Message<T> implements Serializable {
     private String messageContent;
 
     /**
-     * 最后的消息
-     */
-    private String lastMessage;
-
-    /**
      * 消息类型
      */
-    private MessageTypeEnum messageType;
+    private final MessageTypeEnum messageType;
 
     /**
      * 发送时间
@@ -70,32 +67,7 @@ public class Message<T> implements Serializable {
     private Long sendTime;
 
     /**
-     * 拓展信息
-     */
-    private T extendData;
-
-    /**
      * 发送状态 0：发送中 1：已发送
      */
     private Integer status;
-
-    /**
-     * 文件大小
-     */
-    private Long fileSize;
-
-    /**
-     * 文件名
-     */
-    private String fileName;
-
-    /**
-     * 文件类型
-     */
-    private Integer fileType;
-
-    /**
-     * 群聊成员数量
-     */
-    private Integer memberCount;
 }
