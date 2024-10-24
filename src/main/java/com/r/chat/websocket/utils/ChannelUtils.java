@@ -24,8 +24,11 @@ import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RTopic;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,6 +55,43 @@ public class ChannelUtils {
     private final ChatSessionUserMapper chatSessionUserMapper;
     private final ChatMessageMapper chatMessageMapper;
     private final UserContactApplyMapper userContactApplyMapper;
+
+    /**
+     * redis服务器可以作为向各spring-server服务器广播的中介，以此达成集群的消息传递
+     * 比如说部署了多个server s0和s1，用户a连的ws是s0的，用户b连的ws是s1的，此时如果a想要找b聊天
+     * 这种情况下a发送给b的消息在s0上是找不到b对应的channel的，因为b的channel在s1的USER_CHANNEL_MAP(内存)里
+     * 解决方法是把信息发送给redisson，让他向所有server广播要发送的消息
+     * 所有server收到消息后从消息中得到发送者和接收者，如果接收者在自己的MAP里，则由自己发送消息，从而解决集群问题
+     */
+    private final RedissonClient redissonClient;
+
+    /**
+     * redisson上的主题，按MQ消息队列理解
+     */
+    private final String TOPIC_MESSAGE = "message.topic";
+
+    /**
+     * 配置监听器，监听redis服务器广播的消息，如果符合想要的类型，则回调方法
+     */
+    @PostConstruct
+    public void addRedissonListener(){
+        // 需要给出监听的主题，和发送广播的主题一致即可
+        RTopic rTopic = redissonClient.getTopic(TOPIC_MESSAGE);
+        rTopic.addListener(Message.class, (charSequence, message) -> {
+            log.info("收到广播消息 {}", message);
+            // 收到广播后的回调操作
+        });
+    }
+
+    /**
+     * 将消息广播到所有的server服务器
+     */
+    public void castMessage(Message message) {
+        RTopic rTopic = redissonClient.getTopic(TOPIC_MESSAGE);
+        log.info("发送广播消息 {}", message);
+        rTopic.publish(message);
+    }
+
     // 工具类的方法却不使用静态的原因: 需要用到其他bean对象（redisUtils、mapper等），静态注入比较麻烦，把工具类也交给IOC管理，要用再注入就行了（因为也只有netty用，不算麻烦）
 
     /**
