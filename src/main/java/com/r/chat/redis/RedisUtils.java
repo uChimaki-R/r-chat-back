@@ -68,7 +68,7 @@ public class RedisUtils {
     /**
      * 获取用户的联系人id列表
      */
-    public List<String> getUserContactIds(String userId) {
+    public List<String> getContactIds(String userId) {
 //        // 为了避免Unchecked cast: 'java.lang.Object' to 'java.util.List<java.lang.String>'的警告，采用了下面的写法
 //        Object o = redisOperation.lRange(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, 0, -1).get(0);
 //        if (o instanceof List<?>) {
