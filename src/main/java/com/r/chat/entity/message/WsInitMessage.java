@@ -4,14 +4,14 @@ import com.r.chat.entity.enums.MessageTypeEnum;
 import com.r.chat.entity.po.ChatMessage;
 import com.r.chat.entity.result.Message;
 import com.r.chat.entity.vo.ChatSessionUserVO;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class WsInitMessage extends Message implements Serializable {
     private static final long serialVersionUID = 1L;
 
