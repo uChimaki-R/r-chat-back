@@ -5,6 +5,8 @@ import com.r.chat.properties.AppProperties;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.util.Arrays;
+
 public class StringUtils {
     /**
      * 判断字符串是否为空
@@ -32,6 +34,15 @@ public class StringUtils {
      */
     public static String getRandomGroupId() {
         return IdPrefixEnum.GROUP.getPrefix() + getRandomId();
+    }
+
+    /**
+     * 获取会话id
+     * 使用两个用户的id排序拼接并md5后的结果，保证两个用户之间的会话id唯一且不变
+     */
+    public static String getSessionId(String[] ids) {
+        Arrays.sort(ids);
+        return encodeMd5(String.join("", ids));
     }
 
     /**
