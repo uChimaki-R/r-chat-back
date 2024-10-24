@@ -80,7 +80,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfo.setPassword(StringUtils.encodeMd5(registerDTO.getPassword())); // 使用md5加密后再存储
         userInfo.setStatus(UserStatusEnum.ENABLE);
         userInfo.setCreateTime(now);
-        userInfo.setLastOffTime(LocalDateTime.now());
+        userInfo.setLastOffTime(System.currentTimeMillis());
         userInfoMapper.insert(userInfo);
         log.info("注册新账号: {}", userInfo);
     }
