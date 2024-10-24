@@ -5,13 +5,11 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.vo.CheckCodeVO;
-import com.r.chat.entity.vo.SysSettingVO;
 import com.r.chat.entity.vo.UserInfoVO;
 import com.r.chat.entity.vo.UserTokenInfoVO;
 import com.r.chat.exception.CheckCodeErrorException;
 import com.r.chat.redis.RedisOperation;
 import com.r.chat.entity.result.Result;
-import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserInfoService;
 import com.r.chat.utils.CopyUtils;
 import com.wf.captcha.ArithmeticCaptcha;
@@ -32,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 public class UserController {
     private final RedisOperation redisOperation;
     private final IUserInfoService userInfoService;
-    private final RedisUtils redisUtils;
 
     /**
      * 获取验证码图片
