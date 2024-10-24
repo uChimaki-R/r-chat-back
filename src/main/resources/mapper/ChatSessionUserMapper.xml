@@ -12,5 +12,6 @@
         from r_chat.chat_session_user csu
                  inner join r_chat.chat_session cs on csu.session_id = cs.session_id
         where user_id = #{userId}
+        order by cs.last_receive_time desc
     </select>
 </mapper>
