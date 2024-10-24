@@ -3,12 +3,15 @@ package com.r.chat.websocket.utils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.r.chat.entity.enums.IdPrefixEnum;
-import com.r.chat.entity.enums.UserContactTypeEnum;
+import com.r.chat.entity.po.ChatMessage;
+import com.r.chat.entity.po.UserContactApply;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.result.Message;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.entity.message.WsInitMessage;
+import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.ChatSessionUserMapper;
+import com.r.chat.mapper.UserContactApplyMapper;
 import com.r.chat.mapper.UserInfoMapper;
 import com.r.chat.properties.AppProperties;
 import com.r.chat.redis.RedisUtils;
@@ -25,9 +28,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -47,6 +50,8 @@ public class ChannelUtils {
     private final UserInfoMapper userInfoMapper;
     private final AppProperties appProperties;
     private final ChatSessionUserMapper chatSessionUserMapper;
+    private final ChatMessageMapper chatMessageMapper;
+    private final UserContactApplyMapper userContactApplyMapper;
     // 工具类的方法却不使用静态的原因: 需要用到其他bean对象（redisUtils、mapper等），静态注入比较麻烦，把工具类也交给IOC管理，要用再注入就行了（因为也只有netty用，不算麻烦）
 
     /**
@@ -75,16 +80,13 @@ public class ChannelUtils {
         // 保存到map（userId->channel）
         USER_CHANNEL_MAP.put(userId, channel);
         log.info("绑定channel {}", channel);
-        // 将用户的channel加入到用户加入的群聊对应的channelGroup中
+
         // 从redis中获取用户的联系人id列表
-        List<String> userContactIds = redisUtils.getUserContactIds(userId);
-        for (String contactId : userContactIds) {
-            UserContactTypeEnum contactType = Objects.requireNonNull(IdPrefixEnum.getByPrefix(contactId.charAt(0))).getUserContactTypeEnum();
-            if (UserContactTypeEnum.GROUP.equals(contactType)) {
-                // 群聊联系人
-                add2Group(contactId, channel);
-            }
-        }
+        List<String> contactIds = redisUtils.getContactIds(userId);
+        // 获取群聊的id列表
+        List<String> groupContactIds = contactIds.stream().filter(id -> IdPrefixEnum.GROUP.equals(IdPrefixEnum.getPrefix(id))).collect(Collectors.toList());
+        // 将用户的channel加入到用户加入的群聊对应的channelGroup中
+        groupContactIds.forEach(groupId -> {add2Group(groupId, channel);});
 
         // 添加用户心跳缓存
         redisUtils.setUserHeartBeat(userId);
@@ -108,14 +110,31 @@ public class ChannelUtils {
         if (now - fromTime >= Duration.ofDays(appProperties.getMaxUnreadChatFetchDays()).toMillis()) {
             fromTime = now - Duration.ofDays(appProperties.getMaxUnreadChatFetchDays()).toMillis();
         }
+        // 查接收者是自己或自己加入的群聊的信息
+        // 上面已经查过自己加入的群聊id列表了，把自己也加入就行
+        groupContactIds.add(userId);
+        QueryWrapper<ChatMessage> messageQueryWrapper = new QueryWrapper<>();
+        messageQueryWrapper.lambda()
+                .in(ChatMessage::getContactId, groupContactIds)
+                .ge(ChatMessage::getSendTime, fromTime);  // 时间限制
+        List<ChatMessage> chatMessages = chatMessageMapper.selectList(messageQueryWrapper);
 
         // 获取用户所有会话消息
         List<ChatSessionUserVO> chatSessionUserVOList = chatSessionUserMapper.selectChatSessionUserVOList(userId);
         log.info("获取所有会话消息 {}", chatSessionUserVOList);
 
+        // 获取申请好友信息的数量
+        QueryWrapper<UserContactApply> applyQueryWrapper = new QueryWrapper<>();
+        applyQueryWrapper.lambda()
+                .eq(UserContactApply::getReceiveUserId, userId)
+                .ge(UserContactApply::getLastApplyTime, fromTime);  // 时间限制
+        Long applyCount = userContactApplyMapper.selectCount(applyQueryWrapper);
+
         // 发送ws初始化消息
         WsInitMessage wsInitMessage = new WsInitMessage();
         wsInitMessage.setChatSessionUserList(chatSessionUserVOList);
+        wsInitMessage.setChatMessageList(chatMessages);
+        wsInitMessage.setApplyCount(applyCount);
         log.info("发送ws初始化消息 {}", wsInitMessage);
         sendMessage2User(userId, userId, wsInitMessage);
     }
