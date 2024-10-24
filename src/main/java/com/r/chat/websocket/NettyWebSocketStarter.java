@@ -70,8 +70,16 @@ public class NettyWebSocketStarter implements Runnable {
                     }
                 });
         try {
-            ChannelFuture channelFuture = bootstrap.bind(appProperties.getWsPort()).sync();
-            log.info("netty启动成功 绑定端口: {}", appProperties.getWsPort());
+            // 为了在本地开启多个服务器实例，springboot的server端口可以通过-Dserver.port修改，这是因为spring自己做了判断虚拟机参数是否存在的逻辑
+            // 项目里还要用到ws端口，每个服务器实例在一台机子上需要是不同的端口，可以模仿spring的操作，通过判断是否配置了虚拟机参数来修改ws的端口
+            Integer wsPort = appProperties.getWsPort();  // 默认从配置文件中获取端口号
+            String vWsPort = System.getProperty("ws.port");  // 从传递的虚拟机参数中获取（虚拟机参数写如-Dws.port=7070）
+            if (vWsPort != null) {
+                // 设置了虚拟机参数就优先使用虚拟机参数
+                wsPort = Integer.parseInt(vWsPort);
+            }
+            ChannelFuture channelFuture = bootstrap.bind(wsPort).sync();
+            log.info("netty启动成功 绑定端口: {}", wsPort);
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             log.error("netty异常: {}", e.getCause().getMessage());
