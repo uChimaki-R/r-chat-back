@@ -51,7 +51,7 @@ public class GlobalExceptionHandlerController {
         } else {
             // 内部错误
             Result<String> result = Result.error(ResponseCodeEnum.INTERNAL_ERROR.getCode(), Constants.MESSAGE_INTERNAL_ERROR);
-            log.error("UnexpectedException | {}", result);
+            log.error("UnexpectedException | {}", result, e);
             return result;
         }
     }
