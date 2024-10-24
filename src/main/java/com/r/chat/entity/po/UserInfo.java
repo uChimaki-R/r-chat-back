@@ -68,7 +68,8 @@ public class UserInfo implements Serializable {
     /**
      * 个性签名
      */
-    @TableField(value = "personal_signature", updateStrategy = FieldStrategy.NOT_NULL)  // 个性签名可以为空字符串，为null不更新（已经全局设置null/空字符串不更新）
+    @TableField(value = "personal_signature", updateStrategy = FieldStrategy.NOT_NULL)
+    // 个性签名可以为空字符串，为null不更新（已经全局设置null/空字符串不更新）
     private String personalSignature;
 
     /**
@@ -89,17 +90,13 @@ public class UserInfo implements Serializable {
      * 最后登录时间
      */
     @TableField("last_login_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastLoginTime;
+    private Long lastLoginTime;
 
     /**
-     * 最后下线时间（使用bigint记录到毫秒时间）
+     * 最后下线时间
      */
     @TableField("last_off_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastOffTime;
+    private Long lastOffTime;
 
     /**
      * 地区名
@@ -112,6 +109,5 @@ public class UserInfo implements Serializable {
      */
     @TableField("area_code")
     private String areaCode;
-
 
 }

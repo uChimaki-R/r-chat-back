@@ -68,16 +68,12 @@ public class UserInfoVO implements Serializable {
     /**
      * 最后登录时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastLoginTime;
+    private Long lastLoginTime;
 
     /**
      * 最后下线时间（使用bigint记录到毫秒时间）
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastOffTime;
+    private Long lastOffTime;
 
     /**
      * 地区名
@@ -88,6 +84,5 @@ public class UserInfoVO implements Serializable {
      * 地区编号
      */
     private String areaCode;
-
 
 }
