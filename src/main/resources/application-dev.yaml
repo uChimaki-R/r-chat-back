@@ -15,6 +15,7 @@ r:
     app-name: r_chat
     ws-port: 5051
     heartbeat-interval: 60
+    max-unread-chat-fetch-days: 3
     project-folder: D:/Code/JavaCode/r-chat/r-chat-data
     default-settings:
       max-group-count: 5
