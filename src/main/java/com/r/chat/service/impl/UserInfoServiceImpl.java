@@ -5,18 +5,14 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
-import com.r.chat.entity.enums.UserContactStatusEnum;
-import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
-import com.r.chat.entity.enums.UserStatusEnum;
-import com.r.chat.entity.po.UserContact;
-import com.r.chat.entity.po.UserInfo;
-import com.r.chat.entity.po.BeautyUserInfo;
+import com.r.chat.entity.enums.*;
+import com.r.chat.entity.po.*;
 import com.r.chat.exception.*;
-import com.r.chat.mapper.BeautyUserInfoMapper;
-import com.r.chat.mapper.UserContactMapper;
-import com.r.chat.mapper.UserInfoMapper;
+import com.r.chat.mapper.*;
 import com.r.chat.properties.AppProperties;
+import com.r.chat.properties.DefaultSysSettingProperties;
 import com.r.chat.redis.RedisUtils;
+import com.r.chat.service.IUserContactService;
 import com.r.chat.service.IUserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
@@ -43,11 +39,18 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements IUserInfoService {
+    private final IUserContactService userContactService;
+
     private final UserInfoMapper userInfoMapper;
+    private final UserContactMapper userContactMapper;
     private final BeautyUserInfoMapper beautyUserInfoMapper;
+    private final ChatSessionMapper chatSessionMapper;
+    private final ChatSessionUserMapper chatSessionUserMapper;
+    private final ChatMessageMapper chatMessageMapper;
+
     private final AppProperties appProperties;
     private final RedisUtils redisUtils;
-    private final UserContactMapper userContactMapper;
+    private final DefaultSysSettingProperties defaultSysSettingProperties;
 
     @Override
     @Transactional(rollbackFor = Exception.class)  // 多次数据库操作，需要事务管理
@@ -83,6 +86,52 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfo.setLastOffTime(System.currentTimeMillis());
         userInfoMapper.insert(userInfo);
         log.info("注册新账号: {}", userInfo);
+
+        // 添加机器人为好友
+        String robotId = defaultSysSettingProperties.getRobotId();
+        String robotName = defaultSysSettingProperties.getRobotNickName();
+        String robotMsg = defaultSysSettingProperties.getRobotWelcomeMsg();
+        ContactApplyAddDTO robotAdd = new ContactApplyAddDTO();
+        robotAdd.setApplyUserId(userId);
+        robotAdd.setContactId(robotId);
+        robotAdd.setReceiveUserId(robotId);
+        robotAdd.setContactType(UserContactTypeEnum.USER);
+        userContactService.addContact(robotAdd);
+        log.info("注册后续流程: {} 成功添加机器人为好友", userId);
+
+        // 添加机器人会话消息（注册后就有机器人发送欢迎消息）
+        String sessionId = StringUtils.getSessionId(new String[]{userId, robotId});
+
+        // 添加会话消息
+        ChatSession chatSession = new ChatSession();
+        chatSession.setSessionId(sessionId);
+        chatSession.setLastMessage(robotMsg);
+        chatSession.setLastReceiveTime(System.currentTimeMillis());
+        chatSessionMapper.insert(chatSession);
+        log.info("注册后续流程: 添加会话消息 {}", chatSession);
+
+        // 添加用户对与机器人这个会话的关系
+        ChatSessionUser chatSessionUser = new ChatSessionUser();
+        chatSessionUser.setSessionId(sessionId);
+        chatSessionUser.setUserId(userId);
+        chatSessionUser.setContactId(robotId);
+        chatSessionUser.setContactName(robotName);
+        chatSessionUserMapper.insert(chatSessionUser);
+        log.info("注册后续流程: 添加会话用户对应信息 {}", chatSessionUser);
+
+        // 添加聊天消息
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setSessionId(sessionId);
+        chatMessage.setSendUserId(userId);
+        chatMessage.setSendUserNickName(userInfo.getNickName());
+        chatMessage.setContactId(robotId);
+        chatMessage.setContactType(UserContactTypeEnum.USER);
+        chatMessage.setMessageType(MessageTypeEnum.CHAT);
+        chatMessage.setMessageContent(robotMsg);
+        chatMessage.setStatus(MessageStatusEnum.SENT);
+        chatMessage.setSendTime(System.currentTimeMillis());
+        chatMessageMapper.insert(chatMessage);
+        log.info("注册后续流程: 添加聊天信息 {}", chatMessage);
     }
 
     @Override
