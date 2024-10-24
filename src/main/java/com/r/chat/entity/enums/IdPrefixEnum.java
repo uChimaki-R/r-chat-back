@@ -4,13 +4,13 @@ import lombok.Getter;
 
 @Getter
 public enum IdPrefixEnum {
-    USER(0, 'U', "用户"),
-    GROUP(1, 'G', "群聊");
+    USER(0, "U", "用户"),
+    GROUP(1, "G", "群聊");
     private final int id;
-    private final Character prefix;
+    private final String prefix;
     private final String desc;
 
-    IdPrefixEnum(int id, Character prefix, String desc) {
+    IdPrefixEnum(int id, String prefix, String desc) {
         this.id = id;
         this.prefix = prefix;
         this.desc = desc;
@@ -25,9 +25,14 @@ public enum IdPrefixEnum {
         return null;
     }
 
-    public static IdPrefixEnum getByPrefix(Character prefix) {
+    public static IdPrefixEnum getPrefix(String id) {
+        if (id == null) {
+            return null;
+        }
         for (IdPrefixEnum e : IdPrefixEnum.values()) {
-            if (e.prefix.equals(prefix)) {
+            int length = e.getPrefix().length();
+            if (id.length() < length) continue;
+            if (e.prefix.equals(id.substring(0, length))) {
                 return e;
             }
         }
