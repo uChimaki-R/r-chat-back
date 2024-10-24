@@ -78,12 +78,13 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             beautyUserInfoMapper.updateById(beautyUserInfo);
         }
         LocalDateTime now = LocalDateTime.now();
+        Long millis = System.currentTimeMillis();
         userInfo = CopyUtils.copyBean(registerDTO, UserInfo.class);
         userInfo.setUserId(userId);
         userInfo.setPassword(StringUtils.encodeMd5(registerDTO.getPassword())); // 使用md5加密后再存储
         userInfo.setStatus(UserStatusEnum.ENABLE);
         userInfo.setCreateTime(now);
-        userInfo.setLastOffTime(System.currentTimeMillis());
+        userInfo.setLastOffTime(millis);
         userInfoMapper.insert(userInfo);
         log.info("注册新账号: {}", userInfo);
 
@@ -106,11 +107,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         ChatSession chatSession = new ChatSession();
         chatSession.setSessionId(sessionId);
         chatSession.setLastMessage(robotMsg);
-        chatSession.setLastReceiveTime(System.currentTimeMillis());
+        chatSession.setLastReceiveTime(millis);
         chatSessionMapper.insert(chatSession);
         log.info("注册后续流程: 添加会话消息 {}", chatSession);
 
-        // 添加用户对与机器人这个会话的关系
+        // 添加用户对与机器人这个会话的关系，只存用户看到机器人的会话
         ChatSessionUser chatSessionUser = new ChatSessionUser();
         chatSessionUser.setSessionId(sessionId);
         chatSessionUser.setUserId(userId);
@@ -119,17 +120,17 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         chatSessionUserMapper.insert(chatSessionUser);
         log.info("注册后续流程: 添加会话用户对应信息 {}", chatSessionUser);
 
-        // 添加聊天消息
+        // 添加聊天消息，机器人向用户发送欢迎信息
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setSessionId(sessionId);
-        chatMessage.setSendUserId(userId);
-        chatMessage.setSendUserNickName(userInfo.getNickName());
-        chatMessage.setContactId(robotId);
+        chatMessage.setSendUserId(robotId);
+        chatMessage.setSendUserNickName(robotName);
+        chatMessage.setContactId(userId);
         chatMessage.setContactType(UserContactTypeEnum.USER);
         chatMessage.setMessageType(MessageTypeEnum.CHAT);
         chatMessage.setMessageContent(robotMsg);
         chatMessage.setStatus(MessageStatusEnum.SENT);
-        chatMessage.setSendTime(System.currentTimeMillis());
+        chatMessage.setSendTime(millis);
         chatMessageMapper.insert(chatMessage);
         log.info("注册后续流程: 添加聊天信息 {}", chatMessage);
     }
