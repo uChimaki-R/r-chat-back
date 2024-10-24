@@ -32,5 +32,5 @@ public class WsInitMessage extends Message implements Serializable {
     /**
      * 好友申请数量
      */
-    private Integer applyCount;
+    private Long applyCount;
 }
