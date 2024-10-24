@@ -26,6 +26,11 @@ public class AppProperties {
     private Integer heartbeatInterval;
 
     /**
+     * 能够从服务端获取的最长未读聊天信息的天数
+     */
+    private Integer maxUnreadChatFetchDays;
+
+    /**
      * 管理员邮箱
      */
     private List<String> adminUserIds;
