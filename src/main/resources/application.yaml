@@ -56,6 +56,7 @@ r:
     app-name: ${r.chat.app-name}
     ws-port: ${r.chat.ws-port}
     heartbeat-interval: ${r.chat.heartbeat-interval}
+    max-unread-chat-fetch-days: ${r.chat.max-unread-chat-fetch-days}
     project-folder: ${r.chat.project-folder}
     admin-emails: ${r.chat.admin-emails}
     id-length: ${r.chat.id-length}
