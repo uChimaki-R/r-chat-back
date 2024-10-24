@@ -5,6 +5,7 @@ import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.exception.LoginTimeOutException;
 import com.r.chat.redis.RedisUtils;
+import com.r.chat.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -41,7 +42,7 @@ public class TokenInterceptor implements HandlerInterceptor {
 
         // 从请求头中获取token
         String token = request.getHeader("token");
-        if (token == null) {
+        if (StringUtils.isEmpty(token)) {
             log.warn("拒绝请求: 未携带token 请求uri: {}", request.getRequestURI());
             throw new LoginTimeOutException(Constants.MESSAGE_NOT_LOGIN);
         }
@@ -53,7 +54,7 @@ public class TokenInterceptor implements HandlerInterceptor {
         try {
             // 用token从redis中获取用户id
             String userId = redisUtils.getUserIdByToken(token);
-            if (userId == null) {
+            if (StringUtils.isEmpty(userId)) {
                 throw new LoginTimeOutException(Constants.MESSAGE_NOT_LOGIN);
             }
             log.info("获取用户id: {}", userId);

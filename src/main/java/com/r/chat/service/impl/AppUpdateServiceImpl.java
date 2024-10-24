@@ -55,14 +55,14 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             // 新增文件的操作放到最后面，因为后面可能判断出请求有错误信息，那这里就会冗余保存
             // 文件更新方式不能有外链信息
             appUpdateDTO.setOuterLink(null);
-        } else if (appUpdateDTO.getOuterLink() == null) {
+        } else if (StringUtils.isEmpty(appUpdateDTO.getOuterLink())) {
             // 外链更新方式，需要有外链信息
             log.warn("新增或修改app更新信息失败: 外链信息为空 {}", appUpdateDTO);
             throw new ParameterErrorException(Constants.MESSAGE_MISSING_OUTER_LINK);
         }
         if (appUpdateDTO.getId() == null) {
             // 新增
-            if (appUpdateDTO.getVersion() == null) {
+            if (StringUtils.isEmpty(appUpdateDTO.getVersion())) {
                 log.warn("新增app更新信息失败: 版本信息为空 {}", appUpdateDTO);
                 throw new ParameterErrorException(Constants.MESSAGE_MISSING_VERSION);
             }

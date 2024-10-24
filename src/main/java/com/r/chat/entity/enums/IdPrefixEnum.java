@@ -1,5 +1,6 @@
 package com.r.chat.entity.enums;
 
+import com.r.chat.utils.StringUtils;
 import lombok.Getter;
 
 @Getter
@@ -26,7 +27,7 @@ public enum IdPrefixEnum {
     }
 
     public static IdPrefixEnum getPrefix(String id) {
-        if (id == null) {
+        if (StringUtils.isEmpty(id)) {
             return null;
         }
         for (IdPrefixEnum e : IdPrefixEnum.values()) {

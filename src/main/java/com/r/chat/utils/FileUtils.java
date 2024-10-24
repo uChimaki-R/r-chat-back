@@ -39,7 +39,7 @@ public class FileUtils {
      * 保存app的exe文件
      */
     public static void saveExeFile(MultipartFile file, String version) {
-        if (file == null || version == null) {
+        if (file == null || StringUtils.isEmpty(version)) {
             log.warn("尝试保存为null的文件/文件名可能为null file: {}, version: {}", file, version);
             return;
         }
@@ -56,7 +56,7 @@ public class FileUtils {
      * 根据传入的app版本获取对应的exe文件
      */
     public static File getExeFile(String version) {
-        if (version == null) {
+        if (StringUtils.isEmpty(version)) {
             log.warn("尝试获取文件, 但提供的文件夹为null");
             return null;
         }

@@ -1,6 +1,7 @@
 package com.r.chat.websocket.handler;
 
 import com.r.chat.redis.RedisUtils;
+import com.r.chat.utils.StringUtils;
 import com.r.chat.websocket.utils.ChannelUtils;
 import com.r.chat.websocket.utils.URLUtils;
 import io.netty.channel.ChannelHandler;
@@ -50,14 +51,14 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
             String uri = handshakeComplete.requestUri();
             log.info("建立ws连接 uri: {}", uri);
             String token = URLUtils.getParamsByKey(uri, "token");
-            if (token == null) {
+            if (StringUtils.isEmpty(token)) {
                 log.warn("ws断开连接: 未携带token");
                 ctx.close();
                 return;
             }
             // 获取userId
             String userId = redisUtils.getUserIdByToken(token);
-            if (userId == null) {
+            if (StringUtils.isEmpty(userId)) {
                 log.warn("ws断开: token不合法");
                 ctx.close();
                 return;
