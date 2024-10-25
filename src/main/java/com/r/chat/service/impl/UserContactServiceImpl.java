@@ -7,20 +7,18 @@ import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
-import com.r.chat.entity.message.ContactApplyMessage;
-import com.r.chat.entity.po.GroupInfo;
-import com.r.chat.entity.po.UserContact;
-import com.r.chat.entity.po.UserContactApply;
-import com.r.chat.entity.po.UserInfo;
+import com.r.chat.entity.message.ContactApplyNotice;
+import com.r.chat.entity.message.UserAddAcceptNotice;
+import com.r.chat.entity.message.UserAddByOthersNotice;
+import com.r.chat.entity.po.*;
+import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.exception.*;
-import com.r.chat.mapper.GroupInfoMapper;
-import com.r.chat.mapper.UserContactApplyMapper;
-import com.r.chat.mapper.UserContactMapper;
-import com.r.chat.mapper.UserInfoMapper;
+import com.r.chat.mapper.*;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserContactService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
+import com.r.chat.utils.StringUtils;
 import com.r.chat.websocket.utils.ChannelUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +49,9 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
 
     private final RedisUtils redisUtils;
     private final ChannelUtils channelUtils;
+    private final ChatSessionMapper chatSessionMapper;
+    private final ChatSessionUserMapper chatSessionUserMapper;
+    private final ChatMessageMapper chatMessageMapper;
 
     @Override
     public List<BasicInfoDTO> getGroupMemberInfo(String groupId) {
@@ -205,23 +206,30 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             uca.setLastApplyTime(now);
             uca.setStatus(UserContactApplyStatusEnum.PENDING);
             userContactApplyMapper.insert(uca);
+            // 发送通知，让前端渲染出有新的申请（红点）和申请信息
+            ContactApplyNotice message = new ContactApplyNotice();
+            message.setReceiveId(receiveUserId);
+            message.setUserContactApply(uca);
+            channelUtils.sendNotice(message);
+            log.info("发送有新的申请信息的通知 {}", message);
         } else {
             // 申请过，更新申请时间、申请信息，重设申请状态为待处理
+            // 先保存原来的申请状态
+            UserContactApplyStatusEnum originStatus = userContactApply.getStatus();
             log.info("已申请添加过该联系人, 重新设置申请状态未待处理");
             userContactApply.setStatus(UserContactApplyStatusEnum.PENDING);
             userContactApply.setApplyInfo(applyDTO.getApplyInfo());
             userContactApply.setLastApplyTime(now);
             userContactApplyMapper.updateById(userContactApply);
-        }
-        // 发送ws消息通知接收者
-        // 只有第一次申请或者申请被处理过才发送ws消息
-        // 如果原本就处于待处理，就不管，不然会多次发送消息给接收方，这不合理
-        if (userContactApply == null || UserContactApplyStatusEnum.PENDING.equals(userContactApply.getStatus())) {
-            log.info("发送ws消息通知接收者 receiveUserId: {}", receiveUserId);
-            ContactApplyMessage message = new ContactApplyMessage();
-            message.setSendId(UserIdContext.getCurrentUserId());
-            message.setReceiveId(receiveUserId);
-            channelUtils.sendMessage(message);
+            // 只有申请被处理过才发送ws通知
+            // 如果原本就处于待处理，就不管，不然会多次发送通知给接收方，这不合理
+            if (UserContactApplyStatusEnum.PENDING.equals(originStatus)) {
+                ContactApplyNotice message = new ContactApplyNotice();
+                message.setReceiveId(receiveUserId);
+                message.setUserContactApply(userContactApply);
+                channelUtils.sendNotice(message);
+                log.info("重新发送有新的申请信息的通知 {}", message);
+            }
         }
         return joinType;
     }
@@ -273,18 +281,150 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         }
         // 添加相互关系
         saveOrUpdateMutualContact(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId(), UserContactStatusEnum.FRIENDS);
-        log.info("添加好友/群聊成功 contactId: {}", contactApplyAddDTO.getContactId());
+        log.info("新增好友/群聊的好友关系成功 contactId: {}", contactApplyAddDTO.getContactId());
 
         // 登录的时候把联系人id列表放在了redis上了，现在添加了新朋友/新群聊，需要更新缓存
         // 判断是加了新朋友还是加入了新群聊
         if (UserContactTypeEnum.USER.equals(contactApplyAddDTO.getContactType())) {
             // 加了新朋友的话需要更新两个人的缓存
-            redisUtils.addToContactIds(contactApplyAddDTO.getReceiveUserId(), contactApplyAddDTO.getApplyUserId());
+            redisUtils.addToContactIds(contactApplyAddDTO.getContactId(), contactApplyAddDTO.getApplyUserId());
+            log.info("更新redis用户联系人id列表 userId: {}, addId: {}", contactApplyAddDTO.getContactId(), contactApplyAddDTO.getApplyUserId());
         }
         // 加了新群聊则只需要更新自己的联系人id列表
         redisUtils.addToContactIds(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId());
+        log.info("更新redis用户联系人id列表 userId: {}, addId: {}", contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId());
 
-        // 创建会话
+        // 获取申请信息，添加好友后要发送这个申请信息
+        QueryWrapper<UserContactApply> ucaQueryWrapper = new QueryWrapper<>();
+        ucaQueryWrapper.lambda()
+                .eq(UserContactApply::getApplyUserId, contactApplyAddDTO.getApplyUserId())
+                .eq(UserContactApply::getContactId, contactApplyAddDTO.getContactId());
+        UserContactApply userContactApply = userContactApplyMapper.selectOne(ucaQueryWrapper);
+
+        // 创建会话（添加好友/群聊会生成聊天框，好友聊天框里申请人会发送申请信息的内容）
+        String sessionId;
+        Long now = System.currentTimeMillis();
+        // 好友sessionId是两个人的id生成的，群聊sessionId只用群聊id即可
+        if (UserContactTypeEnum.USER.equals(contactApplyAddDTO.getContactType())) {
+            sessionId = StringUtils.getSessionId(new String[]{contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId()});
+            // 创建/更新会话
+            // 因为两个人的会话是唯一的，就算删了好友加回来也是同一个会话，所以可能是新增也可能是更新
+            QueryWrapper<ChatSession> csQueryWrapper = new QueryWrapper<>();
+            csQueryWrapper.lambda().eq(ChatSession::getSessionId, sessionId);
+            ChatSession chatSession = chatSessionMapper.selectOne(csQueryWrapper);
+            if (chatSession == null) {
+                // 新增
+                chatSession = new ChatSession();
+                chatSession.setSessionId(sessionId);
+                chatSession.setLastMessage(userContactApply.getApplyInfo());
+                chatSession.setLastReceiveTime(now);
+                chatSessionMapper.insert(chatSession);
+                log.info("新增会话 {}", chatSession);
+            } else {
+                // 更新
+                chatSession.setLastMessage(userContactApply.getApplyInfo());
+                chatSession.setLastReceiveTime(now);
+                chatSessionMapper.updateById(chatSession);
+                log.info("更新会话 {}", chatSession);
+            }
+
+            // 创建用户到会话的关系，同样也分新增和更新
+            // 申请方对被申请方的
+            QueryWrapper<ChatSessionUser> scuQueryWrapper = new QueryWrapper<>();
+            scuQueryWrapper.lambda()
+                    .eq(ChatSessionUser::getSessionId, sessionId)
+                    .eq(ChatSessionUser::getUserId, contactApplyAddDTO.getApplyUserId())
+                    .eq(ChatSessionUser::getContactId, contactApplyAddDTO.getContactId());
+            ChatSessionUser chatSessionUser = chatSessionUserMapper.selectOne(scuQueryWrapper);
+            // 获取会话对方的名称，即被申请方的名字，新增或更新要用
+            QueryWrapper<UserInfo> uiQueryWrapper = new QueryWrapper<>();
+            uiQueryWrapper.lambda().eq(UserInfo::getUserId, contactApplyAddDTO.getContactId());
+            UserInfo contactUserInfo = userInfoMapper.selectOne(uiQueryWrapper);
+            if (chatSessionUser == null) {
+                chatSessionUser = new ChatSessionUser();
+                chatSessionUser.setSessionId(sessionId);
+                chatSessionUser.setUserId(contactApplyAddDTO.getApplyUserId());
+                chatSessionUser.setContactId(contactApplyAddDTO.getContactId());
+                chatSessionUser.setContactName(contactUserInfo.getNickName());
+                chatSessionUserMapper.insert(chatSessionUser);
+                log.info("新增申请方对被申请方的用户会话关系 {}", chatSessionUser);
+            } else {
+                // 只有名称可能会变
+                chatSessionUser.setContactName(contactUserInfo.getNickName());
+                chatSessionUserMapper.updateById(chatSessionUser);
+                log.info("修改申请方对被申请方的用户会话关系 {}", chatSessionUser);
+            }
+
+            // 被申请方对申请方的
+            scuQueryWrapper = new QueryWrapper<>();
+            scuQueryWrapper.lambda()
+                    .eq(ChatSessionUser::getSessionId, sessionId)
+                    .eq(ChatSessionUser::getUserId, contactApplyAddDTO.getContactId())
+                    .eq(ChatSessionUser::getContactId, contactApplyAddDTO.getApplyUserId());
+            chatSessionUser = chatSessionUserMapper.selectOne(scuQueryWrapper);
+            // 获取会话对方的名称，即申请方的名字，新增或更新要用
+            uiQueryWrapper = new QueryWrapper<>();
+            uiQueryWrapper.lambda().eq(UserInfo::getUserId, contactApplyAddDTO.getApplyUserId());
+            UserInfo applyUserInfo = userInfoMapper.selectOne(uiQueryWrapper);
+            if (chatSessionUser == null) {
+                chatSessionUser = new ChatSessionUser();
+                chatSessionUser.setSessionId(sessionId);
+                chatSessionUser.setUserId(contactApplyAddDTO.getContactId());
+                chatSessionUser.setContactId(contactApplyAddDTO.getApplyUserId());
+                chatSessionUser.setContactName(applyUserInfo.getNickName());
+                chatSessionUserMapper.insert(chatSessionUser);
+                log.info("新增被申请方对申请方的用户会话关系 {}", chatSessionUser);
+            } else {
+                // 只有名称可能会变
+                chatSessionUser.setContactName(applyUserInfo.getNickName());
+                chatSessionUserMapper.updateById(chatSessionUser);
+                log.info("修改被申请方对申请方的用户会话关系 {}", chatSessionUser);
+            }
+
+            // 新增这个聊天信息
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setSessionId(sessionId);
+            chatMessage.setMessageContent(userContactApply.getApplyInfo());
+            chatMessage.setSendUserId(contactApplyAddDTO.getApplyUserId());
+            chatMessage.setContactId(contactApplyAddDTO.getContactId());
+            chatMessage.setMessageType(MessageTypeEnum.CHAT);
+            chatMessage.setSendUserNickName(applyUserInfo.getNickName());
+            chatMessage.setSendTime(now);
+            chatMessage.setContactType(contactApplyAddDTO.getContactType());
+            chatMessage.setStatus(MessageStatusEnum.SENT);
+            chatMessageMapper.insert(chatMessage);
+            log.info("新增聊天信息 {}", chatMessage);
+
+            // 给申请人和被申请人都发送通知，带上会话信息，让前端渲染出会话
+            // 给被申请人发送同意了别人申请的通知
+            UserAddAcceptNotice userAddAcceptMessage = new UserAddAcceptNotice();
+            userAddAcceptMessage.setReceiveId(contactApplyAddDTO.getContactId());
+            // 构造前端需要的会话信息
+            ChatSessionUserVO chatSessionUserVO = new ChatSessionUserVO();
+            chatSessionUserVO.setUserId(contactApplyAddDTO.getApplyUserId());
+            chatSessionUserVO.setContactId(contactApplyAddDTO.getContactId());
+            chatSessionUserVO.setContactName(contactUserInfo.getNickName());
+            chatSessionUserVO.setSessionId(sessionId);
+            chatSessionUserVO.setLastMessage(userContactApply.getApplyInfo());
+            chatSessionUserVO.setLastReceiveTime(now);
+            userAddAcceptMessage.setChatSessionUserVO(chatSessionUserVO);
+            channelUtils.sendNotice(userAddAcceptMessage);
+            log.info("发送被申请人同意了别人申请的ws通知  {}", userAddAcceptMessage);
+
+            // 给申请人发送申请被别人同意的通知
+            UserAddByOthersNotice userAddByOthersNotice = new UserAddByOthersNotice();
+            userAddByOthersNotice.setReceiveId(contactApplyAddDTO.getApplyUserId());
+            // 更换下会话框显示内容
+            chatSessionUserVO.setUserId(contactApplyAddDTO.getContactId());
+            chatSessionUserVO.setContactId(contactApplyAddDTO.getApplyUserId());
+            chatSessionUserVO.setContactName(applyUserInfo.getNickName());
+            userAddByOthersNotice.setChatSessionUserVO(chatSessionUserVO);
+            channelUtils.sendNotice(userAddByOthersNotice);
+            log.info("发送申请人申请被别人同意的ws通知  {}", userAddByOthersNotice);
+        } else {
+            sessionId = StringUtils.getSessionId(new String[]{contactApplyAddDTO.getContactId()});
+        }
+        log.info("添加好友/群聊成功 contactId: {}", contactApplyAddDTO.getContactId());
     }
 
     @Override
@@ -351,14 +491,13 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         if (UserContactTypeEnum.GROUP.equals(c1) || UserContactTypeEnum.GROUP.equals(c2)) {
             // 两个id里有一个群聊就是群聊关系
             contactType = UserContactTypeEnum.GROUP;
-        }
-        else {
+        } else {
             // 否则是用户关系
             contactType = UserContactTypeEnum.USER;
         }
         // 获取相对关系
         UserContactStatusEnum anotherStatus;
-        log.info("新增/修改相互的联系人关系 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId,contactType, status);
+        log.info("新增/修改相互的联系人关系 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId, contactType, status);
         switch (status) {
             case FRIENDS:
                 anotherStatus = UserContactStatusEnum.FRIENDS;
@@ -410,7 +549,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 newUserContact.setStatus(anotherStatus);
                 userContactMapper.insert(newUserContact);
             }
-            log.info("新增相互的联系人关系成功 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId,contactType, status);
+            log.info("新增相互的联系人关系成功 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId, contactType, status);
         } else {
             // 修改关系
             // 对联系人的关系
@@ -431,7 +570,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                         .set(UserContact::getLastUpdateTime, now);
                 update(fromFriend);
             }
-            log.info("修改相互的联系人关系成功 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId,contactType, status);
+            log.info("修改相互的联系人关系成功 fromId: {}, toId: {}, contactType: {} status: {}", fromId, toId, contactType, status);
         }
     }
 
