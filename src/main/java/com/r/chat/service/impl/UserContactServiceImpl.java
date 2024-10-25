@@ -7,6 +7,7 @@ import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
+import com.r.chat.entity.message.ContactApplyMessage;
 import com.r.chat.entity.po.GroupInfo;
 import com.r.chat.entity.po.UserContact;
 import com.r.chat.entity.po.UserContactApply;
@@ -20,6 +21,7 @@ import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IUserContactService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
+import com.r.chat.websocket.utils.ChannelUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
     private final UserContactApplyMapper userContactApplyMapper;
 
     private final RedisUtils redisUtils;
+    private final ChannelUtils channelUtils;
 
     @Override
     public List<BasicInfoDTO> getGroupMemberInfo(String groupId) {
@@ -211,10 +214,14 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             userContactApplyMapper.updateById(userContactApply);
         }
         // 发送ws消息通知接收者
+        // 只有第一次申请或者申请被处理过才发送ws消息
         // 如果原本就处于待处理，就不管，不然会多次发送消息给接收方，这不合理
-        if (userContactApply != null && UserContactApplyStatusEnum.PENDING.equals(userContactApply.getStatus())) {
-            // todo 发送ws消息
+        if (userContactApply == null || UserContactApplyStatusEnum.PENDING.equals(userContactApply.getStatus())) {
             log.info("发送ws消息通知接收者 receiveUserId: {}", receiveUserId);
+            ContactApplyMessage message = new ContactApplyMessage();
+            message.setSendId(UserIdContext.getCurrentUserId());
+            message.setReceiveId(receiveUserId);
+            channelUtils.sendMessage(message);
         }
         return joinType;
     }
@@ -267,7 +274,17 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         // 添加相互关系
         saveOrUpdateMutualContact(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId(), UserContactStatusEnum.FRIENDS);
         log.info("添加好友/群聊成功 contactId: {}", contactApplyAddDTO.getContactId());
-        // todo 添加缓存，创建会话等
+
+        // 登录的时候把联系人id列表放在了redis上了，现在添加了新朋友/新群聊，需要更新缓存
+        // 判断是加了新朋友还是加入了新群聊
+        if (UserContactTypeEnum.USER.equals(contactApplyAddDTO.getContactType())) {
+            // 加了新朋友的话需要更新两个人的缓存
+            redisUtils.addToContactIds(contactApplyAddDTO.getReceiveUserId(), contactApplyAddDTO.getApplyUserId());
+        }
+        // 加了新群聊则只需要更新自己的联系人id列表
+        redisUtils.addToContactIds(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId());
+
+        // 创建会话
     }
 
     @Override
