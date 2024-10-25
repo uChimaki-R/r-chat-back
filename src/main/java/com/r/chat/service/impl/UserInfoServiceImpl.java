@@ -86,7 +86,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfo.setCreateTime(now);
         userInfo.setLastOffTime(millis);
         userInfoMapper.insert(userInfo);
-        log.info("注册新账号: {}", userInfo);
+        log.info("新增用户信息 {}", userInfo);
 
         // 添加机器人为好友
         String robotId = defaultSysSettingProperties.getRobotId();
@@ -98,7 +98,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         robotAdd.setReceiveUserId(robotId);
         robotAdd.setContactType(UserContactTypeEnum.USER);
         userContactService.addContact(robotAdd);
-        log.info("注册后续流程: {} 成功添加机器人为好友", userId);
+        log.info("{} 成功添加机器人为好友", userId);
 
         // 添加机器人会话消息（注册后就有机器人发送欢迎消息）
         String sessionId = StringUtils.getSessionId(new String[]{userId, robotId});
@@ -109,7 +109,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         chatSession.setLastMessage(robotMsg);
         chatSession.setLastReceiveTime(millis);
         chatSessionMapper.insert(chatSession);
-        log.info("注册后续流程: 添加会话消息 {}", chatSession);
+        log.info("{} 添加会话消息 {}", userId, chatSession);
 
         // 添加用户对与机器人这个会话的关系，只存用户看到机器人的会话
         ChatSessionUser chatSessionUser = new ChatSessionUser();
@@ -118,7 +118,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         chatSessionUser.setContactId(robotId);
         chatSessionUser.setContactName(robotName);
         chatSessionUserMapper.insert(chatSessionUser);
-        log.info("注册后续流程: 添加会话用户对应信息 {}", chatSessionUser);
+        log.info("{} 添加会话用户对应信息 {}", userId, chatSessionUser);
 
         // 添加聊天消息，机器人向用户发送欢迎信息
         ChatMessage chatMessage = new ChatMessage();
@@ -132,7 +132,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         chatMessage.setStatus(MessageStatusEnum.SENT);
         chatMessage.setSendTime(millis);
         chatMessageMapper.insert(chatMessage);
-        log.info("注册后续流程: 添加聊天信息 {}", chatMessage);
+        log.info("{} 添加聊天信息 {}", userId, chatMessage);
+
+        log.info("注册新账号成功 {}", userInfo);
     }
 
     @Override
