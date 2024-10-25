@@ -2,13 +2,16 @@ package com.r.chat.websocket.utils;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.IdPrefixEnum;
+import com.r.chat.entity.enums.MessageTypeEnum;
 import com.r.chat.entity.po.ChatMessage;
 import com.r.chat.entity.po.UserContactApply;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.result.Message;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.entity.message.WsInitMessage;
+import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.ChatSessionUserMapper;
 import com.r.chat.mapper.UserContactApplyMapper;
@@ -16,6 +19,7 @@ import com.r.chat.mapper.UserInfoMapper;
 import com.r.chat.properties.AppProperties;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.utils.JsonUtils;
+import com.r.chat.utils.StringUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -26,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -79,14 +84,19 @@ public class ChannelUtils {
         RTopic rTopic = redissonClient.getTopic(TOPIC_MESSAGE);
         rTopic.addListener(Message.class, (charSequence, message) -> {
             log.info("收到广播消息 {}", message);
-            // 收到广播后的回调操作
+            // 保存自定义的日志输出标识（因为是不同的线程了，再加一次方便看是谁发的）
+            MDC.put("ws", " WS:" + message.getSendId());
+            // 收到广播后尝试处理这个消息（发送消息）
+            sendMsg(message);
+            // 移除自定义的日志输出标识
+            MDC.remove("ws");
         });
     }
 
     /**
-     * 将消息广播到所有的server服务器
+     * 发送消息，实际上是将消息广播到所有的server服务器，让所有server服务器都尝试处理这个消息，以便集群部署
      */
-    public void castMessage(Message message) {
+    public void sendMessage(Message message) {
         RTopic rTopic = redissonClient.getTopic(TOPIC_MESSAGE);
         log.info("发送广播消息 {}", message);
         rTopic.publish(message);
@@ -175,14 +185,16 @@ public class ChannelUtils {
         wsInitMessage.setChatSessionUserList(chatSessionUserVOList);
         wsInitMessage.setChatMessageList(chatMessages);
         wsInitMessage.setApplyCount(applyCount);
+        wsInitMessage.setReceiveId(userId);  // 原路返回
         log.info("发送ws初始化消息 {}", wsInitMessage);
-        sendMessage2User(userId, userId, wsInitMessage);
+        sendMsg(wsInitMessage);
     }
 
     /**
      * 连接断开时调用
      * 1. 移除用户channel
      * 2. 移除用户心跳缓存
+     * 4. 移除用户登录token缓存
      * 3. 更新用户最后离线时间
      */
     public void removeChannel(Channel channel) {
@@ -192,6 +204,8 @@ public class ChannelUtils {
         log.info("移除绑定 channel: {}", channel);
         // 移除心跳缓存
         redisUtils.removeUserHeartBeat(userId);
+        // 移除用户登录token缓存
+        redisUtils.removeTokenByUserId(userId);
         // 更新用户最后离线时间
         UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
         Long lastOffTime = System.currentTimeMillis();
@@ -205,7 +219,7 @@ public class ChannelUtils {
     /**
      * 将用户的channel加入到groupId对应的channelGroup中
      */
-    public void add2Group(String groupId, Channel channel) {
+    private void add2Group(String groupId, Channel channel) {
         // 添加进群聊channelGroup
         ChannelGroup channelGroup = GROUP_CHANNEL_MAP.get(groupId);
         if (channelGroup == null) {
@@ -225,29 +239,65 @@ public class ChannelUtils {
     }
 
     /**
+     * 发送消息
+     */
+    private void sendMsg(Message message) {
+        String contactId = message.getReceiveId();
+        if (StringUtils.isEmpty(contactId)) {
+            return;
+        }
+        IdPrefixEnum prefix = IdPrefixEnum.getPrefix(contactId);
+        if (prefix == null) {
+            return;
+        }
+        switch (prefix) {
+            case USER:
+                sendMessage2User(message);
+                break;
+            case GROUP:
+                sendMessage2Group(message);
+                break;
+            default:
+                log.warn(Constants.IN_SWITCH_DEFAULT);
+                throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
+        }
+    }
+
+    /**
      * 发送消息给用户
      */
-    public void sendMessage2User(String from, String to, Message message) {
-        message.setSendUserId(from);
-        message.setContactId(to);
-        message.setSendTime(System.currentTimeMillis());
-        Channel channel = USER_CHANNEL_MAP.get(to);
+    private void sendMessage2User(Message message) {
+        String contactId = message.getReceiveId();
+        if (StringUtils.isEmpty(contactId)) {
+            return;
+        }
+        Channel channel = USER_CHANNEL_MAP.get(contactId);
         if (channel == null) {
             return;
         }
         channel.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(message)));
-        log.info("{} 发送消息给 {}, message: {}", from, to, message);
+        log.info("发送消息给 {}, message: {}", contactId, message);
+        // 如果是强制下线消息，还要将用户ws连接关闭
+        MessageTypeEnum messageType = message.getMessageType();
+        if (MessageTypeEnum.FORCE_OFF_LINE.equals(messageType)) {
+            log.info("用户 {} 被强制下线", contactId);
+            removeChannel(channel);
+        }
     }
 
     /**
      * 发送消息到群聊
      */
-    public void sendMessage2Group(String groupId, String message) {
+    private void sendMessage2Group(Message message) {
+        String groupId = message.getReceiveId();
+        if (StringUtils.isEmpty(groupId)) {
+            return;
+        }
         ChannelGroup group = GROUP_CHANNEL_MAP.get(groupId);
         if (group == null) {
             return;
         }
-        group.writeAndFlush(new TextWebSocketFrame(message));
+        group.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(message)));
         log.info("发送消息到群聊 {}, message: {}", groupId, message);
     }
 }
