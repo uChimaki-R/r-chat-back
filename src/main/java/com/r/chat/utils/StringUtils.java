@@ -39,6 +39,7 @@ public class StringUtils {
     /**
      * 获取会话id
      * 使用两个用户的id排序拼接并md5后的结果，保证两个用户之间的会话id唯一且不变
+     * 如果是群聊的话就传一个群聊的id即可
      */
     public static String getSessionId(String[] ids) {
         Arrays.sort(ids);

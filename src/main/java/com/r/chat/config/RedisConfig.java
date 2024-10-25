@@ -27,7 +27,7 @@ public class RedisConfig {
     private String redisPassword;
 
     /**
-     * 集群开发需要使用redis服务器进行消息的广播，在这里注册RedissonClient，连接redis服务器
+     * 集群开发需要使用redis服务器进行通知的广播，在这里注册RedissonClient，连接redis服务器
      */
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redissonClient() {
