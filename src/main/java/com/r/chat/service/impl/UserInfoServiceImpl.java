@@ -184,7 +184,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             // 只取联系人的id
             List<String> contactIds = contacts.stream().map(UserContact::getContactId).collect(Collectors.toList());
             // 保存新的id列表到redis
-            redisUtils.setUserContactIds(userInfo.getUserId(), contactIds);
+            redisUtils.setContactIds(userInfo.getUserId(), contactIds);
             log.info("保存用户联系人id列表到redis userId: {}, {}", userInfo.getUserId(), contactIds);
         }
 
