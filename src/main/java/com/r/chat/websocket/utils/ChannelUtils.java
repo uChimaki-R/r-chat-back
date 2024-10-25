@@ -4,13 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.IdPrefixEnum;
-import com.r.chat.entity.enums.MessageTypeEnum;
+import com.r.chat.entity.enums.NoticeTypeEnum;
 import com.r.chat.entity.po.ChatMessage;
 import com.r.chat.entity.po.UserContactApply;
 import com.r.chat.entity.po.UserInfo;
-import com.r.chat.entity.result.Message;
+import com.r.chat.entity.result.Notice;
 import com.r.chat.entity.vo.ChatSessionUserVO;
-import com.r.chat.entity.message.WsInitMessage;
+import com.r.chat.entity.message.WsInitNotice;
 import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.ChatSessionUserMapper;
@@ -30,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -62,44 +61,40 @@ public class ChannelUtils {
     private final UserContactApplyMapper userContactApplyMapper;
 
     /**
-     * redis服务器可以作为向各spring-server服务器广播的中介，以此达成集群的消息传递
+     * redis服务器可以作为向各spring-server服务器广播的中介，以此达成集群的通知传递
      * 比如说部署了多个server s0和s1，用户a连的ws是s0的，用户b连的ws是s1的，此时如果a想要找b聊天
      * 这种情况下a发送给b的消息在s0上是找不到b对应的channel的，因为b的channel在s1的USER_CHANNEL_MAP(内存)里
-     * 解决方法是把信息发送给redisson，让他向所有server广播要发送的消息
-     * 所有server收到消息后从消息中得到发送者和接收者，如果接收者在自己的MAP里，则由自己发送消息，从而解决集群问题
+     * 解决方法是把信息发送给redisson，让他向所有server广播通知要发送的消息
+     * 所有server收到通知后从通知中得到发送者和接收者和消息内容，如果接收者在自己的MAP里，则由自己发送有人发送消息的通知，从而解决集群问题
      */
     private final RedissonClient redissonClient;
 
     /**
      * redisson上的主题，按MQ消息队列理解
      */
-    private final String TOPIC_MESSAGE = "message.topic";
+    private final String TOPIC_NOTICE = "notice.topic";
 
     /**
-     * 配置监听器，监听redis服务器广播的消息，如果符合想要的类型，则回调方法
+     * 配置监听器，监听redis服务器广播的通知，如果符合想要的类型，则回调方法
      */
     @PostConstruct
     public void addRedissonListener(){
         // 需要给出监听的主题，和发送广播的主题一致即可
-        RTopic rTopic = redissonClient.getTopic(TOPIC_MESSAGE);
-        rTopic.addListener(Message.class, (charSequence, message) -> {
-            log.info("收到广播消息 {}", message);
-            // 保存自定义的日志输出标识（因为是不同的线程了，再加一次方便看是谁发的）
-            MDC.put("ws", " WS:" + message.getSendId());
-            // 收到广播后尝试处理这个消息（发送消息）
-            sendMsg(message);
-            // 移除自定义的日志输出标识
-            MDC.remove("ws");
+        RTopic rTopic = redissonClient.getTopic(TOPIC_NOTICE);
+        rTopic.addListener(Notice.class, (charSequence, notice) -> {
+            log.info("收到广播通知 {}", notice);
+            // 收到广播后尝试处理这个通知（发送通知）
+            sendNtc(notice);
         });
     }
 
     /**
-     * 发送消息，实际上是将消息广播到所有的server服务器，让所有server服务器都尝试处理这个消息，以便集群部署
+     * 发送通知，实际上是将通知广播到所有的server服务器，让所有server服务器都尝试处理这个通知，以便集群部署
      */
-    public void sendMessage(Message message) {
-        RTopic rTopic = redissonClient.getTopic(TOPIC_MESSAGE);
-        log.info("发送广播消息 {}", message);
-        rTopic.publish(message);
+    public void sendNotice(Notice notice) {
+        RTopic rTopic = redissonClient.getTopic(TOPIC_NOTICE);
+        log.info("发送广播通知 {}", notice);
+        rTopic.publish(notice);
     }
 
     // 工具类的方法却不使用静态的原因: 需要用到其他bean对象（redisUtils、mapper等），静态注入比较麻烦，把工具类也交给IOC管理，要用再注入就行了（因为也只有netty用，不算麻烦）
@@ -111,6 +106,7 @@ public class ChannelUtils {
      * 3. 添加用户心跳缓存
      * 4. 更新用户最后登陆时间
      * 5. 获取用户所有会话消息、上次下线后的未读聊天信息、好友申请数量
+     * 6. 发送ws初始化通知
      */
     public void initChannel(String userId, Channel channel) {
         // 由于channel序列化之后后续无法使用，所以无法保存到redis中，只能直接保存到内存中
@@ -180,14 +176,14 @@ public class ChannelUtils {
                 .ge(UserContactApply::getLastApplyTime, fromTime);  // 时间限制
         Long applyCount = userContactApplyMapper.selectCount(applyQueryWrapper);
 
-        // 发送ws初始化消息
-        WsInitMessage wsInitMessage = new WsInitMessage();
+        // 发送ws初始化通知
+        WsInitNotice wsInitMessage = new WsInitNotice();
         wsInitMessage.setChatSessionUserList(chatSessionUserVOList);
         wsInitMessage.setChatMessageList(chatMessages);
         wsInitMessage.setApplyCount(applyCount);
         wsInitMessage.setReceiveId(userId);  // 原路返回
-        log.info("发送ws初始化消息 {}", wsInitMessage);
-        sendMsg(wsInitMessage);
+        log.info("发送ws初始化通知 {}", wsInitMessage);
+        sendNtc(wsInitMessage);
     }
 
     /**
@@ -239,10 +235,10 @@ public class ChannelUtils {
     }
 
     /**
-     * 发送消息
+     * 发送通知
      */
-    private void sendMsg(Message message) {
-        String contactId = message.getReceiveId();
+    private void sendNtc(Notice notice) {
+        String contactId = notice.getReceiveId();
         if (StringUtils.isEmpty(contactId)) {
             return;
         }
@@ -252,10 +248,10 @@ public class ChannelUtils {
         }
         switch (prefix) {
             case USER:
-                sendMessage2User(message);
+                sendNotice2User(notice);
                 break;
             case GROUP:
-                sendMessage2Group(message);
+                sendNotice2Group(notice);
                 break;
             default:
                 log.warn(Constants.IN_SWITCH_DEFAULT);
@@ -264,32 +260,32 @@ public class ChannelUtils {
     }
 
     /**
-     * 发送消息给用户
+     * 发送通知给用户
      */
-    private void sendMessage2User(Message message) {
-        String contactId = message.getReceiveId();
-        if (StringUtils.isEmpty(contactId)) {
+    private void sendNotice2User(Notice notice) {
+        String receiveId = notice.getReceiveId();
+        if (StringUtils.isEmpty(receiveId)) {
             return;
         }
-        Channel channel = USER_CHANNEL_MAP.get(contactId);
+        Channel channel = USER_CHANNEL_MAP.get(receiveId);
         if (channel == null) {
             return;
         }
-        channel.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(message)));
-        log.info("发送消息给 {}, message: {}", contactId, message);
-        // 如果是强制下线消息，还要将用户ws连接关闭
-        MessageTypeEnum messageType = message.getMessageType();
-        if (MessageTypeEnum.FORCE_OFF_LINE.equals(messageType)) {
-            log.info("用户 {} 被强制下线", contactId);
+        channel.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
+        log.info("发送ws通知给用户 {} {}", receiveId, notice);
+        // 如果是强制下线通知，还要将用户ws连接关闭
+        NoticeTypeEnum messageType = notice.getMessageType();
+        if (NoticeTypeEnum.FORCE_OFF_LINE.equals(messageType)) {
+            log.info("用户 {} 被强制下线", receiveId);
             removeChannel(channel);
         }
     }
 
     /**
-     * 发送消息到群聊
+     * 发送通知到群聊
      */
-    private void sendMessage2Group(Message message) {
-        String groupId = message.getReceiveId();
+    private void sendNotice2Group(Notice notice) {
+        String groupId = notice.getReceiveId();
         if (StringUtils.isEmpty(groupId)) {
             return;
         }
@@ -297,7 +293,7 @@ public class ChannelUtils {
         if (group == null) {
             return;
         }
-        group.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(message)));
-        log.info("发送消息到群聊 {}, message: {}", groupId, message);
+        group.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
+        log.info("发送ws通知给群聊 {} {}", groupId, notice);
     }
 }
