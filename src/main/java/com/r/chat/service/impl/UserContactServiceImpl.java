@@ -42,16 +42,17 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserContact> implements IUserContactService {
+    private final ChatSessionServiceImpl chatSessionServiceImpl;
+    private final ChatSessionUserServiceImpl chatSessionUserServiceImpl;
+
     private final UserContactMapper userContactMapper;
     private final UserInfoMapper userInfoMapper;
-    private final GroupInfoMapper groupInfoMapper;
     private final UserContactApplyMapper userContactApplyMapper;
+    private final GroupInfoMapper groupInfoMapper;
+    private final ChatMessageMapper chatMessageMapper;
 
     private final RedisUtils redisUtils;
     private final ChannelUtils channelUtils;
-    private final ChatSessionMapper chatSessionMapper;
-    private final ChatSessionUserMapper chatSessionUserMapper;
-    private final ChatMessageMapper chatMessageMapper;
 
     @Override
     public List<BasicInfoDTO> getGroupMemberInfo(String groupId) {
@@ -309,77 +310,39 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             sessionId = StringUtils.getSessionId(new String[]{contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId()});
             // 创建/更新会话
             // 因为两个人的会话是唯一的，就算删了好友加回来也是同一个会话，所以可能是新增也可能是更新
-            QueryWrapper<ChatSession> csQueryWrapper = new QueryWrapper<>();
-            csQueryWrapper.lambda().eq(ChatSession::getSessionId, sessionId);
-            ChatSession chatSession = chatSessionMapper.selectOne(csQueryWrapper);
-            if (chatSession == null) {
-                // 新增
-                chatSession = new ChatSession();
-                chatSession.setSessionId(sessionId);
-                chatSession.setLastMessage(userContactApply.getApplyInfo());
-                chatSession.setLastReceiveTime(now);
-                chatSessionMapper.insert(chatSession);
-                log.info("新增会话 {}", chatSession);
-            } else {
-                // 更新
-                chatSession.setLastMessage(userContactApply.getApplyInfo());
-                chatSession.setLastReceiveTime(now);
-                chatSessionMapper.updateById(chatSession);
-                log.info("更新会话 {}", chatSession);
-            }
+            ChatSession chatSession = new ChatSession();
+            chatSession.setSessionId(sessionId);
+            chatSession.setLastMessage(userContactApply.getApplyInfo());
+            chatSession.setLastReceiveTime(now);
+            chatSessionServiceImpl.saveOrUpdate(chatSession);
+            log.info("新增/更新会话 {}", chatSession);
 
-            // 创建用户到会话的关系，同样也分新增和更新
+            // 创建用户到会话的关系，同样可能是新增或更新
             // 申请方对被申请方的
-            QueryWrapper<ChatSessionUser> scuQueryWrapper = new QueryWrapper<>();
-            scuQueryWrapper.lambda()
-                    .eq(ChatSessionUser::getSessionId, sessionId)
-                    .eq(ChatSessionUser::getUserId, contactApplyAddDTO.getApplyUserId())
-                    .eq(ChatSessionUser::getContactId, contactApplyAddDTO.getContactId());
-            ChatSessionUser chatSessionUser = chatSessionUserMapper.selectOne(scuQueryWrapper);
-            // 获取会话对方的名称，即被申请方的名字，新增或更新要用
+            // 获取会话对方的名称，即被申请方的名字
             QueryWrapper<UserInfo> uiQueryWrapper = new QueryWrapper<>();
             uiQueryWrapper.lambda().eq(UserInfo::getUserId, contactApplyAddDTO.getContactId());
             UserInfo contactUserInfo = userInfoMapper.selectOne(uiQueryWrapper);
-            if (chatSessionUser == null) {
-                chatSessionUser = new ChatSessionUser();
-                chatSessionUser.setSessionId(sessionId);
-                chatSessionUser.setUserId(contactApplyAddDTO.getApplyUserId());
-                chatSessionUser.setContactId(contactApplyAddDTO.getContactId());
-                chatSessionUser.setContactName(contactUserInfo.getNickName());
-                chatSessionUserMapper.insert(chatSessionUser);
-                log.info("新增申请方对被申请方的用户会话关系 {}", chatSessionUser);
-            } else {
-                // 只有名称可能会变
-                chatSessionUser.setContactName(contactUserInfo.getNickName());
-                chatSessionUserMapper.updateById(chatSessionUser);
-                log.info("修改申请方对被申请方的用户会话关系 {}", chatSessionUser);
-            }
+            // 构造用户会话关系
+            ChatSessionUser chatSessionUser = new ChatSessionUser();
+            chatSessionUser.setSessionId(sessionId);
+            chatSessionUser.setUserId(contactApplyAddDTO.getApplyUserId());
+            chatSessionUser.setContactId(contactApplyAddDTO.getContactId());
+            chatSessionUser.setContactName(contactUserInfo.getNickName());
+            chatSessionUserServiceImpl.saveOrUpdate(chatSessionUser);
+            log.info("新增/修改申请方对被申请方的用户会话关系 {}", chatSessionUser);
 
             // 被申请方对申请方的
-            scuQueryWrapper = new QueryWrapper<>();
-            scuQueryWrapper.lambda()
-                    .eq(ChatSessionUser::getSessionId, sessionId)
-                    .eq(ChatSessionUser::getUserId, contactApplyAddDTO.getContactId())
-                    .eq(ChatSessionUser::getContactId, contactApplyAddDTO.getApplyUserId());
-            chatSessionUser = chatSessionUserMapper.selectOne(scuQueryWrapper);
-            // 获取会话对方的名称，即申请方的名字，新增或更新要用
+            // 获取会话对方的名称，即申请方的名字
             uiQueryWrapper = new QueryWrapper<>();
             uiQueryWrapper.lambda().eq(UserInfo::getUserId, contactApplyAddDTO.getApplyUserId());
             UserInfo applyUserInfo = userInfoMapper.selectOne(uiQueryWrapper);
-            if (chatSessionUser == null) {
-                chatSessionUser = new ChatSessionUser();
-                chatSessionUser.setSessionId(sessionId);
-                chatSessionUser.setUserId(contactApplyAddDTO.getContactId());
-                chatSessionUser.setContactId(contactApplyAddDTO.getApplyUserId());
-                chatSessionUser.setContactName(applyUserInfo.getNickName());
-                chatSessionUserMapper.insert(chatSessionUser);
-                log.info("新增被申请方对申请方的用户会话关系 {}", chatSessionUser);
-            } else {
-                // 只有名称可能会变
-                chatSessionUser.setContactName(applyUserInfo.getNickName());
-                chatSessionUserMapper.updateById(chatSessionUser);
-                log.info("修改被申请方对申请方的用户会话关系 {}", chatSessionUser);
-            }
+            // 构造用户会话关系
+            chatSessionUser.setSessionId(sessionId);
+            chatSessionUser.setUserId(contactApplyAddDTO.getContactId());
+            chatSessionUser.setContactId(contactApplyAddDTO.getApplyUserId());
+            chatSessionUser.setContactName(applyUserInfo.getNickName());
+            log.info("新增/修改被申请方对申请方的用户会话关系 {}", chatSessionUser);
 
             // 新增这个聊天信息
             ChatMessage chatMessage = new ChatMessage();
