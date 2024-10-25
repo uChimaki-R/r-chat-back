@@ -1,6 +1,6 @@
 package com.r.chat.entity.result;
 
-import com.r.chat.entity.enums.MessageTypeEnum;
+import com.r.chat.entity.enums.NoticeTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,27 +11,21 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Message implements Serializable {
+public class Notice implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public Message(MessageTypeEnum type) {
+    public Notice(NoticeTypeEnum type) {
         this.messageType = type;
     }
 
     /**
-     * 发送人id
-     */
-    @Setter
-    private String sendId;
-
-    /**
-     * 联系人id
+     * 通知的接收人id
      */
     @Setter
     private String receiveId;
 
     /**
-     * 消息类型
+     * 通知类型
      */
-    private MessageTypeEnum messageType;
+    private NoticeTypeEnum messageType;
 }
