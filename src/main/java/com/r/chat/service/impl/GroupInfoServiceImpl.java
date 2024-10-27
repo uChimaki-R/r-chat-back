@@ -8,16 +8,15 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.dto.GroupInfoQueryDTO;
 import com.r.chat.entity.dto.SysSettingDTO;
-import com.r.chat.entity.enums.GroupInfoStatusEnum;
-import com.r.chat.entity.enums.IdPrefixEnum;
-import com.r.chat.entity.enums.UserContactStatusEnum;
-import com.r.chat.entity.enums.UserContactTypeEnum;
-import com.r.chat.entity.po.GroupInfo;
-import com.r.chat.entity.po.UserContact;
+import com.r.chat.entity.enums.*;
+import com.r.chat.entity.message.GroupCreatedNotice;
+import com.r.chat.entity.po.*;
+import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
 import com.r.chat.exception.GroupCountLimitException;
 import com.r.chat.exception.GroupNotExistException;
 import com.r.chat.exception.IllegalOperationException;
+import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.redis.RedisUtils;
@@ -26,12 +25,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
 import com.r.chat.utils.FileUtils;
 import com.r.chat.utils.StringUtils;
+import com.r.chat.websocket.utils.ChannelUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.time.LocalDateTime;
 
 /**
@@ -46,9 +45,15 @@ import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
 public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo> implements IGroupInfoService {
-    private final RedisUtils redisUtils;
+    private final ChatSessionServiceImpl chatSessionServiceImpl;
+    private final ChatSessionUserServiceImpl chatSessionUserServiceImpl;
+
     private final UserContactMapper userContactMapper;
     private final GroupInfoMapper groupInfoMapper;
+    private final ChatMessageMapper chatMessageMapper;
+
+    private final RedisUtils redisUtils;
+    private final ChannelUtils channelUtils;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -80,6 +85,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             groupInfo.setCreateTime(now);
             groupInfo.setStatus(GroupInfoStatusEnum.NORMAL);
             save(groupInfo);
+            log.info("新增群聊信息 {}", groupInfo);
 
             // 将自己加入群聊（添加联系人信息）
             UserContact userContact = new UserContact();
@@ -90,6 +96,60 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             userContact.setCreateTime(now);
             userContact.setLastUpdateTime(now);
             userContactMapper.insert(userContact);
+            log.info("将自己添加入创建的群聊中 {}", userContact);
+
+            Long millis = System.currentTimeMillis();
+
+            // 新增群聊会话，会话是唯一的，可能新增可能更新
+            String sessionId = StringUtils.getSessionId(new String[]{groupInfo.getGroupId()});
+            ChatSession chatSession = new ChatSession();
+            chatSession.setSessionId(sessionId);
+            chatSession.setLastMessage(Constants.MESSAGE_GROUP_CREATED);
+            chatSession.setLastReceiveTime(millis);
+            chatSessionServiceImpl.saveOrUpdate(chatSession);
+            log.info("新增/更新群聊会话 {}", chatSession);
+
+            // 新增群主对群聊的会话关系
+            ChatSessionUser chatSessionUser = new ChatSessionUser();
+            chatSessionUser.setSessionId(sessionId);
+            chatSessionUser.setUserId(UserIdContext.getCurrentUserId());
+            chatSessionUser.setContactId(groupInfo.getGroupId());
+            chatSessionUser.setContactName(groupInfo.getGroupName());
+            chatSessionUserServiceImpl.saveOrUpdate(chatSessionUser);
+            log.info("新增/更新用户会话关系 {}", chatSessionUser);
+
+            // 新增群聊创建时的提示消息，提示消息没有发送人
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setSessionId(sessionId);
+            chatMessage.setMessageType(MessageTypeEnum.NOTICE);
+            chatMessage.setMessageContent(Constants.MESSAGE_GROUP_CREATED);
+            chatMessage.setContactId(groupInfo.getGroupId());
+            chatMessage.setContactType(UserContactTypeEnum.GROUP);
+            chatMessage.setStatus(MessageStatusEnum.SENT);
+            chatMessage.setSendTime(millis);
+            chatMessageMapper.insert(chatMessage);
+            log.info("新增群聊创建成功提示信息 {}", chatMessage);
+
+            // 更新自己的联系人id列表
+            redisUtils.addToContactIds(UserIdContext.getCurrentUserId(), groupInfo.getGroupId());
+            log.info("更新redis用户联系人id列表 添加群聊id: {}", groupInfo.getGroupId());
+
+            // 将自己加入群聊的channelGroup中
+            channelUtils.addUser2Group(UserIdContext.getCurrentUserId(), groupInfo.getGroupId());
+            log.info("将自己加入到群聊的channelGroup中 groupId: {}", groupInfo.getGroupId());
+
+            // 发送ws通知前端渲染群聊会话
+            GroupCreatedNotice groupCreatedNotice = new GroupCreatedNotice();
+            groupCreatedNotice.setReceiveId(UserIdContext.getCurrentUserId());
+            // 构建用于渲染会话的数据
+            ChatSessionUserVO chatSessionUserVO = CopyUtils.copyBean(chatSessionUser, ChatSessionUserVO.class);
+            chatSessionUserVO.setLastMessage(Constants.MESSAGE_GROUP_CREATED);
+            chatSessionUserVO.setLastReceiveTime(millis);
+            chatSessionUserVO.setMemberCount(1);  // 初始只有自己一个人
+            groupCreatedNotice.setChatSessionUserVO(chatSessionUserVO);
+            channelUtils.sendNotice(groupCreatedNotice);
+            log.info("发送群聊创建成功的ws通知 {}", groupCreatedNotice);
+
             log.info("新增群聊成功 {}", groupInfo);
         } else {
             // 修改群聊信息
