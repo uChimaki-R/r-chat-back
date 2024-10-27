@@ -8,6 +8,7 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
 import com.r.chat.entity.message.ContactApplyNotice;
+import com.r.chat.entity.message.GroupAddAcceptedNotice;
 import com.r.chat.entity.message.UserAddAcceptNotice;
 import com.r.chat.entity.message.UserAddByOthersNotice;
 import com.r.chat.entity.po.*;
@@ -315,7 +316,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatSession.setLastMessage(userContactApply.getApplyInfo());
             chatSession.setLastReceiveTime(now);
             chatSessionServiceImpl.saveOrUpdate(chatSession);
-            log.info("新增/更新会话 {}", chatSession);
+            log.info("新增/更新用户间会话 {}", chatSession);
 
             // 创建用户到会话的关系，同样可能是新增或更新
             // 申请方对被申请方的
@@ -385,10 +386,75 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             userAddByOthersNotice.setChatSessionUserVO(chatSessionUserVO);
             channelUtils.sendNotice(userAddByOthersNotice);
             log.info("发送申请人申请被别人同意的ws通知  {}", userAddByOthersNotice);
+
+            log.info("添加好友成功 {}", contactApplyAddDTO);
         } else {
             sessionId = StringUtils.getSessionId(new String[]{contactApplyAddDTO.getContactId()});
+
+            // 查找申请人信息，获取名字，在加入群聊时展示给其他人
+            UserInfo applyUserInfo = userInfoMapper.selectById(contactApplyAddDTO.getApplyUserId());
+            // 加入群聊的信息
+            String joinMessage = String.format(Constants.MESSAGE_JOIN_GROUP, applyUserInfo.getNickName());
+
+            // 创建会话
+            ChatSession chatSession = new ChatSession();
+            chatSession.setSessionId(sessionId);
+            chatSession.setLastMessage(joinMessage);
+            chatSession.setLastReceiveTime(now);
+            chatSessionServiceImpl.saveOrUpdate(chatSession);
+            log.info("新增/更新用户与群聊之间的会话 {}", chatSession);
+
+            // 创建会话关系
+            ChatSessionUser chatSessionUser = new ChatSessionUser();
+            chatSessionUser.setSessionId(sessionId);
+            chatSessionUser.setUserId(contactApplyAddDTO.getApplyUserId());
+            chatSessionUser.setContactId(contactApplyAddDTO.getContactId());
+            // 查询群聊名
+            GroupInfo groupInfo = groupInfoMapper.selectById(contactApplyAddDTO.getContactId());
+            chatSessionUser.setContactName(groupInfo.getGroupName());
+            chatSessionUserServiceImpl.saveOrUpdate(chatSessionUser);
+            log.info("新增/更新用户对群聊的会话关系 {}", chatSessionUser);
+
+            // 新增聊天消息
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setSessionId(sessionId);
+            chatMessage.setContactId(contactApplyAddDTO.getContactId());
+            chatMessage.setContactType(UserContactTypeEnum.GROUP);
+            chatMessage.setMessageContent(joinMessage);
+            chatMessage.setMessageType(MessageTypeEnum.NOTICE);
+            chatMessage.setSendTime(now);
+            chatMessage.setStatus(MessageStatusEnum.SENT);
+            chatMessageMapper.insert(chatMessage);
+            log.info("新增聊天消息 {}", chatMessage);
+
+            // 将群聊添加到申请人的联系人id列表中
+            redisUtils.addToContactIds(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId());
+            log.info("更新redis用户 {} 的联系人id列表 添加群聊id: {}", contactApplyAddDTO.getApplyUserId(), groupInfo.getGroupId());
+
+            // 将申请人加入群聊的channelGroup中
+            channelUtils.addUser2Group(contactApplyAddDTO.getApplyUserId(), groupInfo.getGroupId());
+            log.info("将申请人 {} 加入到群聊的channelGroup中 groupId: {}", contactApplyAddDTO.getApplyUserId(), groupInfo.getGroupId());
+
+            // 发送ws通知前端渲染加入的群聊的会话
+            GroupAddAcceptedNotice groupAddAcceptedNotice = new GroupAddAcceptedNotice();
+            // 构建申请人看到的群聊会话数据，让前端渲染
+            ChatSessionUserVO chatSessionUserVO = CopyUtils.copyBean(chatSessionUser, ChatSessionUserVO.class);
+            chatSessionUserVO.setLastMessage(joinMessage);
+            chatSessionUserVO.setLastReceiveTime(now);
+            // 查询群聊人数
+            QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
+            queryWrapper.lambda()
+                    .eq(UserContact::getContactId, contactApplyAddDTO.getContactId())
+                    .eq(UserContact::getStatus, UserContactStatusEnum.FRIENDS);
+            Long count = userContactMapper.selectCount(queryWrapper);
+            chatSessionUserVO.setMemberCount(count);
+            groupAddAcceptedNotice.setChatSessionUserVO(chatSessionUserVO);
+            groupAddAcceptedNotice.setReceiveId(contactApplyAddDTO.getApplyUserId());  // 发送给申请人
+            channelUtils.sendNotice(groupAddAcceptedNotice);
+            log.info("发送群聊加入申请被通过的ws通知  {}", groupAddAcceptedNotice);
+
+            log.info("添加群聊成功  {}", contactApplyAddDTO);
         }
-        log.info("添加好友/群聊成功 contactId: {}", contactApplyAddDTO.getContactId());
     }
 
     @Override
