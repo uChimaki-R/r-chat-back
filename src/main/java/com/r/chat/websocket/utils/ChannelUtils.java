@@ -78,7 +78,7 @@ public class ChannelUtils {
      * 配置监听器，监听redis服务器广播的通知，如果符合想要的类型，则回调方法
      */
     @PostConstruct
-    public void addRedissonListener(){
+    public void addRedissonListener() {
         // 需要给出监听的主题，和发送广播的主题一致即可
         RTopic rTopic = redissonClient.getTopic(TOPIC_NOTICE);
         rTopic.addListener(Notice.class, (charSequence, notice) -> {
@@ -132,7 +132,9 @@ public class ChannelUtils {
         // 获取群聊的id列表
         List<String> groupContactIds = contactIds.stream().filter(id -> IdPrefixEnum.GROUP.equals(IdPrefixEnum.getPrefix(id))).collect(Collectors.toList());
         // 将用户的channel加入到用户加入的群聊对应的channelGroup中
-        groupContactIds.forEach(groupId -> {add2Group(groupId, channel);});
+        groupContactIds.forEach(groupId -> {
+            addUser2Group(userId, groupId);
+        });
 
         // 添加用户心跳缓存
         redisUtils.setUserHeartBeat(userId);
@@ -215,12 +217,16 @@ public class ChannelUtils {
     /**
      * 将用户的channel加入到groupId对应的channelGroup中
      */
-    private void add2Group(String groupId, Channel channel) {
+    public void addUser2Group(String userId, String groupId) {
         // 添加进群聊channelGroup
         ChannelGroup channelGroup = GROUP_CHANNEL_MAP.get(groupId);
         if (channelGroup == null) {
             channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
             GROUP_CHANNEL_MAP.put(groupId, channelGroup);
+        }
+        Channel channel = USER_CHANNEL_MAP.get(userId);
+        if (channel == null) {
+            return;
         }
         // 将用户的channel加入到群聊channelGroup中
         channelGroup.add(channel);
