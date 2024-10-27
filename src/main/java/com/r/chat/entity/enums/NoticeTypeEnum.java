@@ -11,7 +11,7 @@ public enum NoticeTypeEnum {
     USER_ADD_BY_OTHERS(2, "对方同意了自己的申请，成为了好友"),
 
     GROUP_CREATED(3, "群聊创建成功"),
-//    GROUP_ADD(4, "加入群聊"),
+    GROUP_ADD_ACCEPTED(4, "群聊加入申请被通过"),
 //    GROUP_RENAME(5, "更新群聊名"),
 //    GROUP_USER_LEAVE(6, "退出群聊"),
 //    GROUP_USER_IS_REMOVED(7, "被群主移出了群聊"),
