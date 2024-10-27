@@ -50,6 +50,9 @@ public class Constants {
     public static final String MESSAGE_CANNOT_CHANGE_VERSION = "不允许修改版本";
     public static final String MESSAGE_JSON_PARSE_ERROR = "json字符串解析失败";
 
+    // chat message
+    public static final String MESSAGE_GROUP_CREATED = "群聊已创建，可以和好友一起畅聊了";
+
     // validate failure message
     public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
     public static final String VALIDATE_EMPTY_CHECK_CODE_KEY = "验证码唯一标识key不能为空";
