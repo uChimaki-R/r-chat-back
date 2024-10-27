@@ -342,6 +342,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatSessionUser.setUserId(contactApplyAddDTO.getContactId());
             chatSessionUser.setContactId(contactApplyAddDTO.getApplyUserId());
             chatSessionUser.setContactName(applyUserInfo.getNickName());
+            chatSessionUserServiceImpl.saveOrUpdate(chatSessionUser);
             log.info("新增/修改被申请方对申请方的用户会话关系 {}", chatSessionUser);
 
             // 新增这个聊天信息
