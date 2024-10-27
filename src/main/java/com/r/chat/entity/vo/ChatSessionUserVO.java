@@ -46,5 +46,5 @@ public class ChatSessionUserVO implements Serializable {
     /**
      * 群聊成员数量（前端在会话界面需要群聊人数，从这里获取）用户会话的话值为0
      */
-    private Integer memberCount;
+    private Long memberCount;
 }
