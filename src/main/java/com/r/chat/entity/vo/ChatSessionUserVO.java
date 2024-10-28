@@ -1,5 +1,6 @@
 package com.r.chat.entity.vo;
 
+import com.r.chat.entity.enums.UserContactTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,11 @@ public class ChatSessionUserVO implements Serializable {
      * 联系人名称
      */
     private String contactName;
+
+    /**
+     * 联系人类型
+     */
+    private UserContactTypeEnum contactType;
 
     /**
      * 最后接收的消息
