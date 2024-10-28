@@ -369,6 +369,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatSessionUserVO.setUserId(contactApplyAddDTO.getApplyUserId());
             chatSessionUserVO.setContactId(contactApplyAddDTO.getContactId());
             chatSessionUserVO.setContactName(contactUserInfo.getNickName());
+            chatSessionUserVO.setContactType(contactApplyAddDTO.getContactType());
             chatSessionUserVO.setSessionId(sessionId);
             chatSessionUserVO.setLastMessage(userContactApply.getApplyInfo());
             chatSessionUserVO.setLastReceiveTime(now);
@@ -439,6 +440,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             GroupAddAcceptedNotice groupAddAcceptedNotice = new GroupAddAcceptedNotice();
             // 构建申请人看到的群聊会话数据，让前端渲染
             ChatSessionUserVO chatSessionUserVO = CopyUtils.copyBean(chatSessionUser, ChatSessionUserVO.class);
+            chatSessionUserVO.setContactType(UserContactTypeEnum.GROUP);
             chatSessionUserVO.setLastMessage(joinMessage);
             chatSessionUserVO.setLastReceiveTime(now);
             // 查询群聊人数

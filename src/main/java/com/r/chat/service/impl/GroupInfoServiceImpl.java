@@ -145,6 +145,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             ChatSessionUserVO chatSessionUserVO = CopyUtils.copyBean(chatSessionUser, ChatSessionUserVO.class);
             chatSessionUserVO.setLastMessage(Constants.MESSAGE_GROUP_CREATED);
             chatSessionUserVO.setLastReceiveTime(millis);
+            chatSessionUserVO.setContactType(UserContactTypeEnum.GROUP);
             chatSessionUserVO.setMemberCount(1L);  // 初始只有自己一个人
             groupCreatedNotice.setChatSessionUserVO(chatSessionUserVO);
             channelUtils.sendNotice(groupCreatedNotice);
