@@ -8,7 +8,8 @@
                cs.last_receive_time,
                IF(substring(csu.contact_id, 1, 1) = 'G', (select count(*)
                                                           from r_chat.user_contact uc
-                                                          where uc.contact_id = csu.contact_id), 0)
+                                                          where uc.contact_id = csu.contact_id), 0),
+               IF(substring(csu.contact_id, 1, 1) = 'G', 1, 0) contactType
         from r_chat.chat_session_user csu
                  inner join r_chat.chat_session cs on csu.session_id = cs.session_id
         where user_id = #{userId}
