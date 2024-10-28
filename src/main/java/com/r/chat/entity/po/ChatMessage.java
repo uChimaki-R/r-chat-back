@@ -32,8 +32,8 @@ public class ChatMessage implements Serializable {
     /**
      * 自增id
      */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    @TableId(value = "message_id", type = IdType.AUTO)
+    private Long messageId;
 
     /**
      * 会话id
