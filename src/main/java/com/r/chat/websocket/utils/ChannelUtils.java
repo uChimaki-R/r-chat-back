@@ -166,6 +166,7 @@ public class ChannelUtils {
                 .in(ChatMessage::getContactId, groupContactIds)
                 .ge(ChatMessage::getSendTime, fromTime);  // 时间限制
         List<ChatMessage> chatMessages = chatMessageMapper.selectList(messageQueryWrapper);
+        log.info("获取用户上次下线后的未读聊天信息 {}", chatMessages);
 
         // 获取用户所有会话消息
         List<ChatSessionUserVO> chatSessionUserVOList = chatSessionUserMapper.selectChatSessionUserVOList(userId);
@@ -177,6 +178,7 @@ public class ChannelUtils {
                 .eq(UserContactApply::getReceiveUserId, userId)
                 .ge(UserContactApply::getLastApplyTime, fromTime);  // 时间限制
         Long applyCount = userContactApplyMapper.selectCount(applyQueryWrapper);
+        log.info("获取申请信息的数量: {}", applyCount);
 
         // 发送ws初始化通知
         WsInitNotice wsInitMessage = new WsInitNotice();
@@ -198,6 +200,7 @@ public class ChannelUtils {
     public void removeChannel(Channel channel) {
         // 移除用户channel
         String userId = getUserId(channel);
+        if (userId == null) return;
         USER_CHANNEL_MAP.remove(userId);
         log.info("移除绑定 channel: {}", channel);
         // 移除心跳缓存
