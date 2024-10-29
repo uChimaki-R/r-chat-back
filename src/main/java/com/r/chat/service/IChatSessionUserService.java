@@ -1,7 +1,7 @@
 package com.r.chat.service;
 
+import com.github.jeffreyning.mybatisplus.service.IMppService;
 import com.r.chat.entity.po.ChatSessionUser;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * <p>
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author r-pocky
  * @since 2024-10-23
  */
-public interface IChatSessionUserService extends IService<ChatSessionUser> {
+public interface IChatSessionUserService extends IMppService<ChatSessionUser> {
 
 }
