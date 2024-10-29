@@ -1,9 +1,9 @@
 package com.r.chat.service.impl;
 
+import com.github.jeffreyning.mybatisplus.service.MppServiceImpl;
 import com.r.chat.entity.po.ChatSessionUser;
 import com.r.chat.mapper.ChatSessionUserMapper;
 import com.r.chat.service.IChatSessionUserService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,6 +15,6 @@ import org.springframework.stereotype.Service;
  * @since 2024-10-23
  */
 @Service
-public class ChatSessionUserServiceImpl extends ServiceImpl<ChatSessionUserMapper, ChatSessionUser> implements IChatSessionUserService {
+public class ChatSessionUserServiceImpl extends MppServiceImpl<ChatSessionUserMapper, ChatSessionUser> implements IChatSessionUserService {
 
 }
