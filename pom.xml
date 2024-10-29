@@ -93,6 +93,12 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>${mybatisplus.version}</version>
         </dependency>
+        <!--解决mybatis-plus存在联合主键下service层saveOrUpdate方法无法正确执行的问题-->
+        <dependency>
+            <groupId>com.github.jeffreyning</groupId>
+            <artifactId>mybatisplus-plus</artifactId>
+            <version>1.7.5-RELEASE</version>
+        </dependency>
         <!-- 数据库-->
         <dependency>
             <groupId>mysql</groupId>
@@ -145,12 +151,12 @@
             <version>${captcha.verion}</version>
         </dependency>
         <!-- 使用jdk1.8 就不用引入依赖(引入的话构建会报警告，而且验证码加载不了) 如果是11以上则需要 -->
-<!--        &lt;!&ndash;验证码依赖引擎nashorn&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.openjdk.nashorn</groupId>-->
-<!--            <artifactId>nashorn-core</artifactId>-->
-<!--            <version>${nashorn.version}</version>-->
-<!--        </dependency>-->
+        <!--        &lt;!&ndash;验证码依赖引擎nashorn&ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.openjdk.nashorn</groupId>-->
+        <!--            <artifactId>nashorn-core</artifactId>-->
+        <!--            <version>${nashorn.version}</version>-->
+        <!--        </dependency>-->
         <!--netty-->
         <dependency>
             <groupId>io.netty</groupId>
