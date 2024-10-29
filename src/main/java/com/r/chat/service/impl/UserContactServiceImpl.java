@@ -332,7 +332,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatSessionUser.setUserId(contactApplyAddDTO.getApplyUserId());
             chatSessionUser.setContactId(contactApplyAddDTO.getContactId());
             chatSessionUser.setContactName(contactUserInfo.getNickName());
-            chatSessionUserServiceImpl.saveOrUpdate(chatSessionUser);
+            chatSessionUserServiceImpl.saveOrUpdateByMultiId(chatSessionUser);
             log.info("新增/修改申请方对被申请方的用户会话关系 {}", chatSessionUser);
 
             // 被申请方对申请方的
@@ -345,7 +345,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatSessionUser.setUserId(contactApplyAddDTO.getContactId());
             chatSessionUser.setContactId(contactApplyAddDTO.getApplyUserId());
             chatSessionUser.setContactName(applyUserInfo.getNickName());
-            chatSessionUserServiceImpl.saveOrUpdate(chatSessionUser);
+            chatSessionUserServiceImpl.saveOrUpdateByMultiId(chatSessionUser);
             log.info("新增/修改被申请方对申请方的用户会话关系 {}", chatSessionUser);
 
             // 新增这个聊天信息
@@ -415,7 +415,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             // 查询群聊名
             GroupInfo groupInfo = groupInfoMapper.selectById(contactApplyAddDTO.getContactId());
             chatSessionUser.setContactName(groupInfo.getGroupName());
-            chatSessionUserServiceImpl.saveOrUpdate(chatSessionUser);
+            chatSessionUserServiceImpl.saveOrUpdateByMultiId(chatSessionUser);
             log.info("新增/更新用户对群聊的会话关系 {}", chatSessionUser);
 
             // 新增聊天消息

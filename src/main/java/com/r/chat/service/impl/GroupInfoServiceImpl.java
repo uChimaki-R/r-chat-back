@@ -117,7 +117,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             chatSessionUser.setUserId(UserIdContext.getCurrentUserId());
             chatSessionUser.setContactId(groupInfo.getGroupId());
             chatSessionUser.setContactName(groupInfo.getGroupName());
-            chatSessionUserServiceImpl.saveOrUpdate(chatSessionUser);
+            chatSessionUserServiceImpl.saveOrUpdateByMultiId(chatSessionUser);
             log.info("新增/更新用户会话关系 {}", chatSessionUser);
 
             // 新增群聊创建时的提示消息，提示消息没有发送人
