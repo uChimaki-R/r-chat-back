@@ -1,7 +1,7 @@
 package com.r.chat.mapper;
 
+import com.github.jeffreyning.mybatisplus.base.MppBaseMapper;
 import com.r.chat.entity.po.ChatSessionUser;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @since 2024-10-23
  */
 @Mapper
-public interface ChatSessionUserMapper extends BaseMapper<ChatSessionUser> {
+public interface ChatSessionUserMapper extends MppBaseMapper<ChatSessionUser> {
 
     /**
      * 根据用户id获取该用户的全部会话信息，需要和chat_session表联查获取具体信息
