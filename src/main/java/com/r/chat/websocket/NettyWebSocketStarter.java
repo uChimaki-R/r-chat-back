@@ -18,16 +18,18 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NettyWebSocketStarter implements Runnable {
+@Order(2)
+public class NettyWebSocketStarter implements CommandLineRunner {
     private final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -36,19 +38,13 @@ public class NettyWebSocketStarter implements Runnable {
 
     private final AppProperties appProperties;
 
-    @PostConstruct
-    public void init() {
-        new Thread(this).start();
-    }
-
     @PreDestroy
     public void destroy() {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
     }
 
-    @Override
-    public void run() {
+    public void start() {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
@@ -87,5 +83,10 @@ public class NettyWebSocketStarter implements Runnable {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        this.start();
     }
 }
