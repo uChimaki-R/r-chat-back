@@ -5,6 +5,7 @@ import com.r.chat.entity.dto.GroupInfoQueryDTO;
 import com.r.chat.entity.po.GroupInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -14,6 +15,7 @@ import com.r.chat.entity.vo.GroupDetailInfoVO;
  * @author r-pocky
  * @since 2024-09-28
  */
+@Mapper
 public interface GroupInfoMapper extends BaseMapper<GroupInfo> {
 
     /**

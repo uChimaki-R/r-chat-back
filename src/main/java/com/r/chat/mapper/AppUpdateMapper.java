@@ -2,6 +2,7 @@ package com.r.chat.mapper;
 
 import com.r.chat.entity.po.AppUpdate;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author r-pocky
  * @since 2024-10-20
  */
+@Mapper
 public interface AppUpdateMapper extends BaseMapper<AppUpdate> {
 
     /**

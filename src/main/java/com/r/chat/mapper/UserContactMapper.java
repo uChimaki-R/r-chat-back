@@ -3,6 +3,7 @@ package com.r.chat.mapper;
 import com.r.chat.entity.dto.BasicInfoDTO;
 import com.r.chat.entity.po.UserContact;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @author r-pocky
  * @since 2024-09-28
  */
+@Mapper
 public interface UserContactMapper extends BaseMapper<UserContact> {
 
     /**

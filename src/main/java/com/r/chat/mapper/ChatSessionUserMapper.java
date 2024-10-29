@@ -3,6 +3,7 @@ package com.r.chat.mapper;
 import com.r.chat.entity.po.ChatSessionUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.r.chat.entity.vo.ChatSessionUserVO;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @author r-pocky
  * @since 2024-10-23
  */
+@Mapper
 public interface ChatSessionUserMapper extends BaseMapper<ChatSessionUser> {
 
     /**

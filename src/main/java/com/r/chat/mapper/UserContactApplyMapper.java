@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.entity.po.UserContactApply;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.r.chat.entity.vo.ContactApplyVO;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -13,6 +14,7 @@ import com.r.chat.entity.vo.ContactApplyVO;
  * @author r-pocky
  * @since 2024-09-28
  */
+@Mapper
 public interface UserContactApplyMapper extends BaseMapper<UserContactApply> {
 
     /**
