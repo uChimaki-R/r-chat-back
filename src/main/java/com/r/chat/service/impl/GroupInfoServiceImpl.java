@@ -20,6 +20,8 @@ import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactMapper;
 import com.r.chat.redis.RedisUtils;
+import com.r.chat.service.IChatSessionService;
+import com.r.chat.service.IChatSessionUserService;
 import com.r.chat.service.IGroupInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
@@ -45,8 +47,8 @@ import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
 public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo> implements IGroupInfoService {
-    private final ChatSessionServiceImpl chatSessionServiceImpl;
-    private final ChatSessionUserServiceImpl chatSessionUserServiceImpl;
+    private final IChatSessionService chatSessionServiceImpl;
+    private final IChatSessionUserService chatSessionUserServiceImpl;
 
     private final UserContactMapper userContactMapper;
     private final GroupInfoMapper groupInfoMapper;

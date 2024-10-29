@@ -16,6 +16,8 @@ import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.*;
 import com.r.chat.redis.RedisUtils;
+import com.r.chat.service.IChatSessionService;
+import com.r.chat.service.IChatSessionUserService;
 import com.r.chat.service.IUserContactService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
@@ -43,8 +45,8 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserContact> implements IUserContactService {
-    private final ChatSessionServiceImpl chatSessionServiceImpl;
-    private final ChatSessionUserServiceImpl chatSessionUserServiceImpl;
+    private final IChatSessionService chatSessionServiceImpl;
+    private final IChatSessionUserService chatSessionUserServiceImpl;
 
     private final UserContactMapper userContactMapper;
     private final UserInfoMapper userInfoMapper;
