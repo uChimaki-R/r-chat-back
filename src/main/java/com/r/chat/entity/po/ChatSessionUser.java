@@ -2,9 +2,9 @@ package com.r.chat.entity.po;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import com.github.jeffreyning.mybatisplus.anno.MppMultiId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -28,7 +28,8 @@ public class ChatSessionUser implements Serializable {
     /**
      * 用户id
      */
-    @TableId(value = "user_id", type = IdType.AUTO)
+    @MppMultiId
+    @TableField("user_id")
     private String userId;
 
     /**
@@ -40,6 +41,7 @@ public class ChatSessionUser implements Serializable {
     /**
      * 会话id
      */
+    @MppMultiId
     @TableField("session_id")
     private String sessionId;
 
