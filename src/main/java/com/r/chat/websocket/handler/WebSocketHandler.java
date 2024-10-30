@@ -37,6 +37,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         log.info("断开连接");
+        MDC.put("ws", " ws: disconnect " + channelUtils.getUserId(ctx.channel()));
         channelUtils.removeChannel(ctx.channel());
         MDC.remove("ws");
     }
@@ -65,9 +66,10 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
             }
             log.info("ws连接成功 userId: {}", userId);
             // 保存自定义的日志输出标识
-            MDC.put("ws", " WS:" + userId);
+            MDC.put("ws", " ws: connect " + userId);
             // 将userId和channel绑定
             channelUtils.initChannel(userId, ctx.channel());
+            MDC.remove("ws");
         }
     }
 }
