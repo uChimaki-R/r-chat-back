@@ -15,6 +15,7 @@ import com.r.chat.entity.po.*;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.*;
+import com.r.chat.properties.DefaultSysSettingProperties;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IChatSessionService;
 import com.r.chat.service.IChatSessionUserService;
@@ -56,6 +57,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
 
     private final RedisUtils redisUtils;
     private final ChannelUtils channelUtils;
+    private final DefaultSysSettingProperties defaultSysSettingProperties;
 
     @Override
     public List<BasicInfoDTO> getGroupMemberInfo(String groupId) {
@@ -289,8 +291,8 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
 
         // 登录的时候把联系人id列表放在了redis上了，现在添加了新朋友/新群聊，需要更新缓存
         // 判断是加了新朋友还是加入了新群聊
-        if (UserContactTypeEnum.USER.equals(contactApplyAddDTO.getContactType())) {
-            // 加了新朋友的话需要更新两个人的缓存
+        if (UserContactTypeEnum.USER.equals(contactApplyAddDTO.getContactType()) && !defaultSysSettingProperties.getRobotId().equals(contactApplyAddDTO.getContactId())) {
+            // 加了新朋友的话需要更新两个人的缓存，如果对方是机器人的话不用给机器人更新
             redisUtils.addToContactIds(contactApplyAddDTO.getContactId(), contactApplyAddDTO.getApplyUserId());
             log.info("更新redis用户联系人id列表 userId: {}, addId: {}", contactApplyAddDTO.getContactId(), contactApplyAddDTO.getApplyUserId());
         }
@@ -299,11 +301,24 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         log.info("更新redis用户联系人id列表 userId: {}, addId: {}", contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId());
 
         // 获取申请信息，添加好友后要发送这个申请信息
-        QueryWrapper<UserContactApply> ucaQueryWrapper = new QueryWrapper<>();
-        ucaQueryWrapper.lambda()
-                .eq(UserContactApply::getApplyUserId, contactApplyAddDTO.getApplyUserId())
-                .eq(UserContactApply::getContactId, contactApplyAddDTO.getContactId());
-        UserContactApply userContactApply = userContactApplyMapper.selectOne(ucaQueryWrapper);
+        String applyInfo;
+        if (defaultSysSettingProperties.getRobotId().equals(contactApplyAddDTO.getContactId())) {
+            // 注册的时候加的机器人是没有申请信息的，构造一个
+            applyInfo = defaultSysSettingProperties.getRobotWelcomeMsg();  // 设置为欢迎消息
+        } else {
+            QueryWrapper<UserContactApply> ucaQueryWrapper = new QueryWrapper<>();
+            ucaQueryWrapper.lambda()
+                    .eq(UserContactApply::getApplyUserId, contactApplyAddDTO.getApplyUserId())
+                    .eq(UserContactApply::getContactId, contactApplyAddDTO.getContactId());
+            UserContactApply userContactApply = userContactApplyMapper.selectOne(ucaQueryWrapper);
+            if (userContactApply == null) {
+                // 直接添加的那种没有申请信息，使用默认信息
+                applyInfo = Constants.MESSAGE_FRIEND_ADD;
+            }
+            else {
+                applyInfo = userContactApply.getApplyInfo();
+            }
+        }
 
         // 创建会话（添加好友/群聊会生成聊天框，好友聊天框里申请人会发送申请信息的内容）
         String sessionId;
@@ -315,7 +330,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             // 因为两个人的会话是唯一的，就算删了好友加回来也是同一个会话，所以可能是新增也可能是更新
             ChatSession chatSession = new ChatSession();
             chatSession.setSessionId(sessionId);
-            chatSession.setLastMessage(userContactApply.getApplyInfo());
+            chatSession.setLastMessage(applyInfo);
             chatSession.setLastReceiveTime(now);
             chatSessionServiceImpl.saveOrUpdate(chatSession);
             log.info("新增/更新用户间会话 {}", chatSession);
@@ -351,7 +366,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             // 新增这个聊天信息
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setSessionId(sessionId);
-            chatMessage.setMessageContent(userContactApply.getApplyInfo());
+            chatMessage.setMessageContent(applyInfo);
             chatMessage.setSendUserId(contactApplyAddDTO.getApplyUserId());
             chatMessage.setContactId(contactApplyAddDTO.getContactId());
             chatMessage.setMessageType(MessageTypeEnum.CHAT);
@@ -373,11 +388,11 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatSessionUserVO.setContactName(contactUserInfo.getNickName());
             chatSessionUserVO.setContactType(contactApplyAddDTO.getContactType());
             chatSessionUserVO.setSessionId(sessionId);
-            chatSessionUserVO.setLastMessage(userContactApply.getApplyInfo());
+            chatSessionUserVO.setLastMessage(applyInfo);
             chatSessionUserVO.setLastReceiveTime(now);
             userAddAcceptMessage.setChatSessionUserVO(chatSessionUserVO);
             channelUtils.sendNotice(userAddAcceptMessage);
-            log.info("发送被申请人同意了别人申请的ws通知  {}", userAddAcceptMessage);
+            log.info("向被申请人发送同意了申请的ws通知  {}", userAddAcceptMessage);
 
             // 给申请人发送申请被别人同意的通知
             UserAddByOthersNotice userAddByOthersNotice = new UserAddByOthersNotice();
@@ -388,7 +403,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatSessionUserVO.setContactName(applyUserInfo.getNickName());
             userAddByOthersNotice.setChatSessionUserVO(chatSessionUserVO);
             channelUtils.sendNotice(userAddByOthersNotice);
-            log.info("发送申请人申请被别人同意的ws通知  {}", userAddByOthersNotice);
+            log.info("向申请人发送申请被同意的ws通知  {}", userAddByOthersNotice);
 
             log.info("添加好友成功 {}", contactApplyAddDTO);
         } else {
@@ -429,10 +444,6 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatMessage.setStatus(MessageStatusEnum.SENT);
             chatMessageMapper.insert(chatMessage);
             log.info("新增聊天消息 {}", chatMessage);
-
-            // 将群聊添加到申请人的联系人id列表中
-            redisUtils.addToContactIds(contactApplyAddDTO.getApplyUserId(), contactApplyAddDTO.getContactId());
-            log.info("更新redis用户 {} 的联系人id列表 添加群聊id: {}", contactApplyAddDTO.getApplyUserId(), groupInfo.getGroupId());
 
             // 将申请人加入群聊的channelGroup中
             channelUtils.addUser2Group(contactApplyAddDTO.getApplyUserId(), groupInfo.getGroupId());
