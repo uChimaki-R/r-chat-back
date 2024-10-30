@@ -87,9 +87,7 @@ public class RedisUtils {
 //            return list.stream().map(oo -> (String) oo).collect(Collectors.toList());
 //        }
         // 改用工具类来执行上面的逻辑
-        // get(0) 是因为jackson在反序列化列表时第一个元素是类型，后面才是数据，如（["java.util.ArrayList",["U00000000002"]]）
-        // 序列化回列表的时候返回的是[["U00000000002"]]，要get(0)才能获取到列表内容
-        return CastUtils.castList(redisOperation.lRange(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, 0, -1).get(0), String.class);
+        return CastUtils.castList(redisOperation.lRange(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, 0, -1), String.class);
     }
 
     /**
