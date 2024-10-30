@@ -30,10 +30,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -129,12 +131,18 @@ public class ChannelUtils {
 
         // 从redis中获取用户的联系人id列表
         List<String> contactIds = redisUtils.getContactIds(userId);
-        // 获取群聊的id列表
-        List<String> groupContactIds = contactIds.stream().filter(id -> IdPrefixEnum.GROUP.equals(IdPrefixEnum.getPrefix(id))).collect(Collectors.toList());
-        // 将用户的channel加入到用户加入的群聊对应的channelGroup中
-        groupContactIds.forEach(groupId -> {
-            addUser2Group(userId, groupId);
-        });
+        List<String> groupContactIds;
+        if (contactIds != null && !contactIds.isEmpty()) {
+            // 获取群聊的id列表
+            groupContactIds = contactIds.stream().filter(id -> IdPrefixEnum.GROUP.equals(IdPrefixEnum.getPrefix(id))).collect(Collectors.toList());
+            // 将用户的channel加入到用户加入的群聊对应的channelGroup中
+            groupContactIds.forEach(groupId -> {
+                addUser2Group(userId, groupId);
+            });
+        }
+        else {
+            groupContactIds = new ArrayList<>();
+        }
 
         // 添加用户心跳缓存
         redisUtils.setUserHeartBeat(userId);
@@ -259,6 +267,7 @@ public class ChannelUtils {
         if (prefix == null) {
             return;
         }
+        MDC.put("ws", " ws: send to " + contactId);
         switch (prefix) {
             case USER:
                 sendNotice2User(notice);
@@ -270,6 +279,7 @@ public class ChannelUtils {
                 log.warn(Constants.IN_SWITCH_DEFAULT);
                 throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
         }
+        MDC.remove("ws");
     }
 
     /**
