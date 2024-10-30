@@ -40,7 +40,7 @@ public interface IUserContactService extends IService<UserContact> {
     List<BasicInfoDTO> loadContact(UserContactTypeEnum contactType);
 
     /**
-     * 添加联系人
+     * 添加联系人，包括redis列表更新、会话信息和用户会话信息的新增或更新、聊天信息（申请信息）的新增、发送同意添加和被好友同意的通知等
      */
     void addContact(ContactApplyAddDTO contactApplyAddDTO);
 
