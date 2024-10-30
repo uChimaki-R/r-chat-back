@@ -162,7 +162,13 @@ public class ChannelUtils {
         // 上面已经查过自己加入的群聊id列表了，把自己也加入就行
         groupContactIds.add(userId);
         QueryWrapper<ChatMessage> messageQueryWrapper = new QueryWrapper<>();
-        messageQueryWrapper.lambda().in(ChatMessage::getContactId, groupContactIds);
+        messageQueryWrapper.lambda()
+                // 使用and给这两个条件打个括号
+                .and(o -> {
+                    o.in(ChatMessage::getContactId, groupContactIds)
+                            .or().eq(ChatMessage::getSendUserId, userId); // 下线了也可能有是自己发的信息发出去了，比如说别人同意了自己的好友请求
+                })
+                .ge(ChatMessage::getSendTime, fromTime);  // 时间限制
         List<ChatMessage> chatMessages = chatMessageMapper.selectList(messageQueryWrapper);
         log.info("获取用户上次下线后的未读聊天信息 {}", chatMessages);
 
