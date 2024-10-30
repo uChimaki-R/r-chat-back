@@ -44,9 +44,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     private final UserInfoMapper userInfoMapper;
     private final UserContactMapper userContactMapper;
     private final BeautyUserInfoMapper beautyUserInfoMapper;
-    private final ChatSessionMapper chatSessionMapper;
-    private final ChatSessionUserMapper chatSessionUserMapper;
-    private final ChatMessageMapper chatMessageMapper;
 
     private final AppProperties appProperties;
     private final RedisUtils redisUtils;
@@ -90,8 +87,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
         // 添加机器人为好友
         String robotId = defaultSysSettingProperties.getRobotId();
-        String robotName = defaultSysSettingProperties.getRobotNickName();
-        String robotMsg = defaultSysSettingProperties.getRobotWelcomeMsg();
         ContactApplyAddDTO robotAdd = new ContactApplyAddDTO();
         robotAdd.setApplyUserId(userId);
         robotAdd.setContactId(robotId);
@@ -99,40 +94,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         robotAdd.setContactType(UserContactTypeEnum.USER);
         userContactService.addContact(robotAdd);
         log.info("{} 成功添加机器人为好友", userId);
-
-        // 添加机器人会话消息（注册后就有机器人发送欢迎消息）
-        String sessionId = StringUtils.getSessionId(new String[]{userId, robotId});
-
-        // 添加会话消息
-        ChatSession chatSession = new ChatSession();
-        chatSession.setSessionId(sessionId);
-        chatSession.setLastMessage(robotMsg);
-        chatSession.setLastReceiveTime(millis);
-        chatSessionMapper.insert(chatSession);
-        log.info("{} 添加会话消息 {}", userId, chatSession);
-
-        // 添加用户对与机器人这个会话的关系，只存用户看到机器人的会话
-        ChatSessionUser chatSessionUser = new ChatSessionUser();
-        chatSessionUser.setSessionId(sessionId);
-        chatSessionUser.setUserId(userId);
-        chatSessionUser.setContactId(robotId);
-        chatSessionUser.setContactName(robotName);
-        chatSessionUserMapper.insert(chatSessionUser);
-        log.info("{} 添加会话用户对应信息 {}", userId, chatSessionUser);
-
-        // 添加聊天消息，机器人向用户发送欢迎信息
-        ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setSessionId(sessionId);
-        chatMessage.setSendUserId(robotId);
-        chatMessage.setSendUserNickName(robotName);
-        chatMessage.setContactId(userId);
-        chatMessage.setContactType(UserContactTypeEnum.USER);
-        chatMessage.setMessageType(MessageTypeEnum.CHAT);
-        chatMessage.setMessageContent(robotMsg);
-        chatMessage.setStatus(MessageStatusEnum.SENT);
-        chatMessage.setSendTime(millis);
-        chatMessageMapper.insert(chatMessage);
-        log.info("{} 添加聊天信息 {}", userId, chatMessage);
 
         log.info("注册新账号成功 {}", userInfo);
     }
