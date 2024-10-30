@@ -62,14 +62,18 @@ public class RedisUtils {
      * 保存用户的联系人id列表
      */
     public void setContactIds(String userId, List<String> contactIds) {
-        redisOperation.lLeftPushAll(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, contactIds);
+        for (String contactId : contactIds) {
+            redisOperation.lLeftPush(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, contactId);
+        }
     }
 
     /**
      * 更新用户的联系人id列表
      */
     public void addToContactIds(String userId, String... contactIds) {
-        redisOperation.lLeftPushAll(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, (Object) contactIds);
+        for (String contactId : contactIds) {
+            redisOperation.lLeftPush(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, contactId);
+        }
     }
 
     /**
