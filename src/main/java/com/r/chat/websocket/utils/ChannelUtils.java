@@ -175,8 +175,8 @@ public class ChannelUtils {
                 .and(o -> {
                     o.in(ChatMessage::getContactId, groupContactIds)
                             .or().eq(ChatMessage::getSendUserId, userId); // 下线了也可能有是自己发的信息发出去了，比如说别人同意了自己的好友请求
-                })
-                .ge(ChatMessage::getSendTime, fromTime);  // 时间限制
+                });
+//                .ge(ChatMessage::getSendTime, fromTime);  // todo 暂时不用时间限制，把所有信息都发了，方便调试
         List<ChatMessage> chatMessages = chatMessageMapper.selectList(messageQueryWrapper);
         log.info("获取用户上次下线后的未读聊天信息 {}", chatMessages);
 
