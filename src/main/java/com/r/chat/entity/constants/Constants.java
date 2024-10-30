@@ -52,6 +52,7 @@ public class Constants {
 
     // chat message
     public static final String MESSAGE_GROUP_CREATED = "群聊已创建，可以和好友一起畅聊了";
+    public static final String MESSAGE_FRIEND_ADD = "我们已经是好友了，一起聊天吧";
     public static final String MESSAGE_JOIN_GROUP = "%s 加入了群聊";
 
     // validate failure message
