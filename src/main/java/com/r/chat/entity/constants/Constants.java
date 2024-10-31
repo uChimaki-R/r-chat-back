@@ -18,7 +18,7 @@ public class Constants {
     public static final String MESSAGE_CAN_NOT_SEE_THE_FRIEND = "非法操作 与用户 [{}] 非好友(状态非: 好友/被删除/被拉黑)";
     public static final String MESSAGE_REPETITIVE_OPERATION = "重复操作";
     public static final String MESSAGE_PARAMETER_ERROR = "参数错误";
-    public static final String MESSAGE_STATUS_ERROR = "状态信息错误";
+    public static final String MESSAGE_ENUM_ERROR = "枚举信息错误";
     public static final String MESSAGE_CHECK_CODE_ERROR = "验证码错误";
     public static final String MESSAGE_EMAIL_ALREADY_REGISTERED = "邮箱已注册";
     public static final String MESSAGE_BEAUTY_USER_ID_ALREADY_EXISTED = "靓号已存在";
@@ -65,11 +65,14 @@ public class Constants {
     public static final String VALIDATE_EMPTY_USER_ID = "用户id不能为空";
     public static final String VALIDATE_EMPTY_GROUP_ID = "群聊id不能为空";
     public static final String VALIDATE_EMPTY_APPLY_ID = "申请id不能为空";
+    public static final String VALIDATE_EMPTY_SESSION_ID = "会话id不能为空";
     public static final String VALIDATE_EMPTY_STATUS = "状态信息不能为空";
     public static final String VALIDATE_EMPTY_ID = "id不能为空";
     public static final String VALIDATE_EMPTY_DESCRIPTION = "描述信息不能为空";
     public static final String VALIDATE_EMPTY_VERSION = "版本信息不能为空";
     public static final String VALIDATE_EMPTY_METHOD_TYPE = "更新方法不能为空";
+    public static final String VALIDATE_EMPTY_MESSAGE_CONTENT = "消息内容不能为空";
+    public static final String VALIDATE_MESSAGE_CONTENT_TOO_LONG = "消息内容过长";
     public static final String VALIDATE_ILLEGAL_GENDER = "性别信息有误";
     public static final String VALIDATE_ILLEGAL_NICK_NAME = "用户名信息格式有误";
     public static final String VALIDATE_ILLEGAL_EMAIL = "邮箱信息格式有误";
