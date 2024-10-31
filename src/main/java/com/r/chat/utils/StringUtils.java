@@ -87,4 +87,16 @@ public class StringUtils {
         // 前缀相同看长度
         return v1s.length >= v2s.length;
     }
+
+    /**
+     * 将字符串中的html字符转义，防止注入，更换换行符（前端使用br标签显示换行效果）
+     */
+    public static String transStrForFront(String origin) {
+        if (isEmpty(origin)) return origin;
+        return origin
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\r\n", "<br>")
+                .replace("\n", "<br>");
+    }
 }
