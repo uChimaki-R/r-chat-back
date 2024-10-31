@@ -223,6 +223,7 @@ public class ChannelUtils {
         String userId = getUserId(channel);
         if (userId == null) {
             log.warn("尝试移除不存在的channel {}", channel);
+            return;
         }
         USER_CHANNEL_MAP.remove(userId);
         log.info("移除绑定 channel: {}", channel);
