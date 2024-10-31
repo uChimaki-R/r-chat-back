@@ -44,7 +44,7 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
     public void saveOrUpdateAppUpdate(AppUpdateDTO appUpdateDTO) {
         if (appUpdateDTO.getMethodType() == null) {
             log.warn("新增或修改app更新信息失败: 更新手段信息错误 {}", appUpdateDTO);
-            throw new EnumIsNullException(Constants.MESSAGE_STATUS_ERROR);
+            throw new EnumIsNullException(Constants.MESSAGE_ENUM_ERROR);
         }
         if (AppUpdateMethodTypeEnum.FILE.equals(appUpdateDTO.getMethodType())) {
             // 文件更新方式需要保存文件
@@ -116,7 +116,7 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
         AppUpdateStatusEnum status = appUpdateReleaseDTO.getStatus();
         if (status == null) {
             log.warn("发布app更新失败: 状态信息为空 {}", appUpdateReleaseDTO);
-            throw new EnumIsNullException(Constants.MESSAGE_STATUS_ERROR);
+            throw new EnumIsNullException(Constants.MESSAGE_ENUM_ERROR);
         }
         // 查找原来的app更新信息
         AppUpdate dbInfo = appUpdateMapper.selectById(appUpdateReleaseDTO.getId());
