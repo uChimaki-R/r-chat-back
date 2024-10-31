@@ -2,6 +2,7 @@ package com.r.chat.redis;
 
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.SysSettingDTO;
+import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.properties.AppProperties;
 import com.r.chat.properties.DefaultSysSettingProperties;
 import com.r.chat.utils.CastUtils;
@@ -41,21 +42,32 @@ public class RedisUtils {
      * 移除用户心跳缓存
      */
     public void removeUserHeartBeat(String userId) {
-        redisOperation.delete(Constants.REDIS_KEY_PREFIX_WS_HEART_BEAT + userId);
+        if (userId != null) {
+            redisOperation.delete(Constants.REDIS_KEY_PREFIX_WS_HEART_BEAT + userId);
+        }
     }
 
     /**
-     * 保存token到id的映射，设置一天的过期时间
+     * 保存token到userTokenInfo的映射，设置一天的过期时间
      */
-    public void setToken2UserId(String token, String userId) {
-        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token, userId, 1, TimeUnit.DAYS);
+    public void setToken2UserTokenInfo(String token, UserTokenInfoDTO userTokenInfoDTO) {
+        redisOperation.setEx(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token, userTokenInfoDTO, 1, TimeUnit.DAYS);
     }
 
     /**
-     * 根据用户token获取id
+     * 根据用户token获取用户信息
      */
-    public String getUserIdByToken(String token) {
-        return (String) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
+    public UserTokenInfoDTO getUserTokenInfoByToken(String token) {
+        return (UserTokenInfoDTO) redisOperation.get(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
+    }
+
+    /**
+     * 根据token移除用户登录信息
+     */
+    public void removeUserTokenInfoByToken(String token) {
+        if (token != null) {
+            redisOperation.delete(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
+        }
     }
 
     /**
@@ -94,16 +106,8 @@ public class RedisUtils {
      * 清空用户的联系人id列表
      */
     public void removeUserContactIds(String userId) {
-        redisOperation.delete(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId);
-    }
-
-    /**
-     * 根据用户id移除用户登录信息token
-     */
-    public void removeTokenByUserId(String userId) {
-        String token = getUserIdByToken(userId);
-        if (token != null) {
-            redisOperation.delete(Constants.REDIS_KEY_PREFIX_USER_TOKEN + token);
+        if (userId != null) {
+            redisOperation.delete(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId);
         }
     }
 
