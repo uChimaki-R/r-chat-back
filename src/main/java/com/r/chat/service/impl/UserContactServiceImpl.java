@@ -369,7 +369,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatMessage.setMessageContent(applyInfo);
             chatMessage.setSendUserId(contactApplyAddDTO.getApplyUserId());
             chatMessage.setContactId(contactApplyAddDTO.getContactId());
-            chatMessage.setMessageType(MessageTypeEnum.CHAT);
+            chatMessage.setMessageType(MessageTypeEnum.TEXT);
             chatMessage.setSendUserNickName(applyUserInfo.getNickName());
             chatMessage.setSendTime(now);
             chatMessage.setContactType(contactApplyAddDTO.getContactType());
