@@ -7,7 +7,7 @@ import com.r.chat.entity.dto.BeautyUserInfoQueryDTO;
 import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
-import com.r.chat.exception.ParameterErrorException;
+import com.r.chat.exception.BeautyUserInfoNotExistException;
 import com.r.chat.service.IBeautyUserInfoService;
 import com.r.chat.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +64,7 @@ public class AdminBeautyController {
             log.info("成功删除靓号信息 id: {}", id);
         } else {
             log.warn("删除靓号信息失败: 信息不存在 id: {}", id);
-            throw new ParameterErrorException(Constants.MESSAGE_BEAUTY_USER_INFO_NOT_EXIST);
+            throw new BeautyUserInfoNotExistException(Constants.MESSAGE_BEAUTY_USER_INFO_NOT_EXIST);
         }
         return Result.success();
     }
