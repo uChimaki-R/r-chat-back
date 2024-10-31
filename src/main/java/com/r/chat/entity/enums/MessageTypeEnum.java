@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum MessageTypeEnum {
-    CHAT(0, "普通聊天消息"),
-    FILE_UPLOAD(1, "媒体文件"),
+    TEXT(0, "普通聊天消息"),
+    MEDIA(1, "媒体文件"),
     NOTICE(2, "显示在聊天中间的提示信息");
 
     @EnumValue
