@@ -1,5 +1,6 @@
 package com.r.chat.websocket.handler;
 
+import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.utils.StringUtils;
 import com.r.chat.websocket.utils.ChannelUtils;
@@ -57,18 +58,18 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
                 ctx.close();
                 return;
             }
-            // 获取userId
-            String userId = redisUtils.getUserIdByToken(token);
-            if (StringUtils.isEmpty(userId)) {
+            // 获取用户信息
+            UserTokenInfoDTO userTokenInfo = redisUtils.getUserTokenInfoByToken(token);
+            if (userTokenInfo == null) {
                 log.warn("ws断开: token不合法");
                 ctx.close();
                 return;
             }
-            log.info("ws连接成功 userId: {}", userId);
+            log.info("ws连接成功 {}", userTokenInfo);
             // 保存自定义的日志输出标识
-            MDC.put("ws", " ws: connect " + userId);
+            MDC.put("ws", " ws: connect " + userTokenInfo.getUserId());
             // 将userId和channel绑定
-            channelUtils.initChannel(userId, ctx.channel());
+            channelUtils.initChannel(userTokenInfo.getUserId(), token, ctx.channel());
             MDC.remove("ws");
         }
     }
