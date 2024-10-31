@@ -2,7 +2,7 @@ package com.r.chat.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
@@ -135,8 +135,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 设置并保存token
         String token = StringUtils.generateToken(userInfo.getUserId());
         userTokenInfoDTO.setToken(token);
-        // 保存用户token到id的映射到redis，以后登录就可以从上下文里获取用户id
-        redisUtils.setToken2UserId(token, userInfo.getUserId());
+        // 保存用户token到userTokenInfo的映射到redis，以后登录就可以从上下文里获取用户id
+        // 而且后面聊天的时候需要获取用户名，应该使用redis的而不是每次发送消息都查一遍数据库占用性能
+        // 再者userTokenInfoDTO里面保存了token信息，也就是说即使在业务层，不仅能获取到userId，还能获取到token
+        // 能获取到token，就能够根据这个token更新缓存的userTokenInfo信息（主要是更新用户名）
+        redisUtils.setToken2UserTokenInfo(token, userTokenInfoDTO);
         log.info("{}账号 [{}] 登录成功", isAdmin ? "管理员" : "", loginDTO.getEmail());
 
         // 查询联系人信息并保存到redis中，供后续netty聊天功能使用
@@ -161,19 +164,19 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateUserInfo(UserInfoDTO userInfoDTO) {
-        String userId = UserIdContext.getCurrentUserId();
+        String userId = UserTokenInfoContext.getCurrentUserId();
         String newContactName = userInfoDTO.getNickName();
         // 查看是否更新了名字，更新了的话需要修改会话中的昵称
         UserInfo userInfo = getById(userId);
         if (!userInfo.getNickName().equals(newContactName)) {
             // 名字不一样，需要修改会话中的名称，并发送通知让前端重新渲染
-            log.info("修改了用户名称, 需要修改会话中的用户名称");
+            log.info("修改了用户名称, 需要修改会话中的用户名称为: {}", newContactName);
             UpdateWrapper<ChatSessionUser> updateWrapper = new UpdateWrapper<>();
             updateWrapper.lambda()
                     .eq(ChatSessionUser::getContactId, userInfo.getUserId())
                     .set(ChatSessionUser::getContactName, userInfo.getNickName());
             chatSessionUserMapper.update(null, updateWrapper);
-            log.info("更新会话中的用户名称信息成功");
+            log.info("更新会话中的用户名称信息成功 newContactName: {}", newContactName);
             // 发送用户名修改的通知给所有该用户的好友
             // 查找自己的好友
             QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
@@ -189,6 +192,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 channelUtils.sendNotice(contactRenameNotice);
                 log.info("发送用户名称修改的ws通知 {}", contactRenameNotice);
             });
+            // 更新redis中userTokenInfo中的名字
+            // 获取原来的来修改
+            UserTokenInfoDTO currentUserTokenInfo = UserTokenInfoContext.getCurrentUserTokenInfo();
+            if (currentUserTokenInfo != null) {
+                // 修改名字
+                currentUserTokenInfo.setNickName(newContactName);
+                redisUtils.setToken2UserTokenInfo(currentUserTokenInfo.getToken(), currentUserTokenInfo);
+                log.info("更新redis中的用户昵称成功 {}", currentUserTokenInfo);
+            }
         }
 
         // 更新数据
@@ -204,7 +216,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Override
     public void updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
         // 检查旧密码是否正确
-        UserInfo userInfo = getById(UserIdContext.getCurrentUserId());
+        UserInfo userInfo = getById(UserTokenInfoContext.getCurrentUserId());
         if (!userInfo.getPassword().equals(StringUtils.encodeMd5(passwordUpdateDTO.getOldPassword()))) {
             log.warn("更新密码失败: 密码错误");
             throw new PasswordErrorException(Constants.MESSAGE_PASSWORD_ERROR);
@@ -220,7 +232,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Override
     public void logout() {
         // 移除用户登录token
-        redisUtils.removeTokenByUserId(UserIdContext.getCurrentUserId());
+        redisUtils.removeUserTokenInfoByToken(UserTokenInfoContext.getCurrentUserToken());
         // todo 关闭ws连接
     }
 
