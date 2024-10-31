@@ -212,7 +212,9 @@ public class ChannelUtils {
     public void removeChannel(Channel channel) {
         // 移除用户channel
         String userId = getUserId(channel);
-        if (userId == null) return;
+        if (userId == null) {
+            log.warn("尝试移除不存在的channel {}", channel);
+        }
         USER_CHANNEL_MAP.remove(userId);
         log.info("移除绑定 channel: {}", channel);
         // 移除心跳缓存
@@ -241,6 +243,7 @@ public class ChannelUtils {
         }
         Channel channel = USER_CHANNEL_MAP.get(userId);
         if (channel == null) {
+            log.warn("用户 {} 对应的channel不存在, 无法加入到channelGroup", userId);
             return;
         }
         // 将用户的channel加入到群聊channelGroup中
@@ -259,15 +262,17 @@ public class ChannelUtils {
      * 发送通知
      */
     private void sendNtc(Notice notice) {
-        String contactId = notice.getReceiveId();
-        if (StringUtils.isEmpty(contactId)) {
+        String receiveId = notice.getReceiveId();
+        if (StringUtils.isEmpty(receiveId)) {
+            log.warn("通知发送的对象id为空");
             return;
         }
-        IdPrefixEnum prefix = IdPrefixEnum.getPrefix(contactId);
+        IdPrefixEnum prefix = IdPrefixEnum.getPrefix(receiveId);
         if (prefix == null) {
+            log.warn("通知发送的对象id格式有误 receiveId: {}", receiveId);
             return;
         }
-        MDC.put("ws", " ws: send to " + contactId);
+        MDC.put("ws", " ws: send to " + receiveId);
         switch (prefix) {
             case USER:
                 sendNotice2User(notice);
@@ -287,11 +292,9 @@ public class ChannelUtils {
      */
     private void sendNotice2User(Notice notice) {
         String receiveId = notice.getReceiveId();
-        if (StringUtils.isEmpty(receiveId)) {
-            return;
-        }
         Channel channel = USER_CHANNEL_MAP.get(receiveId);
         if (channel == null) {
+            log.warn("用户 {} 对应的channel不存在", receiveId);
             return;
         }
         channel.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
@@ -309,11 +312,9 @@ public class ChannelUtils {
      */
     private void sendNotice2Group(Notice notice) {
         String groupId = notice.getReceiveId();
-        if (StringUtils.isEmpty(groupId)) {
-            return;
-        }
         ChannelGroup group = GROUP_CHANNEL_MAP.get(groupId);
         if (group == null) {
+            log.warn("群聊 {} 对应的channelGroup不存在", groupId);
             return;
         }
         group.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
