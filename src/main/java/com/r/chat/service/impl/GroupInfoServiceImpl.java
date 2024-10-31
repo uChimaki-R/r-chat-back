@@ -10,6 +10,7 @@ import com.r.chat.entity.dto.GroupInfoQueryDTO;
 import com.r.chat.entity.dto.SysSettingDTO;
 import com.r.chat.entity.enums.*;
 import com.r.chat.entity.message.GroupCreatedNotice;
+import com.r.chat.entity.message.ContactRenameNotice;
 import com.r.chat.entity.po.*;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
@@ -155,9 +156,34 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
 
             log.info("新增群聊成功 {}", groupInfo);
         } else {
+            // 查询原来的信息
+            GroupInfo dbInfo = groupInfoMapper.selectById(groupInfo.getGroupId());
+            if (dbInfo == null) {
+                // 群聊不存在
+                throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
+            }
             // 修改群聊信息
             updateById(groupInfo);
-            log.info("修改群聊信息成功 {}", groupInfo);
+            log.info("修改群聊信息 {}", groupInfo);
+            // 如果群聊名改了的话需要把会话信息中的联系名称也改了，并且发送通知给前端让前端重新渲染
+            if (!dbInfo.getGroupName().equals(groupInfo.getGroupName())) {
+                log.info("修改了群聊名称, 需要修改会话中的群聊名称");
+                UpdateWrapper<ChatSessionUser> updateWrapper = new UpdateWrapper<>();
+                updateWrapper.lambda()
+                        .eq(ChatSessionUser::getContactId, groupInfo.getGroupId())
+                        .set(ChatSessionUser::getContactName, groupInfo.getGroupName());
+                chatSessionUserServiceImpl.update(updateWrapper);
+                log.info("更新会话中的群聊名称信息成功");
+                // 发送群聊名修改的通知给所有群成员
+                ContactRenameNotice contactRenameNotice = new ContactRenameNotice();
+                contactRenameNotice.setReceiveId(groupInfo.getGroupId());
+                contactRenameNotice.setContactId(groupInfo.getGroupId());
+                contactRenameNotice.setContactName(groupInfo.getGroupName());
+                channelUtils.sendNotice(contactRenameNotice);
+                log.info("发送群聊名称修改的ws通知 {}", contactRenameNotice);
+            }
+
+            log.info("修改群聊信息成功 {}", groupInfoDTO);
         }
         // 头像文件的操作
         if (groupInfoDTO.getAvatarFile() == null) {
