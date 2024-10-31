@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.r.chat.entity.enums.FileTypeEnum;
 import com.r.chat.entity.enums.MessageStatusEnum;
 import com.r.chat.entity.enums.MessageTypeEnum;
 import com.r.chat.entity.enums.UserContactTypeEnum;
@@ -99,7 +100,7 @@ public class ChatMessage implements Serializable {
      * 文件类型
      */
     @TableField("file_type")
-    private Integer fileType;
+    private FileTypeEnum fileType;
 
     /**
      * 状态 0：正在发送 1：已发送
