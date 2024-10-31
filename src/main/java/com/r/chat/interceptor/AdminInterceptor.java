@@ -1,10 +1,10 @@
 package com.r.chat.interceptor;
 
 import com.r.chat.context.AdminContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.exception.IllegalOperationException;
 import com.r.chat.properties.AppProperties;
-import com.r.chat.redis.RedisUtils;
 import com.r.chat.utils.CollUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 @RequiredArgsConstructor
 public class AdminInterceptor implements HandlerInterceptor {
-    private final RedisUtils redisUtils;
     private final AppProperties appProperties;
 
     /**
@@ -31,10 +30,8 @@ public class AdminInterceptor implements HandlerInterceptor {
             // 没匹配到路径，给全局异常处理controller处理
             return true;
         }
-        // 从请求头中获取token
-        String token = request.getHeader("token");
-        // 用token从redis中获取用户id
-        String userId = redisUtils.getUserIdByToken(token);
+        // 前一个Token拦截器已经初始化了上下文对象，从上下文对象中获取用户id
+        String userId = UserTokenInfoContext.getCurrentUserId();
         // 判断是否管理员账号
         if (!CollUtils.contains(appProperties.getAdminUserIds(), userId)) {
             log.warn("拒绝请求: 非管理员账号");
