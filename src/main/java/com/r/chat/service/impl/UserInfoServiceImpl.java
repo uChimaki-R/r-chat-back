@@ -6,6 +6,7 @@ import com.r.chat.context.UserIdContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
+import com.r.chat.entity.message.ContactRenameNotice;
 import com.r.chat.entity.po.*;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.*;
@@ -18,6 +19,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
 import com.r.chat.utils.FileUtils;
 import com.r.chat.utils.StringUtils;
+import com.r.chat.websocket.utils.ChannelUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,10 +46,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     private final UserInfoMapper userInfoMapper;
     private final UserContactMapper userContactMapper;
     private final BeautyUserInfoMapper beautyUserInfoMapper;
+    private final ChatSessionUserMapper chatSessionUserMapper;
 
     private final AppProperties appProperties;
     private final RedisUtils redisUtils;
     private final DefaultSysSettingProperties defaultSysSettingProperties;
+    private final ChannelUtils channelUtils;
 
     @Override
     @Transactional(rollbackFor = Exception.class)  // 多次数据库操作，需要事务管理
@@ -161,11 +165,32 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         String newContactName = userInfoDTO.getNickName();
         // 查看是否更新了名字，更新了的话需要修改会话中的昵称
         UserInfo userInfo = getById(userId);
-        if (userInfo.getNickName().equals(newContactName)) {
-            // 名字一样，不用更新
-            newContactName = null;
+        if (!userInfo.getNickName().equals(newContactName)) {
+            // 名字不一样，需要修改会话中的名称，并发送通知让前端重新渲染
+            log.info("修改了用户名称, 需要修改会话中的用户名称");
+            UpdateWrapper<ChatSessionUser> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.lambda()
+                    .eq(ChatSessionUser::getContactId, userInfo.getUserId())
+                    .set(ChatSessionUser::getContactName, userInfo.getNickName());
+            chatSessionUserMapper.update(null, updateWrapper);
+            log.info("更新会话中的用户名称信息成功");
+            // 发送用户名修改的通知给所有该用户的好友
+            // 查找自己的好友
+            QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
+            queryWrapper.lambda()
+                    .eq(UserContact::getContactId, userInfo.getUserId())  // 和自己是好友的
+                    .eq(UserContact::getStatus, UserContactStatusEnum.FRIENDS);
+            userContactMapper.selectList(queryWrapper).stream().map(UserContact::getContactId).forEach(contactId -> {
+                // 对每个自己的好友发送消息
+                ContactRenameNotice contactRenameNotice = new ContactRenameNotice();
+                contactRenameNotice.setReceiveId(contactId);  // 发给好友
+                contactRenameNotice.setContactId(userId);  // 改了名字的是自己
+                contactRenameNotice.setContactName(userInfo.getNickName());  // 自己的新名字
+                channelUtils.sendNotice(contactRenameNotice);
+                log.info("发送用户名称修改的ws通知 {}", contactRenameNotice);
+            });
         }
-        // todo 修改会话中的昵称
+
         // 更新数据
         UserInfo updateInfo = CopyUtils.copyBean(userInfoDTO, UserInfo.class);
         updateInfo.setUserId(userId);
