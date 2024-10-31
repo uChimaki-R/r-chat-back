@@ -9,13 +9,15 @@ public class Constants {
     public static final String REDIS_KEY_SYS_SETTINGS = REDIS_KEY_PREFIX + "sys:settings";  // 系统设置保存路径
     public static final String REDIS_KEY_PREFIX_USER_CONTACT_IDS = REDIS_KEY_PREFIX + "ws:contact:";  // 用户联系人列表保存路径前缀
 
+    // log message
+    public static final String MESSAGE_CAN_NOT_SEE_THE_FRIEND = "非法操作 与 [{}] 非好友(状态非: 好友/被删除/被拉黑)";
+
     // exception message
     public static final String MESSAGE_SUCCESS = "请求成功";
     public static final String MESSAGE_INTERNAL_ERROR = "服务器内部错误";
     public static final String MESSAGE_NOT_FOUND = "请求地址不存在";
     public static final String MESSAGE_REQUEST_METHOD_ERROR = "请求方式错误";
     public static final String MESSAGE_ILLEGAL_OPERATION = "非法操作";
-    public static final String MESSAGE_CAN_NOT_SEE_THE_FRIEND = "非法操作 与用户 [{}] 非好友(状态非: 好友/被删除/被拉黑)";
     public static final String MESSAGE_REPETITIVE_OPERATION = "重复操作";
     public static final String MESSAGE_PARAMETER_ERROR = "参数错误";
     public static final String MESSAGE_ENUM_ERROR = "枚举信息错误";
@@ -42,7 +44,8 @@ public class Constants {
     public static final String MESSAGE_FILE_NOT_EXIST = "文件不存在";
     public static final String MESSAGE_GROUP_NOT_EXIST = "群聊不存在";
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
-    public static final String MESSAGE_NOT_IN_THE_GROUP = "不在此群聊";
+    public static final String MESSAGE_NOT_IN_THE_GROUP = "已不在此群聊";
+    public static final String MESSAGE_NOT_THE_FRIEND = "与此用户已不是好友";
     public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
     public static final String MESSAGE_NOT_ADMIN = "非管理员账号操作";
     public static final String MESSAGE_APP_ALREADY_RELEASED = "无法删除已发布的更新";
