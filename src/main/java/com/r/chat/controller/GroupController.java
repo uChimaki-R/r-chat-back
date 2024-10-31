@@ -1,6 +1,6 @@
 package com.r.chat.controller;
 
-import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.dto.BasicInfoDTO;
@@ -55,7 +55,7 @@ public class GroupController {
      */
     @GetMapping("/loadMyGroup")
     public Result<List<GroupDetailInfoVO>> loadMyGroup() {
-        String ownerId = UserIdContext.getCurrentUserId();
+        String ownerId = UserTokenInfoContext.getCurrentUserId();
         List<GroupInfo> list = groupInfoService.lambdaQuery().eq(GroupInfo::getGroupOwnerId, ownerId).list();
         List<GroupDetailInfoVO> groupDetailInfoVOList = CopyUtils.copyList(list, GroupDetailInfoVO.class);
         initGroupMemberCounts(groupDetailInfoVOList);  // 计算群成员数
@@ -120,7 +120,7 @@ public class GroupController {
     private GroupInfo getBasicGroupInfo(String groupId) {
         // 看该用户是否在群里
         UserContact userContact = userContactService.lambdaQuery()
-                .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
+                .eq(UserContact::getUserId, UserTokenInfoContext.getCurrentUserId())
                 .eq(UserContact::getContactId, groupId)
                 .one();
         if (userContact == null || !UserContactStatusEnum.FRIENDS.equals(userContact.getStatus())) {

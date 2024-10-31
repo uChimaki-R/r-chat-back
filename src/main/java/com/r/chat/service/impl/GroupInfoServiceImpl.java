@@ -3,7 +3,7 @@ package com.r.chat.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.context.AdminContext;
-import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.dto.GroupInfoQueryDTO;
@@ -68,7 +68,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             // 新增群聊
             // 判断该用户的群聊是否已经达到上限
             SysSettingDTO sysSettingDTO = redisUtils.getSysSetting();
-            Long count = lambdaQuery().eq(GroupInfo::getGroupOwnerId, UserIdContext.getCurrentUserId()).count();
+            Long count = lambdaQuery().eq(GroupInfo::getGroupOwnerId, UserTokenInfoContext.getCurrentUserId()).count();
             if (count > sysSettingDTO.getMaxGroupCount()) {
                 log.warn("拒绝新增群聊: 群聊数量达到上限 [{}]", sysSettingDTO.getMaxGroupCount());
                 throw new GroupCountLimitException(String.format(Constants.MESSAGE_GROUP_COUNT_LIMIT, sysSettingDTO.getMaxGroupCount()));
@@ -84,7 +84,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             // 添加群聊到数据库
             // 新建群号，补充内容
             groupInfo.setGroupId(StringUtils.getRandomGroupId());
-            groupInfo.setGroupOwnerId(UserIdContext.getCurrentUserId());
+            groupInfo.setGroupOwnerId(UserTokenInfoContext.getCurrentUserId());
             groupInfo.setCreateTime(now);
             groupInfo.setStatus(GroupInfoStatusEnum.NORMAL);
             save(groupInfo);
@@ -115,7 +115,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             // 新增群主对群聊的会话关系
             ChatSessionUser chatSessionUser = new ChatSessionUser();
             chatSessionUser.setSessionId(sessionId);
-            chatSessionUser.setUserId(UserIdContext.getCurrentUserId());
+            chatSessionUser.setUserId(UserTokenInfoContext.getCurrentUserId());
             chatSessionUser.setContactId(groupInfo.getGroupId());
             chatSessionUser.setContactName(groupInfo.getGroupName());
             chatSessionUserServiceImpl.saveOrUpdateByMultiId(chatSessionUser);
@@ -134,16 +134,16 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             log.info("新增群聊创建成功提示信息 {}", chatMessage);
 
             // 更新自己的联系人id列表
-            redisUtils.addToContactIds(UserIdContext.getCurrentUserId(), groupInfo.getGroupId());
+            redisUtils.addToContactIds(UserTokenInfoContext.getCurrentUserId(), groupInfo.getGroupId());
             log.info("更新redis用户联系人id列表 添加群聊id: {}", groupInfo.getGroupId());
 
             // 将自己加入群聊的channelGroup中
-            channelUtils.addUser2Group(UserIdContext.getCurrentUserId(), groupInfo.getGroupId());
+            channelUtils.addUser2Group(UserTokenInfoContext.getCurrentUserId(), groupInfo.getGroupId());
             log.info("将自己加入到群聊的channelGroup中 groupId: {}", groupInfo.getGroupId());
 
             // 发送ws通知前端渲染群聊会话
             GroupCreatedNotice groupCreatedNotice = new GroupCreatedNotice();
-            groupCreatedNotice.setReceiveId(UserIdContext.getCurrentUserId());
+            groupCreatedNotice.setReceiveId(UserTokenInfoContext.getCurrentUserId());
             // 构建用于渲染会话的数据
             ChatSessionUserVO chatSessionUserVO = CopyUtils.copyBean(chatSessionUser, ChatSessionUserVO.class);
             chatSessionUserVO.setLastMessage(Constants.MESSAGE_GROUP_CREATED);
@@ -216,8 +216,8 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
         }
         // 有两种情况可以解散群聊：1、群主本人解散 2、管理员强制解散
-        if (!groupInfo.getGroupOwnerId().equals(UserIdContext.getCurrentUserId()) || !AdminContext.isAdmin()) {
-            log.warn("解散群聊失败: 非群主或管理员操作 操作人id: {}, groupId: {}, 群主id: {}", UserIdContext.getCurrentUserId(), groupId, groupInfo.getGroupOwnerId());
+        if (!groupInfo.getGroupOwnerId().equals(UserTokenInfoContext.getCurrentUserId()) || !AdminContext.isAdmin()) {
+            log.warn("解散群聊失败: 非群主或管理员操作 操作人id: {}, groupId: {}, 群主id: {}", UserTokenInfoContext.getCurrentUserId(), groupId, groupInfo.getGroupOwnerId());
             throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
         }
         // 更新群聊状态为解散

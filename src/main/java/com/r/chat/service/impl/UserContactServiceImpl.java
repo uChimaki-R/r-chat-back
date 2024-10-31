@@ -3,7 +3,7 @@ package com.r.chat.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
@@ -105,14 +105,14 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                 throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
         }
         // 自己查自己的话就直接返回
-        if (Objects.equals(UserIdContext.getCurrentUserId(), contactId)) {
+        if (Objects.equals(UserTokenInfoContext.getCurrentUserId(), contactId)) {
             log.info("搜索自己 {}", contactSearchResultDTO);
             return contactSearchResultDTO;
         }
         // 否则补充此联系人和自己的关系（是不是朋友，有没有拉黑状态等等）
         QueryWrapper<UserContact> userContactQueryWrapper = new QueryWrapper<>();
         userContactQueryWrapper.lambda()
-                .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
+                .eq(UserContact::getUserId, UserTokenInfoContext.getCurrentUserId())
                 .eq(UserContact::getContactId, contactId);
         UserContact userContact = userContactMapper.selectOne(userContactQueryWrapper);
         contactSearchResultDTO.setStatus(userContact == null ? UserContactStatusEnum.NOT_FRIENDS : userContact.getStatus());
@@ -127,7 +127,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         // 查看对方是否已将自己拉黑
         QueryWrapper<UserContact> userContactQueryWrapper = new QueryWrapper<>();
         userContactQueryWrapper.lambda()
-                .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
+                .eq(UserContact::getUserId, UserTokenInfoContext.getCurrentUserId())
                 .eq(UserContact::getContactId, contactId);
         UserContact userContact = userContactMapper.selectOne(userContactQueryWrapper);
         if (userContact != null && UserContactStatusEnum.BLOCKED_BY_FRIEND.equals(userContact.getStatus())) {
@@ -183,7 +183,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         if (JoinTypeEnum.JOIN_DIRECTLY.equals(joinType)) {
             // 添加联系人
             ContactApplyAddDTO contactApplyAddDTO = new ContactApplyAddDTO();
-            contactApplyAddDTO.setApplyUserId(UserIdContext.getCurrentUserId());
+            contactApplyAddDTO.setApplyUserId(UserTokenInfoContext.getCurrentUserId());
             contactApplyAddDTO.setContactId(contactId);
             contactApplyAddDTO.setReceiveUserId(receiveUserId);
             contactApplyAddDTO.setContactType(prefix.getUserContactTypeEnum());
@@ -195,7 +195,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         // 先看之前是不是申请过
         QueryWrapper<UserContactApply> userContactApplyQueryWrapper = new QueryWrapper<>();
         userContactApplyQueryWrapper.lambda()
-                .eq(UserContactApply::getApplyUserId, UserIdContext.getCurrentUserId())
+                .eq(UserContactApply::getApplyUserId, UserTokenInfoContext.getCurrentUserId())
                 .eq(UserContactApply::getContactId, contactId)
                 .eq(UserContactApply::getReceiveUserId, receiveUserId);
         UserContactApply userContactApply = userContactApplyMapper.selectOne(userContactApplyQueryWrapper);
@@ -204,7 +204,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             // 没申请过，添加申请
             log.info("未申请添加过该联系人, 添加申请数据");
             UserContactApply uca = new UserContactApply();
-            uca.setApplyUserId(UserIdContext.getCurrentUserId());
+            uca.setApplyUserId(UserTokenInfoContext.getCurrentUserId());
             uca.setContactId(contactId);
             uca.setReceiveUserId(receiveUserId);
             uca.setApplyInfo(applyDTO.getApplyInfo());
@@ -251,11 +251,11 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         List<BasicInfoDTO> basicInfoDTOList;
         switch (contactType) {
             case USER:
-                basicInfoDTOList = userContactMapper.selectUserFriends(UserIdContext.getCurrentUserId());
+                basicInfoDTOList = userContactMapper.selectUserFriends(UserTokenInfoContext.getCurrentUserId());
                 log.info("查询到好友列表 {}", basicInfoDTOList);
                 break;
             case GROUP:
-                basicInfoDTOList = userContactMapper.selectGroupFriends(UserIdContext.getCurrentUserId());
+                basicInfoDTOList = userContactMapper.selectGroupFriends(UserTokenInfoContext.getCurrentUserId());
                 log.info("查询到加入的群聊 {}", basicInfoDTOList);
                 break;
             default:
@@ -515,7 +515,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
         }
         // 更新二者的关系
-        saveOrUpdateMutualContact(UserIdContext.getCurrentUserId(), contactId, status);
+        saveOrUpdateMutualContact(UserTokenInfoContext.getCurrentUserId(), contactId, status);
         // todo 从自己的好友列表缓存中删除联系人
         if (UserContactStatusEnum.DELETED_THE_FRIEND.equals(status)) {
             log.info("成功删除联系人 contactId: {}", contactId);
@@ -626,7 +626,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         // 查看该用户与本人的关系
         QueryWrapper<UserContact> userContactQueryWrapper = new QueryWrapper<>();
         userContactQueryWrapper.lambda()
-                .eq(UserContact::getUserId, UserIdContext.getCurrentUserId())
+                .eq(UserContact::getUserId, UserTokenInfoContext.getCurrentUserId())
                 .eq(UserContact::getContactId, contactId);
         UserContact userContact = userContactMapper.selectOne(userContactQueryWrapper);
         // 可以显示为好友的状态：好友、被删除、被拉黑

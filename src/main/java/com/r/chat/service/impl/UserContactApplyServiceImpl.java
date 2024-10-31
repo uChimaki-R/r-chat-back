@@ -1,7 +1,7 @@
 package com.r.chat.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.ApplyDealDTO;
 import com.r.chat.entity.dto.ContactApplyAddDTO;
@@ -43,7 +43,7 @@ public class UserContactApplyServiceImpl extends ServiceImpl<UserContactApplyMap
 
     @Override
     public Page<ContactApplyVO> getApplyInfoPage(Page<ContactApplyVO> page) {
-        return userContactApplyMapper.selectApplyInfoPage(page, UserIdContext.getCurrentUserId());
+        return userContactApplyMapper.selectApplyInfoPage(page, UserTokenInfoContext.getCurrentUserId());
     }
 
     @Override

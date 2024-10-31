@@ -1,6 +1,6 @@
 package com.r.chat.entity.dto;
 
-import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.JoinTypeEnum;
 import com.r.chat.utils.AvatarOwner;
@@ -57,6 +57,6 @@ public class UserInfoDTO implements Serializable, AvatarOwner {
 
     @Override
     public String getIdentityName() {
-        return UserIdContext.getCurrentUserId();
+        return UserTokenInfoContext.getCurrentUserId();
     }
 }

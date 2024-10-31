@@ -1,6 +1,6 @@
 package com.r.chat.controller;
 
-import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.po.UserInfo;
@@ -98,7 +98,7 @@ public class UserController {
      */
     @GetMapping("/getUserInfo")
     public Result<UserInfoVO> getUserInfo() {
-        UserInfo userInfo = userInfoService.getById(UserIdContext.getCurrentUserId());
+        UserInfo userInfo = userInfoService.getById(UserTokenInfoContext.getCurrentUserId());
         UserInfoVO userInfoVO = CopyUtils.copyBean(userInfo, UserInfoVO.class);
         log.info("获取用户信息 {}", userInfoVO);
         return Result.success(userInfoVO);

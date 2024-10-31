@@ -1,7 +1,7 @@
 package com.r.chat.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.r.chat.context.UserIdContext;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.AppUpdateDTO;
 import com.r.chat.entity.dto.AppUpdateReleaseDTO;
@@ -171,7 +171,7 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
     @Override
     public AppUpdateVO checkVersion(String version) {
         // 需要根据用户是否是灰度用户来寻找适合该用户的最新版本
-        AppUpdate latest = appUpdateMapper.selectLatestForUser(UserIdContext.getCurrentUserId());
+        AppUpdate latest = appUpdateMapper.selectLatestForUser(UserTokenInfoContext.getCurrentUserId());
         if (latest == null || StringUtils.versionGTE(version, latest.getVersion())) {
             // 无最新版本或当前版本等于最新版本，无需更新版本
             log.info("当前已是最新版本, 无需更新");
@@ -185,6 +185,10 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
         }
         // 如果是文件下载方式，需要补充文件名和文件大小
         File file = FileUtils.getExeFile(latest.getVersion());
+        if (file == null) {
+            log.warn("版本对应的文件不存在 version: {}", latest);
+            return null;
+        }
         appUpdateVO.setFileName(appProperties.getAppName() + "_" + file.getName());
         appUpdateVO.setSize(file.length());
         log.info("获取到最新版本 {}", appUpdateVO);
