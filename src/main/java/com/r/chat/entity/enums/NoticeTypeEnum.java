@@ -12,11 +12,11 @@ public enum NoticeTypeEnum {
 
     GROUP_CREATED(3, "群聊创建成功"),
     GROUP_ADD_ACCEPTED(4, "群聊加入申请被通过"),
-//    GROUP_RENAME(5, "更新群聊名"),
 //    GROUP_USER_LEAVE(6, "退出群聊"),
 //    GROUP_USER_IS_REMOVED(7, "被群主移出了群聊"),
 //    GROUP_DISSOLUTION(8, "解散群聊"),
 
+    CONTACT_RENAME(8, "更新联系人名称"),  // 可以是群聊名称修改了，也可以是用户名称修改了，都要通知
     CONTACT_APPLY(9, "好友申请"),
 
     //    FILE_UPLOAD_COMPLETED(10, "", "文件上传完毕"),
