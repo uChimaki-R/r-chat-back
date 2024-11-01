@@ -74,18 +74,17 @@ public class RedisUtils {
      * 保存用户的联系人id列表
      */
     public void setContactIds(String userId, List<String> contactIds) {
-        for (String contactId : contactIds) {
-            redisOperation.lLeftPush(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, contactId);
-        }
+        if (userId == null || contactIds == null || contactIds.isEmpty()) return;
+        contactIds.forEach(id -> {
+            redisOperation.sAdd(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, id);
+        });
     }
 
     /**
      * 更新用户的联系人id列表
      */
-    public void addToContactIds(String userId, String... contactIds) {
-        for (String contactId : contactIds) {
-            redisOperation.lLeftPush(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, contactId);
-        }
+    public void addToContactIds(String userId, String contactId) {
+        redisOperation.sAdd(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, contactId);
     }
 
     /**
@@ -99,7 +98,15 @@ public class RedisUtils {
 //            return list.stream().map(oo -> (String) oo).collect(Collectors.toList());
 //        }
         // 改用工具类来执行上面的逻辑
-        return CastUtils.castList(redisOperation.lRange(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, 0, -1), String.class);
+        return CastUtils.castList(redisOperation.setMembers(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId), String.class);
+    }
+
+    /**
+     * 移除指定用户的id列表中的数据
+     */
+    public void removeFromContactIds(String userId, String idToRemove) {
+        if (userId == null || idToRemove == null) return;
+        redisOperation.sRemove(Constants.REDIS_KEY_PREFIX_USER_CONTACT_IDS + userId, idToRemove);
     }
 
     /**
