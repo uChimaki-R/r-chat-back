@@ -3,16 +3,18 @@ package com.r.chat.service.impl;
 import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.ChatMessageDTO;
+import com.r.chat.entity.dto.FileUploadDTO;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
+import com.r.chat.entity.enums.FileTypeEnum;
 import com.r.chat.entity.enums.MessageStatusEnum;
 import com.r.chat.entity.enums.MessageTypeEnum;
 import com.r.chat.entity.enums.UserContactTypeEnum;
 import com.r.chat.entity.message.ChatNotice;
+import com.r.chat.entity.message.FileUploadCompletedNotice;
 import com.r.chat.entity.po.ChatMessage;
 import com.r.chat.entity.po.ChatSession;
 import com.r.chat.entity.vo.ChatMessageVO;
-import com.r.chat.exception.EnumIsNullException;
-import com.r.chat.exception.IllegalOperationException;
+import com.r.chat.exception.*;
 import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.ChatSessionMapper;
 import com.r.chat.properties.DefaultSysSettingProperties;
@@ -20,13 +22,17 @@ import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IChatMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
+import com.r.chat.utils.FileUtils;
 import com.r.chat.utils.StringUtils;
 import com.r.chat.websocket.utils.ChannelUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -141,5 +147,66 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         log.info("发送收到消息的通知给接收者 {}", chatNotice);
 
         return chatMessageVO;
+    }
+
+    @Override
+    public void saveFile(FileUploadDTO uploadDTO) {
+        ChatMessage chatMessage = chatMessageMapper.selectById(uploadDTO.getMessageId());
+        if (chatMessage == null) {
+            log.warn("保存文件失败: 聊天信息不存在 messageId: {}", uploadDTO.getMessageId());
+            throw new ChatMessageNotExistException(Constants.MESSAGE_CHAT_MESSAGE_NOT_EXIST);
+        }
+        if (!UserTokenInfoContext.getCurrentUserId().equals(chatMessage.getSendUserId())) {
+            // 这个消息都不是自己发的，不合法请求
+            log.warn("保存文件失败: 聊天消息不属于该用户 消息的发送者为: {}", chatMessage.getSendUserId());
+            throw new IllegalOperationException(Constants.MESSAGE_NOT_THE_MESSAGE_SENDER);
+        }
+        MultipartFile file = uploadDTO.getFile();
+        MultipartFile cover = uploadDTO.getCover();
+        String fileSuffix = StringUtils.getFileSuffix(Objects.requireNonNull(file.getOriginalFilename()));
+        if (StringUtils.isEmpty(fileSuffix)) {
+            log.warn("保存文件失败: 文件格式错误");
+            throw new FileNameErrorException(Constants.MESSAGE_FILE_NAME_ERROR);
+        }
+        FileTypeEnum fileType;
+        if (Arrays.asList(Constants.IMAGE_SUFFIXES).contains(fileSuffix)) {
+            // 图片类型
+            if (file.getSize() > defaultSysSettingProperties.getMaxImageSize() * Constants.MB_TO_BYTE) {
+                // 超出大小限制
+                log.warn("保存图片文件失败: 图片文件大小 {} > {}", file.getSize(), defaultSysSettingProperties.getMaxImageSize() * Constants.MB_TO_BYTE);
+                throw new FileSizeLimitException(Constants.MESSAGE_FILE_SIZE_LIMIT);
+            }
+            fileType = FileTypeEnum.IMAGE;
+        } else if (Arrays.asList(Constants.VIDEO_SUFFIXES).contains(fileSuffix)) {
+            // 视频类型
+            if (file.getSize() > defaultSysSettingProperties.getMaxVideoSize() * Constants.MB_TO_BYTE) {
+                // 超出大小限制
+                log.warn("保存视频文件失败: 视频文件大小 {} > {}", file.getSize(), defaultSysSettingProperties.getMaxVideoSize() * Constants.MB_TO_BYTE);
+                throw new FileSizeLimitException(Constants.MESSAGE_FILE_SIZE_LIMIT);
+            }
+            fileType = FileTypeEnum.VIDEO;
+        } else {
+            // 其他文件类型
+            if (file.getSize() > defaultSysSettingProperties.getMaxFileSize() * Constants.MB_TO_BYTE) {
+                // 超出大小限制
+                log.warn("保存文件失败: 文件大小 {} > {}", file.getSize(), defaultSysSettingProperties.getMaxFileSize() * Constants.MB_TO_BYTE);
+                throw new FileSizeLimitException(Constants.MESSAGE_FILE_SIZE_LIMIT);
+            }
+            fileType = FileTypeEnum.OTHER;
+        }
+        // 保存文件
+        FileUtils.saveChatFile(file, cover, chatMessage.getSendTime(), fileType, chatMessage.getMessageId());
+
+        // 更新信息为已发送
+        chatMessage.setStatus(MessageStatusEnum.SENT);
+        chatMessageMapper.updateById(chatMessage);
+        log.info("更新消息状态为已发送 {}", chatMessage);
+
+        // 发送通知通知接收方可以获取文件数据了
+        FileUploadCompletedNotice notice = new FileUploadCompletedNotice();
+        notice.setMessageId(chatMessage.getMessageId());
+        notice.setReceiveId(chatMessage.getContactId());
+        channelUtils.sendNotice(notice);
+        log.info("发送发送方文件上传完毕，接收方可以接收文件的ws通知 {}", notice);
     }
 }
