@@ -20,7 +20,7 @@ public enum NoticeTypeEnum {
     CONTACT_RENAME(9, "更新联系人名称"),  // 可以是群聊名称修改了，也可以是用户名称修改了，都要通知
     CONTACT_APPLY(10, "好友申请"),
 
-    //    FILE_UPLOAD_COMPLETED(11, "", "文件上传完毕"),
+    FILE_UPLOAD_COMPLETED(11, "文件上传完毕"),
 
     FORCE_OFF_LINE(12, "强制下线");
 
