@@ -4,6 +4,7 @@ import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.GroupInfoDTO;
 import com.r.chat.entity.dto.BasicInfoDTO;
+import com.r.chat.entity.dto.GroupMemberOpDTO;
 import com.r.chat.entity.enums.GroupInfoStatusEnum;
 import com.r.chat.entity.enums.UserContactStatusEnum;
 import com.r.chat.entity.po.GroupInfo;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collections;
 import java.util.List;
@@ -102,6 +104,28 @@ public class GroupController {
     public Result<String> disbandGroup(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
         log.info("解散群聊 groupId: {}", groupId);
         groupInfoService.disbandGroup(groupId);
+        return Result.success();
+    }
+
+    /**
+     * 离开群聊
+     */
+    @PutMapping("/leaveGroup")
+    public Result<String> leaveGroup(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
+        log.info("离开群聊 groupId: {}", groupId);
+        groupInfoService.leaveGroup(UserTokenInfoContext.getCurrentUserId(), groupId);
+        log.info("已离开群聊 groupId: {}", groupId);
+        return Result.success();
+    }
+
+    /**
+     * 添加或移除群成员
+     */
+    @PostMapping("/addOrRemoveGroupMember")
+    public Result<String> addOrRemoveGroupMember(@Valid GroupMemberOpDTO groupMemberOpDTO) {
+        log.info("添加或移除群成员 {}", groupMemberOpDTO);
+        groupInfoService.addOrRemoveGroupMember(groupMemberOpDTO);
+        log.info("添加或移除群成员成功 {}", groupMemberOpDTO);
         return Result.success();
     }
 
