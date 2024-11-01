@@ -10,7 +10,7 @@ import com.r.chat.entity.po.UserContactApply;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.result.Notice;
 import com.r.chat.entity.vo.ChatSessionUserVO;
-import com.r.chat.entity.message.WsInitNotice;
+import com.r.chat.entity.notice.WsInitNotice;
 import com.r.chat.exception.ParameterErrorException;
 import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.ChatSessionUserMapper;
@@ -217,7 +217,7 @@ public class ChannelUtils {
         }
         Channel channel = USER_CHANNEL_MAP.get(userId);
         if (channel == null) {
-            log.warn("{} 没有对应的channel", userId);
+            log.warn("{} 没有对应的channel, 用户可能登录在别的服务器, 取消removeChannel操作", userId);
             return;
         }
         USER_CHANNEL_MAP.remove(userId);
@@ -235,6 +235,25 @@ public class ChannelUtils {
         log.info("更新用户最后离线时间 lastOffTime: {}", lastOffTime);
         // 关闭channel（断开连接可能是客户端断的，也可能是服务端调用这个方法断的，如果是后者则需要close）
         channel.close();
+        log.info("已断开与 {} 的ws连接", userId);
+    }
+
+    /**
+     * 将用户对应的channel从群聊对应的channelGroup中移除
+     */
+    public void removeChannelFromGroup(String userId, String groupId) {
+        Channel channel = USER_CHANNEL_MAP.get(userId);
+        if (channel == null) {
+            log.warn("用户 {} 对应的channel不存在, 用户可能登录在别的服务器, 取消从channelGroup中移除channel", userId);
+            return;
+        }
+        ChannelGroup group = GROUP_CHANNEL_MAP.get(groupId);
+        if (group == null) {
+            log.warn("群聊 {} 对应的channelGroup不存在, 取消从channelGroup中移除channel", groupId);
+            return;
+        }
+        group.remove(channel);
+        log.info("取消从channelGroup中移除channel groupId: {}, userId: {}", groupId, userId);
     }
 
     /**
@@ -300,11 +319,17 @@ public class ChannelUtils {
         String receiveId = notice.getReceiveId();
         Channel channel = USER_CHANNEL_MAP.get(receiveId);
         if (channel == null) {
-            log.warn("用户 {} 对应的channel不存在", receiveId);
+            log.warn("用户 {} 对应的channel不存在, 用户可能登录在别的服务器, 取消发送通知 {}", receiveId, notice);
             return;
         }
         channel.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
         log.info("发送ws通知给用户 {} {}", receiveId, notice);
+        // 某些操作如强制下线，因为集群的存在，想强制下线的人不一定在自己的服务器里登陆了，所以不能在强制下线的业务代码里调用removeChannel方法来关闭ws连接
+        // 所以在接收到广播的时候，每个服务器都要判断是否接收到了强制下线的通知，都尝试从自己的服务器中关闭该ws连接
+        if (NoticeTypeEnum.FORCE_OFF_LINE.equals(notice.getNoticeType())) {
+            log.info("接收到强制下线的通知, 尝试断开与 {} 的ws连接", notice.getReceiveId());
+            removeChannel(notice.getReceiveId());
+        }
     }
 
     /**
@@ -314,10 +339,28 @@ public class ChannelUtils {
         String groupId = notice.getReceiveId();
         ChannelGroup group = GROUP_CHANNEL_MAP.get(groupId);
         if (group == null) {
-            log.warn("群聊 {} 对应的channelGroup不存在", groupId);
+            log.warn("群聊 {} 对应的channelGroup不存在, 可能是本服务器没有该群聊成员登录, 取消发送通知 {}", groupId, notice);
             return;
         }
         group.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
         log.info("发送ws通知给群聊 {} {}", groupId, notice);
+        // 和上面sendNotice2User的强制下线同理，群聊也有一些因为集群需要特殊处理的通知
+        // 如被移出群聊，被移出的人不一定在自己的服务器登录，需要所有服务器尝试在对应的群聊channelGroup里找到这个人并断开连接
+        // （因为退出群聊和被移出群聊都是走的IGroupInfoService.leaveGroup逻辑，所以也统一在这里断开连接）
+        // 如解散群聊，群聊的成员分散在多个服务器的channelGroup里，需要将这些group都删除
+        if (NoticeTypeEnum.GROUP_MEMBER_LEAVE_OR_IS_REMOVED.equals(notice.getNoticeType())) {
+            log.info("接收到退出群聊或被移出群聊的通知, 尝试将 {} 移出群聊 {} 对应的channelGroup", notice.getReceiveId(), groupId);
+            removeChannelFromGroup(notice.getReceiveId(), groupId);
+        } else if (NoticeTypeEnum.GROUP_DISBAND.equals(notice.getNoticeType())) {
+            log.info("接收到解散群聊的通知, 尝试关闭 {} 对应的channelGroup", notice.getReceiveId());
+            ChannelGroup channelGroup = GROUP_CHANNEL_MAP.get(groupId);
+            if (channelGroup == null) {
+                log.warn("群聊 {} 对应的channelGroup不存在, 取消关闭channelGroup", groupId);
+                return;
+            }
+            GROUP_CHANNEL_MAP.remove(groupId);
+            channelGroup.close();
+            log.info("成功关闭群聊 {} 对应的channelGroup", groupId);
+        }
     }
 }
