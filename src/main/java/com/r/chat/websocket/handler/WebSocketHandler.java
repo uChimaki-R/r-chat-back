@@ -69,7 +69,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
             // 保存自定义的日志输出标识
             MDC.put("ws", " ws: connect " + userTokenInfo.getUserId());
             // 将userId和channel绑定
-            channelUtils.initChannel(userTokenInfo.getUserId(), token, ctx.channel());
+            channelUtils.initChannel(userTokenInfo.getUserId(), ctx.channel());
             MDC.remove("ws");
         }
     }
