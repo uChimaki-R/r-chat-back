@@ -16,7 +16,7 @@ public class DefaultSysSettingProperties {
     /**
      * 单个群聊最多群成员
      */
-    private Integer maxGroupMemberCount;
+    private Long maxGroupMemberCount;
 
     /**
      * 图片最大大小
