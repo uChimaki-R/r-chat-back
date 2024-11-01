@@ -15,7 +15,7 @@ public class Notice implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public Notice(NoticeTypeEnum type) {
-        this.messageType = type;
+        this.noticeType = type;
     }
 
     /**
@@ -27,5 +27,5 @@ public class Notice implements Serializable {
     /**
      * 通知类型
      */
-    private NoticeTypeEnum messageType;
+    private NoticeTypeEnum noticeType;
 }
