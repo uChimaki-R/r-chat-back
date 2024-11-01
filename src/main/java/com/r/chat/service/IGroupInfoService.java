@@ -30,5 +30,5 @@ public interface IGroupInfoService extends IService<GroupInfo> {
     /**
      * 解散群聊
      */
-    void dissolutionGroup(String groupId);
+    void disbandGroup(String groupId);
 }

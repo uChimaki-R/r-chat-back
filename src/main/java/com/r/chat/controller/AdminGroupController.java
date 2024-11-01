@@ -40,10 +40,10 @@ public class AdminGroupController {
     /**
      * 解散群聊
      */
-    @DeleteMapping("/dissolutionGroup")
-    public Result<String> dissolutionGroup(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
+    @DeleteMapping("/disbandGroup")
+    public Result<String> disbandGroup(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
         log.info("解散群聊 groupId: {}", groupId);
-        groupInfoService.dissolutionGroup(groupId);
+        groupInfoService.disbandGroup(groupId);
         return Result.success();
     }
 }
