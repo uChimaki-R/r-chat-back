@@ -38,8 +38,9 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         log.info("断开连接");
-        MDC.put("ws", " ws: disconnect " + channelUtils.getUserId(ctx.channel()));
-        channelUtils.removeChannel(ctx.channel());
+        String userId = channelUtils.getUserId(ctx.channel());
+        MDC.put("ws", " ws: disconnect " + userId);
+        channelUtils.removeChannel(userId);
         MDC.remove("ws");
     }
 
