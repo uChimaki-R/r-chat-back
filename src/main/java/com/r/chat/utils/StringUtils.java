@@ -99,4 +99,12 @@ public class StringUtils {
                 .replace("\r\n", "<br>")
                 .replace("\n", "<br>");
     }
+
+    /**
+     * 获取文件名的后缀
+     */
+    public static String getFileSuffix(String fileName) {
+        if (isEmpty(fileName)) return null;
+        return fileName.substring(fileName.lastIndexOf("."));  // 包括.
+    }
 }
