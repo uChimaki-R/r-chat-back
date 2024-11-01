@@ -63,11 +63,15 @@ public class FileUtils {
      * @param messageId 消息id，用来生成文件名
      */
     public static void saveChatFile(MultipartFile file, MultipartFile cover, Long sendTime, FileTypeEnum fileType, Long messageId) {
+        if (file == null || cover == null || sendTime == null || fileType == null || messageId == null) {
+            log.warn("聊天文件信息不全, 无法保存文件 file: {}, cover: {}, sendTime: {}, fileType: {}, messageId: {}", file, cover, sendTime, fileType, messageId);
+            return;
+        }
         // 按时间分目录保存
         String month = DateUtil.format(new Date(sendTime), Constants.FORMAT_DATE_yyyyMM);
         saveFile(
                 AppProperties.projectFolder,
-                month + File.separator + fileType.name(),
+                month + File.separator + fileType.name().toLowerCase(),
                 // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
                 String.valueOf(messageId),
                 StringUtils.getFileSuffix(file.getOriginalFilename()),
@@ -75,7 +79,7 @@ public class FileUtils {
         );
         saveFile(
                 AppProperties.projectFolder,
-                month + File.separator + fileType.name(),
+                month + File.separator + fileType.name().toLowerCase(),
                 // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
                 String.valueOf(messageId),
                 Constants.FILE_SUFFIX_COVER + StringUtils.getFileSuffix(cover.getOriginalFilename()),  // _cover.xxx
@@ -88,7 +92,7 @@ public class FileUtils {
      */
     public static File getExeFile(String version) {
         if (StringUtils.isEmpty(version)) {
-            log.warn("尝试获取文件, 但提供的文件夹为null");
+            log.warn("尝试获取exe文件, 但提供的version为null");
             return null;
         }
         return getFile(
@@ -96,6 +100,43 @@ public class FileUtils {
                 Constants.FILE_FOLDER_EXE,
                 version.replace(".", "_"),
                 Constants.FILE_SUFFIX_EXE
+        );
+    }
+
+    /**
+     * 获取头像文件
+     */
+    public static File getAvatarFile(String identityName, Boolean isCover) {
+        if (StringUtils.isEmpty(identityName) || isCover == null) {
+            log.warn("尝试获取头像文件, 但提供的文件名为null或未指明是否获取缩略图 identityName: {}, isCover: {}", identityName, isCover);
+            return null;
+        }
+        return getFile(
+                AppProperties.projectFolder,
+                Constants.FILE_FOLDER_AVATAR,
+                identityName,
+                (isCover ? Constants.FILE_SUFFIX_COVER : "") + Constants.FILE_SUFFIX_AVATAR
+        );
+    }
+
+    /**
+     * 获取聊天文件
+     *
+     * @param fileName  数据库里保存的原文件名
+     * @param messageId 消息id，实际保存的文件名
+     */
+    public static File getChatFile(Long sendTime, FileTypeEnum fileType, String fileName, Long messageId, Boolean isCover) {
+        if (sendTime == null || fileType == null || fileName == null || isCover == null) {
+            log.warn("聊天信息不全, 无法获取文件 sendTime: {}, fileType: {}, fileName: {}, isCover: {}", sendTime, fileType, fileName, isCover);
+            return null;
+        }
+        String fileSuffix = StringUtils.getFileSuffix(fileName);
+        String month = DateUtil.format(new Date(sendTime), Constants.FORMAT_DATE_yyyyMM);
+        return getFile(
+                AppProperties.projectFolder,
+                month + File.separator + fileType.name().toLowerCase(),
+                String.valueOf(messageId),
+                (isCover ? Constants.FILE_SUFFIX_COVER : "") + fileSuffix
         );
     }
 
