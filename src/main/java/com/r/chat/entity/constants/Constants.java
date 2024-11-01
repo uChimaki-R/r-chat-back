@@ -49,19 +49,23 @@ public class Constants {
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
     public static final String MESSAGE_NOT_IN_THE_GROUP = "已不在此群聊";
     public static final String MESSAGE_NOT_THE_FRIEND = "与此用户已不是好友";
-    public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
     public static final String MESSAGE_NOT_ADMIN = "非管理员账号操作";
+    public static final String MESSAGE_NOT_GROUP_OWNER = "非群主账号操作";
+    public static final String MESSAGE_BING_BLOCKED = "已被拉黑";
     public static final String MESSAGE_APP_ALREADY_RELEASED = "无法删除已发布的更新";
     public static final String MESSAGE_VERSION_TOO_LOW = "新增版本低于最新版本";
     public static final String MESSAGE_CANNOT_CHANGE_VERSION = "不允许修改版本";
+    public static final String MESSAGE_CANNOT_REMOVE_OWNER = "不允许移除群主";
     public static final String MESSAGE_JSON_PARSE_ERROR = "json字符串解析失败";
     public static final String MESSAGE_NOT_THE_MESSAGE_SENDER = "非该聊天消息的发送者";
 
     // chat message
     public static final String MESSAGE_GROUP_CREATED = "群聊已创建，可以和好友一起畅聊了";
-    public static final String MESSAGE_FRIEND_ADD = "我们已经是好友了，一起聊天吧";
+    public static final String MESSAGE_FRIEND_ADD = "一起聊天吧";
     public static final String MESSAGE_JOIN_GROUP = "%s 加入了群聊";
     public static final String MESSAGE_GROUP_DISBAND = "群聊已解散";
+    public static final String MESSAGE_LEAVE_GROUP = "%s 退出了群聊";
+    public static final String MESSAGE_REMOVED_FROM_GROUP = "%s 被移出了群聊";
 
     // validate failure message
     public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
@@ -84,6 +88,7 @@ public class Constants {
     public static final String VALIDATE_EMPTY_MESSAGE_CONTENT = "消息内容不能为空";
     public static final String VALIDATE_EMPTY_MULTIPART_FILE = "文件不能为空";
     public static final String VALIDATE_EMPTY_FILE_NAME = "文件名不能为空";
+    public static final String VALIDATE_EMPTY_OPERATE_TYPE = "操作类型不能为空";
     public static final String VALIDATE_MESSAGE_CONTENT_TOO_LONG = "消息内容过长";
     public static final String VALIDATE_ILLEGAL_GENDER = "性别信息有误";
     public static final String VALIDATE_ILLEGAL_NICK_NAME = "用户名信息格式有误";
