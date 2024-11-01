@@ -139,8 +139,7 @@ public class ChannelUtils {
             groupContactIds.forEach(groupId -> {
                 addUser2Group(userId, groupId);
             });
-        }
-        else {
+        } else {
             groupContactIds = new ArrayList<>();
         }
         log.info("将用户的channel加入到用户加入的群聊对应的channelGroup中 {}", groupContactIds);
@@ -205,20 +204,24 @@ public class ChannelUtils {
     }
 
     /**
-     * 连接断开时调用
+     * 连接断开或想要断开连接时调用
      * 1. 移除用户channel
      * 2. 移除用户心跳缓存
      * 3. 更新用户最后离线时间
+     * 4. 关闭channel
      */
-    public void removeChannel(Channel channel) {
-        // 移除用户channel
-        String userId = getUserId(channel);
+    public void removeChannel(String userId) {
         if (userId == null) {
-            log.warn("尝试移除不存在的channel {}", channel);
+            log.warn("userId为空");
+            return;
+        }
+        Channel channel = USER_CHANNEL_MAP.get(userId);
+        if (channel == null) {
+            log.warn("{} 没有对应的channel", userId);
             return;
         }
         USER_CHANNEL_MAP.remove(userId);
-        log.info("移除绑定 channel: {}", channel);
+        log.info("移除channel绑定 userId: {}", userId);
         // 移除心跳缓存
         redisUtils.removeUserHeartBeat(userId);
         log.info("移除用户心跳缓存 userId: {}", userId);
@@ -230,6 +233,8 @@ public class ChannelUtils {
                 .set(UserInfo::getLastOffTime, lastOffTime);
         userInfoMapper.update(null, updateWrapper);
         log.info("更新用户最后离线时间 lastOffTime: {}", lastOffTime);
+        // 关闭channel（断开连接可能是客户端断的，也可能是服务端调用这个方法断的，如果是后者则需要close）
+        channel.close();
     }
 
     /**
@@ -300,12 +305,6 @@ public class ChannelUtils {
         }
         channel.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
         log.info("发送ws通知给用户 {} {}", receiveId, notice);
-        // 如果是强制下线通知，还要将用户ws连接关闭
-        NoticeTypeEnum messageType = notice.getMessageType();
-        if (NoticeTypeEnum.FORCE_OFF_LINE.equals(messageType)) {
-            log.info("用户 {} 被强制下线", receiveId);
-            removeChannel(channel);
-        }
     }
 
     /**
