@@ -1,6 +1,8 @@
 package com.r.chat.utils;
 
+import cn.hutool.core.date.DateUtil;
 import com.r.chat.entity.constants.Constants;
+import com.r.chat.entity.enums.FileTypeEnum;
 import com.r.chat.exception.FileNotExistException;
 import com.r.chat.exception.FileSaveFailedException;
 import com.r.chat.properties.AppProperties;
@@ -8,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Date;
 
 @Slf4j
 public class FileUtils {
@@ -30,7 +33,7 @@ public class FileUtils {
                 AppProperties.projectFolder,
                 Constants.FILE_FOLDER_AVATAR,
                 avatarOwner.getIdentityName(),
-                Constants.FILE_SUFFIX_COVER,  // _cover.png
+                Constants.FILE_SUFFIX_COVER + Constants.FILE_SUFFIX_AVATAR,  // _cover.png
                 avatarOwner.getAvatarCover()
         );
     }
@@ -53,6 +56,34 @@ public class FileUtils {
     }
 
     /**
+     * 保存聊天中的文件
+     *
+     * @param sendTime  发送时间，用来生成第一层文件夹
+     * @param fileType  文件类型，用来生成第二层文件夹
+     * @param messageId 消息id，用来生成文件名
+     */
+    public static void saveChatFile(MultipartFile file, MultipartFile cover, Long sendTime, FileTypeEnum fileType, Long messageId) {
+        // 按时间分目录保存
+        String month = DateUtil.format(new Date(sendTime), Constants.FORMAT_DATE_yyyyMM);
+        saveFile(
+                AppProperties.projectFolder,
+                month + File.separator + fileType.name(),
+                // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
+                String.valueOf(messageId),
+                StringUtils.getFileSuffix(file.getOriginalFilename()),
+                file
+        );
+        saveFile(
+                AppProperties.projectFolder,
+                month + File.separator + fileType.name(),
+                // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
+                String.valueOf(messageId),
+                Constants.FILE_SUFFIX_COVER + StringUtils.getFileSuffix(cover.getOriginalFilename()),  // _cover.xxx
+                cover
+        );
+    }
+
+    /**
      * 根据传入的app版本获取对应的exe文件
      */
     public static File getExeFile(String version) {
@@ -70,10 +101,11 @@ public class FileUtils {
 
     /**
      * 保存文件
-     * @param rootPath 根目录
-     * @param folder 文件夹，不存在的话会创建
-     * @param fileName 文件名
-     * @param suffix 文件后缀
+     *
+     * @param rootPath  根目录
+     * @param folder    文件夹，不存在的话会创建
+     * @param fileName  文件名
+     * @param suffix    文件后缀
      * @param cacheFile 文件
      */
     public static void saveFile(String rootPath, String folder, String fileName, String suffix, MultipartFile cacheFile) {
