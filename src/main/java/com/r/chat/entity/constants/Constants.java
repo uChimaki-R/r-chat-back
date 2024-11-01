@@ -82,6 +82,7 @@ public class Constants {
     public static final String VALIDATE_EMPTY_METHOD_TYPE = "更新方法不能为空";
     public static final String VALIDATE_EMPTY_MESSAGE_CONTENT = "消息内容不能为空";
     public static final String VALIDATE_EMPTY_MULTIPART_FILE = "文件不能为空";
+    public static final String VALIDATE_EMPTY_FILE_NAME = "文件名不能为空";
     public static final String VALIDATE_MESSAGE_CONTENT_TOO_LONG = "消息内容过长";
     public static final String VALIDATE_ILLEGAL_GENDER = "性别信息有误";
     public static final String VALIDATE_ILLEGAL_NICK_NAME = "用户名信息格式有误";
@@ -95,6 +96,7 @@ public class Constants {
     public static final String REGEX_PASSWORD = "^(?![a-zA-Z]+$)(?!\\d+$)(?![^\\da-zA-Z\\s]+$).{8,}$";
     public static final String REGEX_MD5 = "^[a-fA-F0-9]{32}$";
     public static final String REGEX_VERSION = "^([1-9]\\d|[1-9])(.([1-9]\\d|\\d)){2}$";
+    public static final String REGEX_NUMBER = "^[0-9]+$";
 
     // file
     public static final String FILE_FOLDER_AVATAR = "avatar";
