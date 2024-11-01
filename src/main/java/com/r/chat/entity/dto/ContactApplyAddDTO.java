@@ -18,10 +18,7 @@ public class ContactApplyAddDTO implements Serializable {
      */
     private String applyUserId;
 
-    /**
-     * 接收人id（加群的时候是群主id）
-     */
-    private String receiveUserId;
+    // 确认要添加了就不用receiveUserId，加群也只用群id即可
 
     /**
      * 联系人类型：0：好友 1：群聊
