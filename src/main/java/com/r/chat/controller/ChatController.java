@@ -1,6 +1,7 @@
 package com.r.chat.controller;
 
 import com.r.chat.entity.dto.ChatMessageDTO;
+import com.r.chat.entity.dto.FileUploadDTO;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.ChatMessageVO;
 import com.r.chat.service.IChatMessageService;
@@ -31,5 +32,16 @@ public class ChatController {
         ChatMessageVO chatMessage = chatMessageServiceImpl.saveMessage(chatMessageDTO);
         log.info("返回发送聊天信息后更新的内容 {}", chatMessage);
         return Result.success(chatMessage);
+    }
+
+    /**
+     * 上传聊天文件
+     */
+    @PostMapping("/uploadFile")
+    public Result<String> uploadFile(@Valid FileUploadDTO uploadDTO) {
+        log.info("上传文件 {}", uploadDTO);
+        chatMessageServiceImpl.saveFile(uploadDTO);
+        log.info("保存文件成功 {}", uploadDTO);
+        return Result.success();
     }
 }
