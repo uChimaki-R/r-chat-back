@@ -61,6 +61,7 @@ public class Constants {
     public static final String MESSAGE_GROUP_CREATED = "群聊已创建，可以和好友一起畅聊了";
     public static final String MESSAGE_FRIEND_ADD = "我们已经是好友了，一起聊天吧";
     public static final String MESSAGE_JOIN_GROUP = "%s 加入了群聊";
+    public static final String MESSAGE_GROUP_DISBAND = "群聊已解散";
 
     // validate failure message
     public static final String VALIDATE_EMPTY_CHECK_CODE = "验证码不能为空";
