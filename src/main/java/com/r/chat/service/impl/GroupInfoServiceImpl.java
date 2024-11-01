@@ -6,37 +6,37 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.context.AdminContext;
 import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
-import com.r.chat.entity.dto.GroupInfoDTO;
-import com.r.chat.entity.dto.GroupInfoQueryDTO;
-import com.r.chat.entity.dto.SysSettingDTO;
+import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
-import com.r.chat.entity.message.GroupCreatedNotice;
-import com.r.chat.entity.message.ContactRenameNotice;
-import com.r.chat.entity.message.GroupDisbandNotice;
+import com.r.chat.entity.notice.GroupCreatedNotice;
+import com.r.chat.entity.notice.ContactRenameNotice;
+import com.r.chat.entity.notice.GroupDisbandNotice;
+import com.r.chat.entity.notice.GroupMemberLeaveOrIsRemovedNotice;
 import com.r.chat.entity.po.*;
 import com.r.chat.entity.vo.ChatMessageVO;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
-import com.r.chat.exception.GroupCountLimitException;
-import com.r.chat.exception.GroupNotExistException;
-import com.r.chat.exception.IllegalOperationException;
+import com.r.chat.exception.*;
 import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.GroupInfoMapper;
 import com.r.chat.mapper.UserContactMapper;
+import com.r.chat.mapper.UserInfoMapper;
 import com.r.chat.redis.RedisUtils;
 import com.r.chat.service.IChatSessionService;
 import com.r.chat.service.IChatSessionUserService;
 import com.r.chat.service.IGroupInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.r.chat.service.IUserContactService;
 import com.r.chat.utils.CopyUtils;
 import com.r.chat.utils.FileUtils;
 import com.r.chat.utils.StringUtils;
 import com.r.chat.websocket.utils.ChannelUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,17 +50,30 @@ import java.util.List;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo> implements IGroupInfoService {
-    private final IChatSessionService chatSessionServiceImpl;
-    private final IChatSessionUserService chatSessionUserServiceImpl;
+    @Resource
+    private IChatSessionService chatSessionServiceImpl;
+    @Resource
+    private IChatSessionUserService chatSessionUserServiceImpl;
+    @Resource
+    private IUserContactService userContactServiceImpl;
+    @Lazy  // 注入自己，循环依赖使用@Lazy解决
+    @Resource
+    private IGroupInfoService groupInfoServiceImpl;
 
-    private final UserContactMapper userContactMapper;
-    private final GroupInfoMapper groupInfoMapper;
-    private final ChatMessageMapper chatMessageMapper;
+    @Resource
+    private UserContactMapper userContactMapper;
+    @Resource
+    private GroupInfoMapper groupInfoMapper;
+    @Resource
+    private ChatMessageMapper chatMessageMapper;
 
-    private final RedisUtils redisUtils;
-    private final ChannelUtils channelUtils;
+    @Resource
+    private RedisUtils redisUtils;
+    @Resource
+    private ChannelUtils channelUtils;
+    @Resource
+    private UserInfoMapper userInfoMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -220,9 +233,12 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
         }
         // 有两种情况可以解散群聊：1、群主本人解散 2、管理员强制解散
-        if (!groupInfo.getGroupOwnerId().equals(UserTokenInfoContext.getCurrentUserId()) || !AdminContext.isAdmin()) {
-            log.warn("解散群聊失败: 非群主或管理员操作 操作人id: {}, groupId: {}, 群主id: {}", UserTokenInfoContext.getCurrentUserId(), groupId, groupInfo.getGroupOwnerId());
-            throw new IllegalOperationException(Constants.MESSAGE_ILLEGAL_OPERATION);
+        if (!groupInfo.getGroupOwnerId().equals(UserTokenInfoContext.getCurrentUserId())) {
+            log.warn("解散群聊失败: 非群主操作 操作人id: {}, groupId: {}, 群主id: {}", UserTokenInfoContext.getCurrentUserId(), groupId, groupInfo.getGroupOwnerId());
+            throw new IllegalOperationException(Constants.MESSAGE_NOT_GROUP_OWNER);
+        } else if (!AdminContext.isAdmin()) {
+            log.warn("解散群聊失败: 非管理员操作 操作人id: {}, groupId: {}", UserTokenInfoContext.getCurrentUserId(), groupId);
+            throw new IllegalOperationException(Constants.MESSAGE_NOT_ADMIN);
         }
         // 更新群聊状态为解散
         groupInfo.setStatus(GroupInfoStatusEnum.DISBAND);
@@ -284,5 +300,130 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         log.info("发送群聊解散的ws通知 {}", notice);
 
         log.info("解散群聊成功 groupId: {}", groupId);
+    }
+
+    @Override
+    public void addOrRemoveGroupMember(GroupMemberOpDTO opInfo) {
+        GroupMemberOpTypeEnum opType = opInfo.getOpType();
+        if (opType == null) {
+            log.warn("群成员操作类型为空");
+            throw new EnumIsNullException(Constants.MESSAGE_ENUM_ERROR);
+        }
+        String groupId = opInfo.getGroupId();
+        GroupInfo groupInfo = groupInfoMapper.selectById(groupId);
+        if (groupInfo == null) {
+            log.warn("添加或移除群成员失败: 群聊不存在 groupId: {}", groupId);
+            throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
+        }
+        if (!groupInfo.getGroupOwnerId().equals(UserTokenInfoContext.getCurrentUserId())) {
+            log.warn("添加或移除群成员失败: 非群主操作 groupOwnerId: {}", groupInfo.getGroupOwnerId());
+            throw new IllegalOperationException(Constants.MESSAGE_NOT_GROUP_OWNER);
+        }
+        String[] contactIds = opInfo.getContactIds().split(",");
+        // 依次发送消息
+        for (String contactId : contactIds) {
+            switch (opType) {
+                case ADD:
+                    // 添加好友关系
+                    ContactApplyAddDTO contactApplyAddDTO = new ContactApplyAddDTO();
+                    contactApplyAddDTO.setApplyUserId(contactId);
+                    contactApplyAddDTO.setContactId(groupId);
+                    contactApplyAddDTO.setContactType(UserContactTypeEnum.GROUP);
+                    userContactServiceImpl.addContact(contactApplyAddDTO);
+                    break;
+                case REMOVE:
+                    // 内部调用的方法，spring的@Transactional注解不会生效，需要注入自己，用类来调用
+                    groupInfoServiceImpl.leaveGroup(contactId, groupId);
+                    break;
+                default:
+                    log.warn(Constants.IN_SWITCH_DEFAULT);
+                    throw new ParameterErrorException(Constants.IN_SWITCH_DEFAULT);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void leaveGroup(String idToLeave, String groupId) {
+        GroupInfo groupInfo = groupInfoMapper.selectById(groupId);
+        if (groupInfo == null) {
+            log.warn("移除群成员失败: 群聊不存在 groupId: {}", groupId);
+            throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
+        }
+        // 不能移除群主
+        if (groupInfo.getGroupOwnerId().equals(idToLeave)) {
+            log.warn("移除群成员失败: 不可以移除群主 groupId: {}, idToLeave: {}", groupId, idToLeave);
+            throw new IllegalOperationException(Constants.MESSAGE_CANNOT_REMOVE_OWNER);
+        }
+        // 因为只有用户到群聊的关系，所以直接删除关系即可
+        QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(UserContact::getUserId, idToLeave)
+                .eq(UserContact::getContactId, groupId);
+        int count = userContactMapper.delete(queryWrapper);
+        if (count == 0) {
+            log.warn("没有删除任何用户联系人关系, 意味着用户不在此群聊里");
+            throw new IllegalOperationException(Constants.MESSAGE_NOT_IN_THE_GROUP);
+        }
+        log.info("成功删除用户与群聊的联系人关系 idToLeave: {}, groupId: {}", idToLeave, groupId);
+
+        // 会话操作
+        String sessionId = StringUtils.getSessionId(new String[]{groupId});
+        Long now = System.currentTimeMillis();
+        // 被移除和退出群聊是不一样的消息
+        // 如果idToLeave是自己，则是退出群聊的操作，反之则是群主的操作，因为自己如果是群主的话也不允许移除自己，逻辑通
+        String lastMessage;
+        if (idToLeave.equals(UserTokenInfoContext.getCurrentUserId())) {
+            // 自己退出群聊，名字可以从上下文里取
+            lastMessage = String.format(Constants.MESSAGE_LEAVE_GROUP, UserTokenInfoContext.getCurrentUserNickName());
+        } else {
+            // 被群主移出群聊，需要查询被移除的人的名字
+            UserInfo userInfo = userInfoMapper.selectById(idToLeave);
+            if (userInfo == null) {
+                log.warn("移除群成员失败: 该用户不存在 idToLeave: {}", idToLeave);
+                throw new UserNotExistException(Constants.MESSAGE_USER_NOT_EXIST);
+            }
+            lastMessage = String.format(Constants.MESSAGE_REMOVED_FROM_GROUP, userInfo.getNickName());
+        }
+        // 更新会话信息
+        ChatSession chatSession = new ChatSession();
+        chatSession.setSessionId(sessionId);
+        chatSession.setLastMessage(lastMessage);
+        chatSession.setLastReceiveTime(now);
+        chatSessionServiceImpl.saveOrUpdate(chatSession);
+        log.info("更新会话信息 {}", chatSession);
+
+        // 添加这条退出群聊的消息
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setSessionId(sessionId);
+        chatMessage.setMessageType(MessageTypeEnum.NOTICE);
+        chatMessage.setMessageContent(lastMessage);
+        chatMessage.setSendTime(now);
+        chatMessage.setContactId(groupId);
+        chatMessage.setContactType(UserContactTypeEnum.GROUP);
+        chatMessage.setStatus(MessageStatusEnum.SENT);
+        chatMessageMapper.insert(chatMessage);
+        log.info("新增退出群聊的消息 {}", chatMessage);
+
+        // 更新redis中的联系人id列表
+        redisUtils.removeFromContactIds(idToLeave, groupId);
+
+        // 获取最新的群聊人数等信息
+        QueryWrapper<UserContact> countWrapper = new QueryWrapper<>();
+        countWrapper.lambda()
+                .eq(UserContact::getContactId, groupId)
+                .eq(UserContact::getStatus, UserContactStatusEnum.FRIENDS);
+        Long cnt = userContactMapper.selectCount(countWrapper);
+
+        // 发送ws通知给群聊成员
+        GroupMemberLeaveOrIsRemovedNotice notice = new GroupMemberLeaveOrIsRemovedNotice();
+        ChatMessageVO chatMessageVO = CopyUtils.copyBean(chatMessage, ChatMessageVO.class);
+        chatMessageVO.setLastMessage(lastMessage);
+        chatMessageVO.setLastReceiveTime(now);
+        chatMessageVO.setMemberCount(cnt);
+        notice.setChatMessageVO(chatMessageVO);
+        notice.setReceiveId(groupId);
+        channelUtils.sendNotice(notice);
+        log.info("发送离开群聊或者被移出群聊的ws通知 {}", notice);
     }
 }
