@@ -1,10 +1,13 @@
 package com.r.chat.service;
 
 import com.r.chat.entity.dto.ChatMessageDTO;
+import com.r.chat.entity.dto.FileDownloadDTO;
 import com.r.chat.entity.dto.FileUploadDTO;
 import com.r.chat.entity.po.ChatMessage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.r.chat.entity.vo.ChatMessageVO;
+
+import java.io.File;
 
 /**
  * <p>
@@ -25,4 +28,9 @@ public interface IChatMessageService extends IService<ChatMessage> {
      * 保存上传的文件
      */
     void saveFile(FileUploadDTO uploadDTO);
+
+    /**
+     * 获取服务端保存的文件，可能是头像文件或聊天文件
+     */
+    File getFile(FileDownloadDTO fileInfo);
 }
