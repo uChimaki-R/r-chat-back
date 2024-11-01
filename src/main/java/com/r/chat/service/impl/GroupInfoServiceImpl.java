@@ -1,5 +1,6 @@
 package com.r.chat.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.r.chat.context.AdminContext;
@@ -11,7 +12,9 @@ import com.r.chat.entity.dto.SysSettingDTO;
 import com.r.chat.entity.enums.*;
 import com.r.chat.entity.message.GroupCreatedNotice;
 import com.r.chat.entity.message.ContactRenameNotice;
+import com.r.chat.entity.message.GroupDisbandNotice;
 import com.r.chat.entity.po.*;
+import com.r.chat.entity.vo.ChatMessageVO;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
 import com.r.chat.exception.GroupCountLimitException;
@@ -35,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -209,7 +213,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void dissolutionGroup(String groupId) {
+    public void disbandGroup(String groupId) {
         GroupInfo groupInfo = lambdaQuery().eq(GroupInfo::getGroupId, groupId).one();
         if (groupInfo == null) {
             log.warn("解散群聊失败: 群聊不存在 groupId: {}", groupId);
@@ -223,6 +227,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         // 更新群聊状态为解散
         groupInfo.setStatus(GroupInfoStatusEnum.DISBAND);
         updateById(groupInfo);
+        log.info("更新群聊状态为已解散 {}", groupInfo);
         // 将所有群成员对群聊的关系设置为被删除
         UpdateWrapper<UserContact> updateWrapper = new UpdateWrapper<>();
         updateWrapper.lambda()
@@ -231,9 +236,53 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
                 .set(UserContact::getStatus, UserContactStatusEnum.DELETED_BY_FRIEND)
                 .set(UserContact::getLastUpdateTime, LocalDateTime.now());
         userContactMapper.update(null, updateWrapper);
-        log.info("解散群聊成功 groupId: {}", groupId);
+        log.info("将所有群成员对群聊的关系设置为被删除");
 
-        // todo 移除群成员的联系人缓存
-        // todo 发送群聊被解散的信息
+        // 获取所有群成员，从在线的保存了缓存的人的id列表中移除
+        QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(UserContact::getContactId, groupInfo.getGroupId())
+                .eq(UserContact::getContactType, UserContactTypeEnum.GROUP)
+                .eq(UserContact::getStatus, UserContactStatusEnum.DELETED_BY_FRIEND);
+        List<UserContact> contacts = userContactMapper.selectList(queryWrapper);
+        if (contacts == null || contacts.isEmpty()) return;
+        for (UserContact contact : contacts) {
+            redisUtils.removeFromContactIds(contact.getUserId(), groupId);
+        }
+        log.info("从缓存的群聊成员的id列表中移除群聊 群成员: {}", contacts);
+
+        // 更新会话
+        String sessionId = StringUtils.getSessionId(new String[]{groupId});
+        Long now = System.currentTimeMillis();
+        ChatSession chatSession = new ChatSession();
+        chatSession.setSessionId(sessionId);
+        chatSession.setLastMessage(Constants.MESSAGE_GROUP_DISBAND);
+        chatSession.setLastReceiveTime(now);
+        chatSessionServiceImpl.saveOrUpdate(chatSession);
+        log.info("更新群聊会话 {}", chatSession);
+
+        // 新增这条解散信息
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setSessionId(sessionId);
+        chatMessage.setMessageType(MessageTypeEnum.NOTICE);
+        chatMessage.setMessageContent(Constants.MESSAGE_GROUP_DISBAND);
+        chatMessage.setSendTime(now);
+        chatMessage.setContactId(groupId);
+        chatMessage.setContactType(UserContactTypeEnum.GROUP);
+        chatMessage.setStatus(MessageStatusEnum.SENT);
+        chatMessageMapper.insert(chatMessage);
+        log.info("新增解散群聊的消息 {}", chatMessage);
+
+        // 发送群聊解散通知
+        GroupDisbandNotice notice = new GroupDisbandNotice();
+        ChatMessageVO chatMessageVO = CopyUtils.copyBean(chatMessage, ChatMessageVO.class);
+        chatMessageVO.setLastReceiveTime(now);
+        chatMessageVO.setLastMessage(Constants.MESSAGE_GROUP_DISBAND);
+        notice.setChatMessageVO(chatMessageVO);
+        notice.setReceiveId(groupId);
+        channelUtils.sendNotice(notice);
+        log.info("发送群聊解散的ws通知 {}", notice);
+
+        log.info("解散群聊成功 groupId: {}", groupId);
     }
 }
