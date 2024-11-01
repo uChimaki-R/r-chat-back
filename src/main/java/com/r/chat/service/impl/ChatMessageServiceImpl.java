@@ -3,6 +3,7 @@ package com.r.chat.service.impl;
 import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.ChatMessageDTO;
+import com.r.chat.entity.dto.FileDownloadDTO;
 import com.r.chat.entity.dto.FileUploadDTO;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
 import com.r.chat.entity.enums.FileTypeEnum;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -208,5 +210,34 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         notice.setReceiveId(chatMessage.getContactId());
         channelUtils.sendNotice(notice);
         log.info("发送发送方文件上传完毕，接收方可以接收文件的ws通知 {}", notice);
+    }
+
+    @Override
+    public File getFile(FileDownloadDTO fileInfo) {
+        // 判断文件名是否纯数字，纯数字则是聊天文件（messageId），非纯数字则是头像文件
+        if (StringUtils.isNumber(fileInfo.getFileName())) {
+            // 聊天文件
+            String messageId = fileInfo.getFileName();
+            // 获取聊天信息
+            ChatMessage chatMessage = chatMessageMapper.selectById(Long.parseLong(messageId));
+            if (chatMessage == null) {
+                log.warn("获取聊天文件失败: 聊天信息不存在 messageId: {}", messageId);
+                throw new ChatMessageNotExistException(Constants.MESSAGE_CHAT_MESSAGE_NOT_EXIST);
+            }
+            // 聊天的对象需要是自己的好友才行
+            List<String> contactIds = redisUtils.getContactIds(UserTokenInfoContext.getCurrentUserId());
+            if (contactIds == null || !contactIds.contains(chatMessage.getContactId())) {
+                log.warn("获取聊天文件失败: 与 {} 非好友状态", chatMessage.getContactId());
+                if (UserContactTypeEnum.USER.equals(chatMessage.getContactType())) {
+                    throw new IllegalOperationException(Constants.MESSAGE_NOT_THE_FRIEND);
+                } else {
+                    throw new IllegalOperationException(Constants.MESSAGE_NOT_IN_THE_GROUP);
+                }
+            }
+            return FileUtils.getChatFile(chatMessage.getSendTime(), chatMessage.getFileType(), chatMessage.getFileName(), chatMessage.getMessageId(), fileInfo.getIsCover());
+        } else {
+            // 头像文件
+            return FileUtils.getAvatarFile(fileInfo.getFileName(), fileInfo.getIsCover());
+        }
     }
 }
