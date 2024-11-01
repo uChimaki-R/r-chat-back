@@ -5,7 +5,9 @@ import lombok.Getter;
 
 @Getter
 public enum FileTypeEnum {
-    MEDIA(0, "媒体文件");
+    IMAGE(0, "图片文件"),
+    VIDEO(1, "视频文件"),
+    OTHER(2, "其他文件");
 
     @EnumValue
     private final int value;
