@@ -93,4 +93,10 @@ public class ChatMessageVO implements Serializable {
      */
     private Long lastReceiveTime;
 
+    // 有人退出群聊后前端还需要知道群聊的人数
+    /**
+     * 群聊人数
+     */
+    private Long memberCount;
+
 }
