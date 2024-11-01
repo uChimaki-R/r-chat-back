@@ -28,6 +28,7 @@ public class Constants {
     public static final String MESSAGE_BEAUTY_USER_INFO_NOT_EXIST = "靓号信息不存在";
     public static final String MESSAGE_APP_UPDATE_NOT_EXIST = "app更新信息不存在";
     public static final String MESSAGE_CONTACT_APPLY_NOT_EXIST = "申请信息不存在";
+    public static final String MESSAGE_CHAT_MESSAGE_NOT_EXIST = "聊天信息不存在";
     public static final String MESSAGE_USER_NOT_EXIST = "用户不存在";
     public static final String MESSAGE_PASSWORD_ERROR = "密码错误";
     public static final String MESSAGE_ACCOUNT_ALREADY_LOGIN = "账号已在别处登录";
@@ -42,6 +43,8 @@ public class Constants {
     public static final String MESSAGE_FAILED_TO_SAVE_FILE = "文件保存失败";
     public static final String MESSAGE_FAILED_TO_CREATE_FOLDER = "创建目录失败";
     public static final String MESSAGE_FILE_NOT_EXIST = "文件不存在";
+    public static final String MESSAGE_FILE_NAME_ERROR = "文件名格式错误";
+    public static final String MESSAGE_FILE_SIZE_LIMIT = "文件过大";
     public static final String MESSAGE_GROUP_NOT_EXIST = "群聊不存在";
     public static final String MESSAGE_GROUP_ALREADY_DISBAND = "群聊已解散";
     public static final String MESSAGE_NOT_IN_THE_GROUP = "已不在此群聊";
@@ -52,6 +55,7 @@ public class Constants {
     public static final String MESSAGE_VERSION_TOO_LOW = "新增版本低于最新版本";
     public static final String MESSAGE_CANNOT_CHANGE_VERSION = "不允许修改版本";
     public static final String MESSAGE_JSON_PARSE_ERROR = "json字符串解析失败";
+    public static final String MESSAGE_NOT_THE_MESSAGE_SENDER = "非该聊天消息的发送者";
 
     // chat message
     public static final String MESSAGE_GROUP_CREATED = "群聊已创建，可以和好友一起畅聊了";
@@ -69,12 +73,15 @@ public class Constants {
     public static final String VALIDATE_EMPTY_GROUP_ID = "群聊id不能为空";
     public static final String VALIDATE_EMPTY_APPLY_ID = "申请id不能为空";
     public static final String VALIDATE_EMPTY_SESSION_ID = "会话id不能为空";
+    public static final String VALIDATE_EMPTY_MESSAGE_ID = "消息id不能为空";
+    public static final String VALIDATE_EMPTY_APP_UPDATE_ID = "应用更新id不能为空";
+    public static final String VALIDATE_EMPTY_BEAUTY_USER_INFO_ID = "靓号信息id不能为空";
     public static final String VALIDATE_EMPTY_STATUS = "状态信息不能为空";
-    public static final String VALIDATE_EMPTY_ID = "id不能为空";
     public static final String VALIDATE_EMPTY_DESCRIPTION = "描述信息不能为空";
     public static final String VALIDATE_EMPTY_VERSION = "版本信息不能为空";
     public static final String VALIDATE_EMPTY_METHOD_TYPE = "更新方法不能为空";
     public static final String VALIDATE_EMPTY_MESSAGE_CONTENT = "消息内容不能为空";
+    public static final String VALIDATE_EMPTY_MULTIPART_FILE = "文件不能为空";
     public static final String VALIDATE_MESSAGE_CONTENT_TOO_LONG = "消息内容过长";
     public static final String VALIDATE_ILLEGAL_GENDER = "性别信息有误";
     public static final String VALIDATE_ILLEGAL_NICK_NAME = "用户名信息格式有误";
@@ -93,8 +100,14 @@ public class Constants {
     public static final String FILE_FOLDER_AVATAR = "avatar";
     public static final String FILE_FOLDER_EXE = "app";
     public static final String FILE_SUFFIX_AVATAR = ".png";
-    public static final String FILE_SUFFIX_COVER = "_cover.png";
+    public static final String FILE_SUFFIX_COVER = "_cover";
     public static final String FILE_SUFFIX_EXE = ".exe";
+    public static final Long MB_TO_BYTE = 1024 * 1024L;
+    public static final String[] IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"};
+    public static final String[] VIDEO_SUFFIXES = {".mp4", ".avi", ".rmvb", ".mkv", ".mov"};
+
+    // format
+    public static final String FORMAT_DATE_yyyyMM = "yyyyMM";
 
     // other
     public static final String IN_SWITCH_DEFAULT = "进入default分支";
