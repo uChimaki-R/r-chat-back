@@ -1,5 +1,6 @@
 package com.r.chat.utils;
 
+import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.IdPrefixEnum;
 import com.r.chat.properties.AppProperties;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -106,5 +107,20 @@ public class StringUtils {
     public static String getFileSuffix(String fileName) {
         if (isEmpty(fileName)) return null;
         return fileName.substring(fileName.lastIndexOf("."));  // 包括.
+    }
+
+    /**
+     * 判断一个字符串是否是数字
+     */
+    public static Boolean isNumber(String str) {
+        return satisfyTheRegularity(str, Constants.REGEX_NUMBER);
+    }
+
+    /**
+     * 判断一个字符串是否满足正则
+     */
+    public static Boolean satisfyTheRegularity(String str, String regularity) {
+        if (isEmpty(str) || isEmpty(regularity)) return false;
+        return str.matches(regularity);
     }
 }
