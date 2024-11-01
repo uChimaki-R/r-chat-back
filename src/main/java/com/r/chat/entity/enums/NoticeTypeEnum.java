@@ -13,16 +13,15 @@ public enum NoticeTypeEnum {
 
     GROUP_CREATED(4, "群聊创建成功"),
     GROUP_ADD_ACCEPTED(5, "群聊加入申请被通过"),
-    //    GROUP_USER_LEAVE(6, "退出群聊"),
-    //    GROUP_USER_IS_REMOVED(7, "被群主移出了群聊"),
-    GROUP_DISBAND(8, "群聊已解散"),
+    GROUP_MEMBER_LEAVE_OR_IS_REMOVED(6, "退出群聊"),  // 自己退出群聊或者被移出群聊
+    GROUP_DISBAND(7, "群聊已解散"),
 
-    CONTACT_RENAME(9, "更新联系人名称"),  // 可以是群聊名称修改了，也可以是用户名称修改了，都要通知
-    CONTACT_APPLY(10, "好友申请"),
+    CONTACT_RENAME(8, "更新联系人名称"),  // 可以是群聊名称修改了，也可以是用户名称修改了，都要通知
+    CONTACT_APPLY(9, "好友申请"),
 
-    FILE_UPLOAD_COMPLETED(11, "文件上传完毕"),
+    FILE_UPLOAD_COMPLETED(10, "文件上传完毕"),
 
-    FORCE_OFF_LINE(12, "强制下线");
+    FORCE_OFF_LINE(11, "强制下线");
 
     @EnumValue
     private final Integer value;
