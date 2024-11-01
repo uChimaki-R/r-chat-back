@@ -1,4 +1,4 @@
-package com.r.chat.entity.message;
+package com.r.chat.entity.notice;
 
 import com.r.chat.entity.enums.NoticeTypeEnum;
 import com.r.chat.entity.result.Notice;

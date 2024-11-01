@@ -1,4 +1,4 @@
-package com.r.chat.entity.message;
+package com.r.chat.entity.notice;
 
 import com.r.chat.entity.enums.NoticeTypeEnum;
 import com.r.chat.entity.result.Notice;
@@ -9,14 +9,14 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * 对方同意了自己的申请，二者成为了好友的通知，让前端渲染会话
+ * 同意了对方的好友申请，二者成为了好友的通知，让前端渲染会话
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class UserAddByOthersNotice extends Notice implements Serializable {
+public class UserAddAcceptNotice extends Notice implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public UserAddByOthersNotice() {
+    public UserAddAcceptNotice() {
         super(NoticeTypeEnum.USER_ADD_BY_OTHERS);
     }
 

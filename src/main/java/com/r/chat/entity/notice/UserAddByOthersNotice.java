@@ -1,4 +1,4 @@
-package com.r.chat.entity.message;
+package com.r.chat.entity.notice;
 
 import com.r.chat.entity.enums.NoticeTypeEnum;
 import com.r.chat.entity.result.Notice;
@@ -9,19 +9,19 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * 群聊加入申请被通过的通知
+ * 对方同意了自己的申请，二者成为了好友的通知，让前端渲染会话
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class GroupAddAcceptedNotice extends Notice implements Serializable {
+public class UserAddByOthersNotice extends Notice implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public GroupAddAcceptedNotice() {
-        super(NoticeTypeEnum.GROUP_ADD_ACCEPTED);
+    public UserAddByOthersNotice() {
+        super(NoticeTypeEnum.USER_ADD_BY_OTHERS);
     }
 
     /**
-     * 用于渲染会话框的内容，lastMessage就是自己加入群聊的提示信息
+     * 用于渲染会话框的内容，lastMessage就是申请信息
      */
     private ChatSessionUserVO chatSessionUserVO;
 }
