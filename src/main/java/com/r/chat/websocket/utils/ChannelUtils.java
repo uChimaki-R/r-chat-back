@@ -51,11 +51,6 @@ public class ChannelUtils {
     private static final ConcurrentMap<String, Channel> USER_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
-     * userId->token
-     */
-    private static final ConcurrentMap<String, String> USER_ID_TOKEN_MAP = new ConcurrentHashMap<>();
-
-    /**
      * groupId->channelGroup
      */
     private static final ConcurrentMap<String, ChannelGroup> GROUP_CHANNEL_MAP = new ConcurrentHashMap<>();
@@ -109,14 +104,13 @@ public class ChannelUtils {
     /**
      * 在有效连接建立时调用
      * 1. 双向绑定channel<->userId
-     * 2. 绑定userId->token
-     * 3. 将用户的channel加入到用户加入的群聊对应的channelGroup中
-     * 4. 添加用户心跳缓存
-     * 5. 更新用户最后登陆时间
-     * 6. 获取用户所有会话消息、上次下线后的未读聊天信息、好友申请数量
-     * 7. 发送ws初始化通知
+     * 2. 将用户的channel加入到用户加入的群聊对应的channelGroup中
+     * 3. 添加用户心跳缓存
+     * 4. 更新用户最后登陆时间
+     * 5. 获取用户所有会话消息、上次下线后的未读聊天信息、好友申请数量
+     * 6. 发送ws初始化通知
      */
-    public void initChannel(String userId, String token, Channel channel) {
+    public void initChannel(String userId, Channel channel) {
         // 由于channel序列化之后后续无法使用，所以无法保存到redis中，只能直接保存到内存中
         // 这里使用附件绑定userId（channel->userId），使用线程安全的map通过userId找到channel（userId->channel）
         // （理论上channel->userId也可以用一个channelId到userId的map来保存，但是不够优雅）
@@ -135,9 +129,6 @@ public class ChannelUtils {
         USER_CHANNEL_MAP.put(userId, channel);
         log.info("绑定channel {}", channel);
 
-        // 绑定userId->token，后续断开连接需要移除redis上保存的用户信息，需要用到token，而channel的附件只带了userId，所以存下userId->token的映射
-        USER_ID_TOKEN_MAP.put(userId, token);
-
         // 从redis中获取用户的联系人id列表
         List<String> contactIds = redisUtils.getContactIds(userId);
         List<String> groupContactIds;
@@ -152,9 +143,11 @@ public class ChannelUtils {
         else {
             groupContactIds = new ArrayList<>();
         }
+        log.info("将用户的channel加入到用户加入的群聊对应的channelGroup中 {}", groupContactIds);
 
         // 添加用户心跳缓存
         redisUtils.setUserHeartBeat(userId);
+        log.info("添加用户心跳缓存 userId: {}", userId);
 
         // 更新用户最后登陆时间
         UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
@@ -215,7 +208,6 @@ public class ChannelUtils {
      * 连接断开时调用
      * 1. 移除用户channel
      * 2. 移除用户心跳缓存
-     * 4. 移除用户登录token缓存
      * 3. 更新用户最后离线时间
      */
     public void removeChannel(Channel channel) {
@@ -229,10 +221,7 @@ public class ChannelUtils {
         log.info("移除绑定 channel: {}", channel);
         // 移除心跳缓存
         redisUtils.removeUserHeartBeat(userId);
-        // 移除用户登录token缓存
-        redisUtils.removeUserTokenInfoByToken(USER_ID_TOKEN_MAP.get(userId));
-        // 移除userId->token的映射
-        USER_ID_TOKEN_MAP.remove(userId);
+        log.info("移除用户心跳缓存 userId: {}", userId);
         // 更新用户最后离线时间
         UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
         Long lastOffTime = System.currentTimeMillis();
