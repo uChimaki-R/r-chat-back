@@ -19,7 +19,7 @@ public class AppUpdateReleaseDTO implements Serializable {
     /**
      * 自增id
      */
-    @NotNull(message = Constants.VALIDATE_EMPTY_ID)
+    @NotNull(message = Constants.VALIDATE_EMPTY_APP_UPDATE_ID)
     private Integer id;
 
     /**

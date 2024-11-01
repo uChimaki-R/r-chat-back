@@ -65,7 +65,7 @@ public class AdminAppUpdateController {
      * 删除app更新信息
      */
     @DeleteMapping("/delUpdate")
-    public Result<String> delUpdate(@NotNull(message = Constants.VALIDATE_EMPTY_ID) Integer id) {
+    public Result<String> delUpdate(@NotNull(message = Constants.VALIDATE_EMPTY_APP_UPDATE_ID) Integer id) {
         log.info("删除app更新信息 id: {}", id);
         appUpdateService.delUpdate(id);
         return Result.success();

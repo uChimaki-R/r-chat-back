@@ -58,7 +58,7 @@ public class AdminBeautyController {
      * 删除靓号信息
      */
     @DeleteMapping("/delBeautyUserInfo")
-    public Result<String> delBeautyUserInfo(@NotNull(message = Constants.VALIDATE_EMPTY_ID) Integer id) {
+    public Result<String> delBeautyUserInfo(@NotNull(message = Constants.VALIDATE_EMPTY_BEAUTY_USER_INFO_ID) Integer id) {
         log.info("删除靓号信息 id: {}", id);
         if (beautyUserInfoService.removeById(id)) {
             log.info("成功删除靓号信息 id: {}", id);
