@@ -21,10 +21,7 @@ import com.r.chat.utils.CopyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.Collections;
@@ -96,6 +93,16 @@ public class GroupController {
         groupInfo4ChatVO.setUserContactList(userContactList);
         log.info("获取群聊详情(包括群成员清单) {}", groupInfo4ChatVO);
         return Result.success(groupInfo4ChatVO);
+    }
+
+    /**
+     * 解散群聊
+     */
+    @DeleteMapping("/disbandGroup")
+    public Result<String> disbandGroup(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
+        log.info("解散群聊 groupId: {}", groupId);
+        groupInfoService.disbandGroup(groupId);
+        return Result.success();
     }
 
     /**
