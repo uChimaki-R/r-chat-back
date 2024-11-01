@@ -6,7 +6,7 @@ import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
-import com.r.chat.entity.message.ContactRenameNotice;
+import com.r.chat.entity.notice.ContactRenameNotice;
 import com.r.chat.entity.po.*;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.*;
@@ -94,7 +94,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         ContactApplyAddDTO robotAdd = new ContactApplyAddDTO();
         robotAdd.setApplyUserId(userId);
         robotAdd.setContactId(robotId);
-        robotAdd.setReceiveUserId(robotId);
         robotAdd.setContactType(UserContactTypeEnum.USER);
         userContactService.addContact(robotAdd);
         log.info("{} 成功添加机器人为好友", userId);

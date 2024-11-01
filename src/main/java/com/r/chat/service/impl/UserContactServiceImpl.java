@@ -7,10 +7,10 @@ import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
-import com.r.chat.entity.message.ContactApplyNotice;
-import com.r.chat.entity.message.GroupAddAcceptedNotice;
-import com.r.chat.entity.message.UserAddAcceptNotice;
-import com.r.chat.entity.message.UserAddByOthersNotice;
+import com.r.chat.entity.notice.ContactApplyNotice;
+import com.r.chat.entity.notice.GroupAddAcceptedNotice;
+import com.r.chat.entity.notice.UserAddAcceptNotice;
+import com.r.chat.entity.notice.UserAddByOthersNotice;
 import com.r.chat.entity.po.*;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.exception.*;
@@ -185,7 +185,6 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             ContactApplyAddDTO contactApplyAddDTO = new ContactApplyAddDTO();
             contactApplyAddDTO.setApplyUserId(UserTokenInfoContext.getCurrentUserId());
             contactApplyAddDTO.setContactId(contactId);
-            contactApplyAddDTO.setReceiveUserId(receiveUserId);
             contactApplyAddDTO.setContactType(prefix.getUserContactTypeEnum());
             addContact(contactApplyAddDTO);
             log.info("可直接添加联系人, 已直接添加联系人");
@@ -312,7 +311,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
                     .eq(UserContactApply::getContactId, contactApplyAddDTO.getContactId());
             UserContactApply userContactApply = userContactApplyMapper.selectOne(ucaQueryWrapper);
             if (userContactApply == null) {
-                // 直接添加的那种没有申请信息，使用默认信息
+                // 直接添加的那种没有申请信息，使用默认信息（还有被拉入群聊的那种，也是没有申请的）
                 applyInfo = Constants.MESSAGE_FRIEND_ADD;
             }
             else {
