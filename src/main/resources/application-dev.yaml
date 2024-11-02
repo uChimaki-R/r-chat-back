@@ -28,6 +28,6 @@ r:
       robot-welcome-msg: 欢迎使用R-Chat!
       robot-default-reply: 我只是一个机器人，不能回答你的问题
     admin-user-ids:
-      - U62029850169
+      - U20940997780
     id-length: 11
     token-random-chars-length: 20
