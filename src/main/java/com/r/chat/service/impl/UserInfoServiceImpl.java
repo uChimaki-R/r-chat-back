@@ -189,7 +189,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 contactRenameNotice.setContactId(userId);  // 改了名字的是自己
                 contactRenameNotice.setContactName(newContactName);  // 自己的新名字
                 channelUtils.sendNotice(contactRenameNotice);
-                log.info("发送用户名称修改的ws通知 {}", contactRenameNotice);
+                log.info("发送用户名称修改的ws通知给好友 {} {}", receiveId, contactRenameNotice);
             });
             // 更新redis中userTokenInfo中的名字
             // 获取原来的来修改
