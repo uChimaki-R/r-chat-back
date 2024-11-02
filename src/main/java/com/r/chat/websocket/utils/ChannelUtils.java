@@ -327,7 +327,7 @@ public class ChannelUtils {
         log.info("发送ws通知给用户 {} {}", receiveId, notice);
         // 某些操作如强制下线，因为集群的存在，想强制下线的人不一定在自己的服务器里登陆了，所以不能在强制下线的业务代码里调用removeChannel方法来关闭ws连接
         // 所以在接收到广播的时候，每个服务器都要判断是否接收到了强制下线的通知，都尝试从自己的服务器中关闭该ws连接
-        if (NoticeTypeEnum.FORCE_OFF_LINE.equals(notice.getNoticeType())) {
+        if (NoticeTypeEnum.FORCE_OFFLINE.equals(notice.getNoticeType())) {
             log.info("接收到强制下线的通知, 尝试断开与 {} 的ws连接", notice.getReceiveId());
             removeChannel(notice.getReceiveId());
         }
