@@ -2,6 +2,7 @@ package com.r.chat.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.r.chat.entity.enums.JoinTypeEnum;
+import com.r.chat.entity.enums.OnlineTypeEnum;
 import com.r.chat.entity.enums.UserStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -84,5 +85,10 @@ public class UserInfoVO implements Serializable {
      * 地区编号
      */
     private String areaCode;
+
+    /**
+     * 在线/离线状态
+     */
+    private OnlineTypeEnum onlineType;
 
 }
