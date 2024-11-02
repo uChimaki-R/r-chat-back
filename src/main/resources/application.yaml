@@ -31,6 +31,10 @@ spring:
 logging:
   level:
     com:
+      github:
+        jeffreyning:
+          mybatisplus:
+            base: warn
       r:
         chat:
           mapper: debug
