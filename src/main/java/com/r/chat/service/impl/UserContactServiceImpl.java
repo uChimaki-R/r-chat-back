@@ -228,7 +228,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             userContactApplyMapper.updateById(userContactApply);
             // 只有申请被处理过才发送ws通知
             // 如果原本就处于待处理，就不管，不然会多次发送通知给接收方，这不合理
-            if (UserContactApplyStatusEnum.PENDING.equals(originStatus)) {
+            if (!UserContactApplyStatusEnum.PENDING.equals(originStatus)) {
                 ContactApplyNotice message = new ContactApplyNotice();
                 message.setReceiveId(receiveUserId);
                 message.setUserContactApply(userContactApply);
