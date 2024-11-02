@@ -7,6 +7,7 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.*;
 import com.r.chat.entity.enums.*;
 import com.r.chat.entity.notice.ContactRenameNotice;
+import com.r.chat.entity.notice.ForceOfflineNotice;
 import com.r.chat.entity.po.*;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.*;
@@ -257,6 +258,10 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Override
     public void forceOffLine(String userId) {
-        // todo 发送消息让用户强制下线
+        // 发送消息通知用户被强制下线
+        ForceOfflineNotice notice = new ForceOfflineNotice();
+        notice.setReceiveId(userId);
+        channelUtils.sendNotice(notice);
+        log.info("发送被管理员强制下线的ws通知 {}", notice);
     }
 }
