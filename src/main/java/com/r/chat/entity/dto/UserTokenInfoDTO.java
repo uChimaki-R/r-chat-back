@@ -66,9 +66,4 @@ public class UserTokenInfoDTO implements Serializable {
      * 是否是管理员账号
      */
     private Boolean admin = false;
-
-    /**
-     * 当前状态
-     */
-    private Integer contactStatus;
 }
