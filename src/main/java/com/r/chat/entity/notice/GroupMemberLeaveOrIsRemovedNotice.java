@@ -24,4 +24,9 @@ public class GroupMemberLeaveOrIsRemovedNotice extends Notice implements Seriali
      * 发送的消息内容和lastReceiveTime、lastMessage、新的群聊人数等
      */
     private ChatMessageVO chatMessageVO;
+
+    /**
+     * 离开群聊的用户id
+     */
+    private String leaveUserId;
 }
