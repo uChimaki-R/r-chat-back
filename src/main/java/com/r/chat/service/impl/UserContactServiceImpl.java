@@ -515,7 +515,14 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
         }
         // 更新二者的关系
         saveOrUpdateMutualContact(UserTokenInfoContext.getCurrentUserId(), contactId, status);
-        // todo 从自己的好友列表缓存中删除联系人
+
+        // 从自己的好友列表缓存中删除联系人
+        redisUtils.removeFromContactIds(UserTokenInfoContext.getCurrentUserId(), contactId);
+        log.info("从自己的好友列表缓存中删除联系人 {}", contactId);
+        // 从对方的好友列表缓存中删除自己
+        redisUtils.removeFromContactIds(contactId, UserTokenInfoContext.getCurrentUserId());
+        log.info("从 {} 的好友列表缓存中删除自己", contactId);
+
         if (UserContactStatusEnum.DELETED_THE_FRIEND.equals(status)) {
             log.info("成功删除联系人 contactId: {}", contactId);
         } else {
