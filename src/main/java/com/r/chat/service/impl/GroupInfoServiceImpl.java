@@ -233,12 +233,9 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
         }
         // 有两种情况可以解散群聊：1、群主本人解散 2、管理员强制解散
-        if (!groupInfo.getGroupOwnerId().equals(UserTokenInfoContext.getCurrentUserId())) {
-            log.warn("解散群聊失败: 非群主操作 操作人id: {}, groupId: {}, 群主id: {}", UserTokenInfoContext.getCurrentUserId(), groupId, groupInfo.getGroupOwnerId());
-            throw new IllegalOperationException(Constants.MESSAGE_NOT_GROUP_OWNER);
-        } else if (!AdminContext.isAdmin()) {
-            log.warn("解散群聊失败: 非管理员操作 操作人id: {}, groupId: {}", UserTokenInfoContext.getCurrentUserId(), groupId);
-            throw new IllegalOperationException(Constants.MESSAGE_NOT_ADMIN);
+        if (!groupInfo.getGroupOwnerId().equals(UserTokenInfoContext.getCurrentUserId()) && !AdminContext.isAdmin()) {
+            log.warn("解散群聊失败: 非群主或管理员操作 操作人id: {}, groupId: {}, 群主id: {}", UserTokenInfoContext.getCurrentUserId(), groupId, groupInfo.getGroupOwnerId());
+            throw new IllegalOperationException(Constants.MESSAGE_NOT_GROUP_OWNER + "或" + Constants.MESSAGE_NOT_ADMIN);
         }
         // 更新群聊状态为解散
         groupInfo.setStatus(GroupInfoStatusEnum.DISBAND);
@@ -423,6 +420,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         chatMessageVO.setMemberCount(cnt);
         notice.setChatMessageVO(chatMessageVO);
         notice.setReceiveId(groupId);
+        notice.setLeaveUserId(idToLeave);
         channelUtils.sendNotice(notice);
         log.info("发送离开群聊或者被移出群聊的ws通知 {}", notice);
     }
