@@ -110,7 +110,7 @@ public class GroupController {
     /**
      * 离开群聊
      */
-    @PutMapping("/leaveGroup")
+    @PostMapping("/leaveGroup")
     public Result<String> leaveGroup(@NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_ID) String groupId) {
         log.info("离开群聊 groupId: {}", groupId);
         groupInfoService.leaveGroup(UserTokenInfoContext.getCurrentUserId(), groupId);
