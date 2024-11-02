@@ -21,7 +21,7 @@ public enum NoticeTypeEnum {
 
     FILE_UPLOAD_COMPLETED(10, "文件上传完毕"),
 
-    FORCE_OFF_LINE(11, "强制下线");
+    FORCE_OFFLINE(11, "强制下线");
 
     @EnumValue
     private final Integer value;
