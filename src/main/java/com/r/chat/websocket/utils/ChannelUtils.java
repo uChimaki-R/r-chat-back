@@ -52,6 +52,11 @@ public class ChannelUtils {
     private static final ConcurrentMap<String, Channel> USER_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
+     * userId->token
+     */
+    public static final ConcurrentMap<String, String> USER_TOKEN_MAP = new ConcurrentHashMap<>();
+
+    /**
      * groupId->channelGroup
      */
     private static final ConcurrentMap<String, ChannelGroup> GROUP_CHANNEL_MAP = new ConcurrentHashMap<>();
@@ -106,12 +111,13 @@ public class ChannelUtils {
      * 在有效连接建立时调用
      * 1. 双向绑定channel<->userId
      * 2. 将用户的channel加入到用户加入的群聊对应的channelGroup中
-     * 3. 添加用户心跳缓存
-     * 4. 更新用户最后登陆时间
-     * 5. 获取用户所有会话消息、上次下线后的未读聊天信息、好友申请数量
-     * 6. 发送ws初始化通知
+     * 3. 绑定userId->token
+     * 4. 添加用户心跳缓存
+     * 5. 更新用户最后登陆时间
+     * 6. 获取用户所有会话消息、上次下线后的未读聊天信息、好友申请数量
+     * 7. 发送ws初始化通知
      */
-    public void initChannel(String userId, Channel channel) {
+    public void initChannel(String userId, String token, Channel channel) {
         // 由于channel序列化之后后续无法使用，所以无法保存到redis中，只能直接保存到内存中
         // 这里使用附件绑定userId（channel->userId），使用线程安全的map通过userId找到channel（userId->channel）
         // （理论上channel->userId也可以用一个channelId到userId的map来保存，但是不够优雅）
@@ -145,9 +151,13 @@ public class ChannelUtils {
         }
         log.info("将用户的channel加入到用户加入的群聊对应的channelGroup中 {}", groupContactIds);
 
+        // 保存userId->token
+        USER_TOKEN_MAP.put(userId, token);
+        log.info("保存用户id到token的映射 token: {}", token);
+
         // 添加用户心跳缓存
         redisUtils.setUserHeartBeat(userId);
-        log.info("添加用户心跳缓存 userId: {}", userId);
+        log.info("添加用户心跳缓存");
 
         // 更新用户最后登陆时间
         UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
@@ -209,10 +219,11 @@ public class ChannelUtils {
      * 1. 移除用户channel
      * 2. 移除用户心跳缓存
      * 3. 更新用户最后离线时间
-     * 4. 关闭channel
+     * 4. 移除token绑定
+     * 5. 关闭channel
      */
     public void removeChannel(String userId) {
-        if (userId == null) {
+        if (StringUtils.isEmpty(userId)) {
             log.warn("userId为空");
             return;
         }
@@ -235,6 +246,11 @@ public class ChannelUtils {
         userInfoMapper.update(null, updateWrapper);
         log.info("更新用户最后离线时间 lastOffTime: {}", lastOffTime);
         // 关闭channel（断开连接可能是客户端断的，也可能是服务端调用这个方法断的，如果是后者则需要close）
+        String token = USER_TOKEN_MAP.get(userId);
+        if (!StringUtils.isEmpty(token)) {
+            USER_TOKEN_MAP.remove(userId);
+            log.info("移除token绑定 token: {}", userId);
+        }
         channel.close();
         log.info("已断开与 {} 的ws连接", userId);
     }
@@ -329,7 +345,20 @@ public class ChannelUtils {
         // 所以在接收到广播的时候，每个服务器都要判断是否接收到了强制下线的通知，都尝试从自己的服务器中关闭该ws连接
         if (NoticeTypeEnum.FORCE_OFFLINE.equals(notice.getNoticeType())) {
             log.info("接收到强制下线的通知, 尝试断开与 {} 的ws连接", notice.getReceiveId());
-            removeChannel(notice.getReceiveId());
+//            removeChannel(notice.getReceiveId());
+            // 尝试找到对应的channel触发close即可，close触发后在channelInactive里会触发removeChannel方法，这里直接调用removeChannel方法的话会执行两次方法，打印的日志就不是很清晰（第二次会说没有对应的channel，实际上是在第一次里移除了而不是本身没有）
+            Channel chan = USER_CHANNEL_MAP.get(notice.getReceiveId());
+            if (chan == null) {
+                log.warn("{} 没有对应的channel, 用户可能登录在别的服务器, 取消断开ws的操作", notice.getReceiveId());
+                return;
+            }
+            chan.close();
+            // 强制下线需要清除用户登录缓存
+            String token = USER_TOKEN_MAP.get(notice.getReceiveId());
+            if (!StringUtils.isEmpty(token)) {
+                redisUtils.removeUserTokenInfoByToken(token);
+                log.info("清除用户登陆缓存 userId: {}, token: {}", notice.getReceiveId(), token);
+            }
         }
     }
 
