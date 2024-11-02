@@ -5,9 +5,11 @@ import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.UserInfoQueryDTO;
 import com.r.chat.entity.dto.UserStatusDTO;
 import com.r.chat.entity.enums.IdPrefixEnum;
+import com.r.chat.entity.enums.OnlineTypeEnum;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
+import com.r.chat.entity.vo.UserInfoVO;
 import com.r.chat.service.IUserInfoService;
 import com.r.chat.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Validated
@@ -30,9 +33,9 @@ public class AdminUserController {
      * 加载用户的信息
      */
     @GetMapping("/loadUser")
-    public Result<PageResult<UserInfo>> loadUser(UserInfoQueryDTO userInfoQueryDTO,
-                                                 @RequestParam(defaultValue = "1") Long pageNo,
-                                                 @RequestParam(defaultValue = "15") Long pageSize) {
+    public Result<PageResult<UserInfoVO>> loadUser(UserInfoQueryDTO userInfoQueryDTO,
+                                                   @RequestParam(defaultValue = "1") Long pageNo,
+                                                   @RequestParam(defaultValue = "15") Long pageSize) {
         log.info("获取用户信息 pageNo: {}, pageSize: {}, {}", pageNo, pageSize, userInfoQueryDTO);
         Page<UserInfo> page = userInfoService.lambdaQuery()
                 // 下面两个是可以选择传递的查询条件
@@ -40,7 +43,16 @@ public class AdminUserController {
                 .like(!StringUtils.isEmpty(userInfoQueryDTO.getNickName()), UserInfo::getNickName, userInfoQueryDTO.getNickName())
                 .orderByDesc(UserInfo::getCreateTime)
                 .page(new Page<>(pageNo, pageSize));
-        PageResult<UserInfo> pageResult = PageResult.fromPage(page);
+        PageResult<UserInfoVO> pageResult = PageResult.fromPage(page, UserInfoVO.class);
+        // 设置在线状态
+        pageResult.setData(pageResult.getData().stream().peek(userInfoVO -> {
+            // 上次登录时间晚于（大于）上次离线时间，就是在线
+            if (userInfoVO.getLastLoginTime() != null && userInfoVO.getLastOffTime() != null) {
+                userInfoVO.setOnlineType(userInfoVO.getLastLoginTime() > userInfoVO.getLastOffTime() ? OnlineTypeEnum.ONLINE : OnlineTypeEnum.OFFLINE);
+            } else {
+                userInfoVO.setOnlineType(OnlineTypeEnum.OFFLINE);
+            }
+        }).collect(Collectors.toList()));
         log.info("获取到用户信息 {}", pageResult);
         return Result.success(pageResult);
     }
@@ -62,6 +74,7 @@ public class AdminUserController {
     public Result<String> forceOffLine(@NotEmpty(message = Constants.VALIDATE_EMPTY_USER_ID) String userId) {
         log.info("强制下线 userId: {}", userId);
         userInfoService.forceOffLine(userId);
+        log.info("强制用户 {} 下线成功", userId);
         return Result.success();
     }
 
