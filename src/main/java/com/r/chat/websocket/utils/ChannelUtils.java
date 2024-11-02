@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.IdPrefixEnum;
 import com.r.chat.entity.enums.NoticeTypeEnum;
+import com.r.chat.entity.notice.GroupMemberLeaveOrIsRemovedNotice;
 import com.r.chat.entity.po.ChatMessage;
 import com.r.chat.entity.po.UserContactApply;
 import com.r.chat.entity.po.UserInfo;
@@ -349,8 +350,10 @@ public class ChannelUtils {
         // （因为退出群聊和被移出群聊都是走的IGroupInfoService.leaveGroup逻辑，所以也统一在这里断开连接）
         // 如解散群聊，群聊的成员分散在多个服务器的channelGroup里，需要将这些group都删除
         if (NoticeTypeEnum.GROUP_MEMBER_LEAVE_OR_IS_REMOVED.equals(notice.getNoticeType())) {
-            log.info("接收到退出群聊或被移出群聊的通知, 尝试将 {} 移出群聊 {} 对应的channelGroup", notice.getReceiveId(), groupId);
-            removeChannelFromGroup(notice.getReceiveId(), groupId);
+            GroupMemberLeaveOrIsRemovedNotice gNotice = (GroupMemberLeaveOrIsRemovedNotice) notice;
+            String idToLeave = gNotice.getLeaveUserId();
+            log.info("接收到退出群聊或被移出群聊的通知, 尝试将 {} 移出群聊 {} 对应的channelGroup", idToLeave, groupId);
+            removeChannelFromGroup(idToLeave, groupId);
         } else if (NoticeTypeEnum.GROUP_DISBAND.equals(notice.getNoticeType())) {
             log.info("接收到解散群聊的通知, 尝试关闭 {} 对应的channelGroup", notice.getReceiveId());
             ChannelGroup channelGroup = GROUP_CHANNEL_MAP.get(groupId);
