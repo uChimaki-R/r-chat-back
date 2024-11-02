@@ -173,21 +173,21 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             UpdateWrapper<ChatSessionUser> updateWrapper = new UpdateWrapper<>();
             updateWrapper.lambda()
                     .eq(ChatSessionUser::getContactId, userInfo.getUserId())
-                    .set(ChatSessionUser::getContactName, userInfo.getNickName());
+                    .set(ChatSessionUser::getContactName, newContactName);
             chatSessionUserMapper.update(null, updateWrapper);
             log.info("更新会话中的用户名称信息成功 newContactName: {}", newContactName);
             // 发送用户名修改的通知给所有该用户的好友
             // 查找自己的好友
             QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
             queryWrapper.lambda()
-                    .eq(UserContact::getContactId, userInfo.getUserId())  // 和自己是好友的
+                    .eq(UserContact::getContactId, userInfo.getUserId())  // 联系人是自己
                     .eq(UserContact::getStatus, UserContactStatusEnum.FRIENDS);
-            userContactMapper.selectList(queryWrapper).stream().map(UserContact::getContactId).forEach(contactId -> {
+            userContactMapper.selectList(queryWrapper).stream().map(UserContact::getUserId).forEach(receiveId -> { // 获取每个的userId（contactId是自己）
                 // 对每个自己的好友发送消息
                 ContactRenameNotice contactRenameNotice = new ContactRenameNotice();
-                contactRenameNotice.setReceiveId(contactId);  // 发给好友
+                contactRenameNotice.setReceiveId(receiveId);  // 发给好友
                 contactRenameNotice.setContactId(userId);  // 改了名字的是自己
-                contactRenameNotice.setContactName(userInfo.getNickName());  // 自己的新名字
+                contactRenameNotice.setContactName(newContactName);  // 自己的新名字
                 channelUtils.sendNotice(contactRenameNotice);
                 log.info("发送用户名称修改的ws通知 {}", contactRenameNotice);
             });
