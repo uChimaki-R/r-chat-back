@@ -235,6 +235,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     public void logout() {
         // 移除用户登录token
         redisUtils.removeUserTokenInfoByToken(UserTokenInfoContext.getCurrentUserToken());
+        log.info("移除登录token");
+
+        // 清空id列表
+        redisUtils.removeUserContactIds(UserTokenInfoContext.getCurrentUserId());
+        log.info("清空联系人id列表");
 
         // 关闭ws连接
         channelUtils.removeChannel(UserTokenInfoContext.getCurrentUserId());
@@ -258,6 +263,10 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Override
     public void forceOffLine(String userId) {
+        // 清空id列表
+        redisUtils.removeUserContactIds(userId);
+        log.info("清空用户联系人id列表 userId: {}", userId);
+
         // 发送消息通知用户被强制下线
         ForceOfflineNotice notice = new ForceOfflineNotice();
         notice.setReceiveId(userId);
