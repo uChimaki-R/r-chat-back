@@ -71,10 +71,10 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             log.warn(Constants.MESSAGE_CAN_NOT_SEE_THE_FRIEND, contactId);
             // 看是群聊还是好友，提示信息不一样
             if (UserContactTypeEnum.USER.equals(chatMessageDTO.getContactType())) {
-                log.warn("发送消息失败 不在该群聊中 groupId: {}", chatMessageDTO.getContactId());
+                log.warn("发送消息失败 和该用户非好友关系 userId: {}", chatMessageDTO.getContactId());
                 throw new IllegalOperationException(Constants.MESSAGE_NOT_THE_FRIEND);
             } else {
-                log.warn("发送消息失败 和该用户非好友关系 userId: {}", chatMessageDTO.getContactId());
+                log.warn("发送消息失败 不在该群聊中 groupId: {}", chatMessageDTO.getContactId());
                 throw new IllegalOperationException(Constants.MESSAGE_NOT_IN_THE_GROUP);
             }
         }
@@ -122,7 +122,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             // 同样要更新到数据库里
             chatMessageMapper.insert(cm);
             log.info("新增机器人发送的消息 {}", cm);
-            ChatMessageVO chatMessageVO = CopyUtils.copyBean(chatMessage, ChatMessageVO.class);
+            ChatMessageVO chatMessageVO = CopyUtils.copyBean(cm, ChatMessageVO.class);
             chatMessageVO.setLastMessage(lastMessage);
             chatMessageVO.setLastReceiveTime(now);
             chatNotice.setChatMessageVO(chatMessageVO);
