@@ -1,6 +1,7 @@
 package com.r.chat.utils;
 
 import cn.hutool.core.date.DateUtil;
+import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.FileTypeEnum;
 import com.r.chat.exception.FileNotExistException;
@@ -57,6 +58,7 @@ public class FileUtils {
 
     /**
      * 保存聊天中的文件
+     * 最外层文件夹为 projectFolder + 用户id，里面还有两层文件夹
      *
      * @param sendTime  发送时间，用来生成第一层文件夹
      * @param fileType  文件类型，用来生成第二层文件夹
@@ -71,7 +73,10 @@ public class FileUtils {
         String month = DateUtil.format(new Date(sendTime), Constants.FORMAT_DATE_yyyyMM);
         saveFile(
                 AppProperties.projectFolder,
-                month + File.separator + fileType.name().toLowerCase(),
+                Constants.FILE_FOLDER_CHAT + File.separator
+                        + UserTokenInfoContext.getCurrentUserId() + File.separator
+                        + month + File.separator
+                        + fileType.name().toLowerCase(),
                 // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
                 String.valueOf(messageId),
                 StringUtils.getFileSuffix(file.getOriginalFilename()),
@@ -79,7 +84,9 @@ public class FileUtils {
         );
         saveFile(
                 AppProperties.projectFolder,
-                month + File.separator + fileType.name().toLowerCase(),
+                Constants.FILE_FOLDER_CHAT + File.separator
+                        + UserTokenInfoContext.getCurrentUserId() + File.separator
+                        + month + File.separator + fileType.name().toLowerCase(),
                 // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
                 String.valueOf(messageId),
                 Constants.FILE_SUFFIX_COVER + StringUtils.getFileSuffix(cover.getOriginalFilename()),  // _cover.xxx
@@ -121,9 +128,13 @@ public class FileUtils {
 
     /**
      * 获取聊天文件
+     * 存放文件的目录最外层文件夹为 projectFolder + 用户id，里面还有两层文件夹
      *
-     * @param fileName  数据库里保存的原文件名
+     * @param sendTime  发送时间，转换为第一层文件夹
+     * @param fileType  文件类型，转换为第二层文件夹
+     * @param fileName  数据库里保存的原文件名全名，用于获取实际保存的文件名的后缀
      * @param messageId 消息id，实际保存的文件名
+     * @param isCover   是否是缩略图，是则文件还有一个后缀
      */
     public static File getChatFile(Long sendTime, FileTypeEnum fileType, String fileName, Long messageId, Boolean isCover) {
         if (sendTime == null || fileType == null || fileName == null || isCover == null) {
@@ -134,7 +145,9 @@ public class FileUtils {
         String month = DateUtil.format(new Date(sendTime), Constants.FORMAT_DATE_yyyyMM);
         return getFile(
                 AppProperties.projectFolder,
-                month + File.separator + fileType.name().toLowerCase(),
+                Constants.FILE_FOLDER_CHAT + File.separator
+                        + UserTokenInfoContext.getCurrentUserId() + File.separator
+                        + month + File.separator + fileType.name().toLowerCase(),
                 String.valueOf(messageId),
                 (isCover ? Constants.FILE_SUFFIX_COVER : "") + fileSuffix
         );
