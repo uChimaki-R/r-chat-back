@@ -187,8 +187,8 @@ public class ChannelUtils {
                 .and(o -> {
                     o.in(ChatMessage::getContactId, groupContactIds)
                             .or().eq(ChatMessage::getSendUserId, userId); // 下线了也可能有是自己发的信息发出去了，比如说别人同意了自己的好友请求
-                });
-//                .ge(ChatMessage::getSendTime, fromTime);  // todo 暂时不用时间限制，把所有信息都发了，方便调试
+                })
+                .ge(ChatMessage::getSendTime, fromTime);  // 时间限制
         List<ChatMessage> chatMessages = chatMessageMapper.selectList(messageQueryWrapper);
         log.info("获取用户上次下线后的未读聊天信息 {}", chatMessages);
 
@@ -229,7 +229,7 @@ public class ChannelUtils {
         }
         Channel channel = USER_CHANNEL_MAP.get(userId);
         if (channel == null) {
-            log.warn("{} 没有对应的channel, 用户可能登录在别的服务器, 取消removeChannel操作", userId);
+            log.warn("{} 没有对应的channel, 用户可能未登录或登录在别的服务器, 取消removeChannel操作", userId);
             return;
         }
         USER_CHANNEL_MAP.remove(userId);
@@ -261,7 +261,7 @@ public class ChannelUtils {
     public void removeChannelFromGroup(String userId, String groupId) {
         Channel channel = USER_CHANNEL_MAP.get(userId);
         if (channel == null) {
-            log.warn("用户 {} 对应的channel不存在, 用户可能登录在别的服务器, 取消从channelGroup中移除channel", userId);
+            log.warn("用户 {} 对应的channel不存在, 用户可能未登录或登录在别的服务器, 取消从channelGroup中移除channel", userId);
             return;
         }
         ChannelGroup group = GROUP_CHANNEL_MAP.get(groupId);
@@ -336,7 +336,7 @@ public class ChannelUtils {
         String receiveId = notice.getReceiveId();
         Channel channel = USER_CHANNEL_MAP.get(receiveId);
         if (channel == null) {
-            log.warn("用户 {} 对应的channel不存在, 用户可能登录在别的服务器, 取消发送通知 {}", receiveId, notice);
+            log.warn("用户 {} 对应的channel不存在, 用户可能未登录或登录在别的服务器, 取消发送通知 {}", receiveId, notice);
             return;
         }
         channel.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
@@ -349,7 +349,7 @@ public class ChannelUtils {
             // 尝试找到对应的channel触发close即可，close触发后在channelInactive里会触发removeChannel方法，这里直接调用removeChannel方法的话会执行两次方法，打印的日志就不是很清晰（第二次会说没有对应的channel，实际上是在第一次里移除了而不是本身没有）
             Channel chan = USER_CHANNEL_MAP.get(notice.getReceiveId());
             if (chan == null) {
-                log.warn("{} 没有对应的channel, 用户可能登录在别的服务器, 取消断开ws的操作", notice.getReceiveId());
+                log.warn("{} 没有对应的channel, 用户可能未登录或登录在别的服务器, 取消断开ws的操作", notice.getReceiveId());
                 return;
             }
             chan.close();
