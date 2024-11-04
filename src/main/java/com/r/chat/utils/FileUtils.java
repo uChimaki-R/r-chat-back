@@ -59,14 +59,15 @@ public class FileUtils {
     /**
      * 保存聊天中的文件
      * 最外层文件夹为 projectFolder + 用户id，里面还有两层文件夹
+     * cover可以为空，除了图片和视频文件，其他文件是没有缩略图的
      *
      * @param sendTime  发送时间，用来生成第一层文件夹
      * @param fileType  文件类型，用来生成第二层文件夹
      * @param messageId 消息id，用来生成文件名
      */
     public static void saveChatFile(MultipartFile file, MultipartFile cover, Long sendTime, FileTypeEnum fileType, Long messageId) {
-        if (file == null || cover == null || sendTime == null || fileType == null || messageId == null) {
-            log.warn("聊天文件信息不全, 无法保存文件 file: {}, cover: {}, sendTime: {}, fileType: {}, messageId: {}", file, cover, sendTime, fileType, messageId);
+        if (file == null || sendTime == null || fileType == null || messageId == null) {
+            log.warn("聊天文件信息不全, 无法保存文件 file: {}, sendTime: {}, fileType: {}, messageId: {}", file, sendTime, fileType, messageId);
             return;
         }
         // 按时间分目录保存
@@ -82,16 +83,18 @@ public class FileUtils {
                 StringUtils.getFileSuffix(file.getOriginalFilename()),
                 file
         );
-        saveFile(
-                AppProperties.projectFolder,
-                Constants.FILE_FOLDER_CHAT + File.separator
-                        + UserTokenInfoContext.getCurrentUserId() + File.separator
-                        + month + File.separator + fileType.name().toLowerCase(),
-                // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
-                String.valueOf(messageId),
-                Constants.FILE_SUFFIX_COVER + StringUtils.getFileSuffix(cover.getOriginalFilename()),  // _cover.xxx
-                cover
-        );
+        if (cover != null) {
+            saveFile(
+                    AppProperties.projectFolder,
+                    Constants.FILE_FOLDER_CHAT + File.separator
+                            + UserTokenInfoContext.getCurrentUserId() + File.separator
+                            + month + File.separator + fileType.name().toLowerCase(),
+                    // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
+                    String.valueOf(messageId),
+                    Constants.FILE_SUFFIX_COVER + StringUtils.getFileSuffix(cover.getOriginalFilename()),  // _cover.xxx
+                    cover
+            );
+        }
     }
 
     /**
