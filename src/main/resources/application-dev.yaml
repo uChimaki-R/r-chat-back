@@ -20,9 +20,9 @@ r:
     default-settings:
       max-group-count: 5
       max-group-member-count: 200
-      max-image-size: 2
-      max-video-size: 5
-      max-file-size: 5
+      max-image-size: 10
+      max-video-size: 200
+      max-file-size: 300
       robot-id: U00000000002
       robot-nick-name: Robot-Chat
       robot-welcome-msg: 欢迎使用R-Chat!
