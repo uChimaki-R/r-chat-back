@@ -22,8 +22,7 @@ public class FileUploadDTO implements Serializable {
     private MultipartFile file;
 
     /**
-     * 缩略图
+     * 缩略图，图片文件和视频文件会有
      */
-    @NotNull(message = Constants.VALIDATE_EMPTY_MULTIPART_FILE)
     private MultipartFile cover;
 }
