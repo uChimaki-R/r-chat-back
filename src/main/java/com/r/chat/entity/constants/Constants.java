@@ -107,6 +107,7 @@ public class Constants {
     // file
     public static final String FILE_FOLDER_AVATAR = "avatar";
     public static final String FILE_FOLDER_EXE = "app";
+    public static final String FILE_FOLDER_CHAT = "chat";
     public static final String FILE_SUFFIX_AVATAR = ".png";
     public static final String FILE_SUFFIX_COVER = "_cover";
     public static final String FILE_SUFFIX_EXE = ".exe";
