@@ -39,7 +39,7 @@ public class GroupInfoDTO implements Serializable, AvatarOwner {
      * 头像图片文件，一个压缩过一个没压缩过
      */
     private MultipartFile avatarFile;
-    private MultipartFile avatarCover;
+    private MultipartFile coverFile;
 
     @Override
     public String getIdentityName() {

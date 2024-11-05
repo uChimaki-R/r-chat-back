@@ -53,7 +53,7 @@ public class UserInfoDTO implements Serializable, AvatarOwner {
      * 头像，一个原始，一个压缩过
      */
     private MultipartFile avatarFile;
-    private MultipartFile avatarCover;
+    private MultipartFile coverFile;
 
     @Override
     public String getIdentityName() {

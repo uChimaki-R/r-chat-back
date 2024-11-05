@@ -58,7 +58,7 @@ public class SysSettingDTO implements Serializable, AvatarOwner {
      * 机器人头像，一个压缩过一个没有
      */
     private MultipartFile avatarFile;
-    private MultipartFile avatarCover;
+    private MultipartFile coverFile;
 
     @Override
     public String getIdentityName() {
