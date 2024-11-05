@@ -64,7 +64,7 @@ public class ChatController {
         log.info("下载文件 {}", downloadDTO);
         File file = chatMessageServiceImpl.getFile(downloadDTO);
         if (file == null) {
-            log.info("获取下载文件失败: 文件不存在 {}", downloadDTO);
+            log.warn("获取下载文件失败: 文件不存在 {}", downloadDTO);
             throw new FileNotExistException(Constants.MESSAGE_FILE_NOT_EXIST);
         }
         log.info("获取下载文件成功, 开始下载文件 {}", file);
