@@ -19,7 +19,7 @@ public class FileUtils {
      * 保存图片到文件夹中
      */
     public static void saveAvatarFile(AvatarOwner avatarOwner) {
-        if (avatarOwner.getAvatarFile() == null || avatarOwner.getAvatarCover() == null) {
+        if (avatarOwner.getAvatarFile() == null || avatarOwner.getCoverFile() == null) {
             log.warn("尝试保存为null的文件 {}", avatarOwner);
             return;
         }
@@ -35,7 +35,7 @@ public class FileUtils {
                 Constants.FILE_FOLDER_AVATAR,
                 avatarOwner.getIdentityName(),
                 Constants.FILE_SUFFIX_COVER + Constants.FILE_SUFFIX_AVATAR,  // _cover.png
-                avatarOwner.getAvatarCover()
+                avatarOwner.getCoverFile()
         );
     }
 
@@ -194,7 +194,7 @@ public class FileUtils {
         File targetFolder = new File(rootPath, folder);
         File localFile = new File(targetFolder, fileName + suffix);
         if (!localFile.exists()) {
-            log.error("打开文件失败: 文件不存在 {}", localFile.getAbsolutePath());
+            log.warn("打开文件失败: 文件不存在 {}", localFile.getAbsolutePath());
             throw new FileNotExistException(Constants.MESSAGE_FILE_NOT_EXIST);
         }
         log.info("获取到文件 {}", localFile);
