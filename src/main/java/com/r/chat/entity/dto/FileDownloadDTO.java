@@ -18,7 +18,7 @@ public class FileDownloadDTO implements Serializable {
      * 需要下载的文件名。如果是头像的话则是U/G+数字，如果是聊天文件的话则是messageId
      */
     @NotEmpty(message = Constants.VALIDATE_EMPTY_FILE_NAME)
-    private String fileName;
+    private String fileId;
 
     /**
      * 要下载的是否是缩略图

@@ -214,10 +214,10 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
 
     @Override
     public File getFile(FileDownloadDTO fileInfo) {
-        // 判断文件名是否纯数字，纯数字则是聊天文件（messageId），非纯数字则是头像文件
-        if (StringUtils.isNumber(fileInfo.getFileName())) {
+        // 判断文件id是否纯数字，纯数字则是聊天文件（messageId），非纯数字则是头像文件
+        if (StringUtils.isNumber(fileInfo.getFileId())) {
             // 聊天文件
-            String messageId = fileInfo.getFileName();
+            String messageId = fileInfo.getFileId();
             // 获取聊天信息
             ChatMessage chatMessage = chatMessageMapper.selectById(Long.parseLong(messageId));
             if (chatMessage == null) {
@@ -237,7 +237,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             return FileUtils.getChatFile(chatMessage.getSendTime(), chatMessage.getFileType(), chatMessage.getFileName(), chatMessage.getMessageId(), fileInfo.getIsCover());
         } else {
             // 头像文件
-            return FileUtils.getAvatarFile(fileInfo.getFileName(), fileInfo.getIsCover());
+            return FileUtils.getAvatarFile(fileInfo.getFileId(), fileInfo.getIsCover());
         }
     }
 }
