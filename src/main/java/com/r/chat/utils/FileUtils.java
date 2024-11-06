@@ -75,7 +75,6 @@ public class FileUtils {
         saveFile(
                 AppProperties.projectFolder,
                 Constants.FILE_FOLDER_CHAT + File.separator
-                        + UserTokenInfoContext.getCurrentUserId() + File.separator
                         + month + File.separator
                         + fileType.name().toLowerCase(),
                 // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
@@ -87,11 +86,10 @@ public class FileUtils {
             saveFile(
                     AppProperties.projectFolder,
                     Constants.FILE_FOLDER_CHAT + File.separator
-                            + UserTokenInfoContext.getCurrentUserId() + File.separator
                             + month + File.separator + fileType.name().toLowerCase(),
                     // 对文件进行重新命名防止用户间的文件重名，直接使用消息id命名
                     String.valueOf(messageId),
-                    Constants.FILE_SUFFIX_COVER + StringUtils.getFileSuffix(cover.getOriginalFilename()),  // _cover.xxx
+                    Constants.FILE_SUFFIX_COVER + Constants.FILE_SUFFIX_AVATAR,  // _cover.png // 所有的缩略图都用这个结尾，用源文件后缀在传视频的情况下会是_cover.mp4，就不是缩略图了
                     cover
             );
         }
@@ -149,10 +147,9 @@ public class FileUtils {
         return getFile(
                 AppProperties.projectFolder,
                 Constants.FILE_FOLDER_CHAT + File.separator
-                        + UserTokenInfoContext.getCurrentUserId() + File.separator
                         + month + File.separator + fileType.name().toLowerCase(),
                 String.valueOf(messageId),
-                (isCover ? Constants.FILE_SUFFIX_COVER : "") + fileSuffix
+                (isCover ? Constants.FILE_SUFFIX_COVER  + Constants.FILE_SUFFIX_AVATAR : fileSuffix)
         );
     }
 
