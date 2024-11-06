@@ -88,7 +88,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         chatMessage.setSendUserNickName(userTokenInfo.getNickName());
         chatMessage.setSendTime(now);
         // 如果是文字消息直接标记发送完毕，如果是媒体消息则标记发送中
-        chatMessage.setStatus(MessageTypeEnum.TEXT.equals(messageType) ? MessageStatusEnum.SENT : MessageStatusEnum.SENDING);
+        chatMessage.setSendStatus(MessageTypeEnum.TEXT.equals(messageType) ? MessageStatusEnum.SENT : MessageStatusEnum.SENDING);
         chatMessageMapper.insert(chatMessage);
         log.info("新增发送的消息 {}", chatMessage);
 
@@ -104,9 +104,10 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             lastMessage = chatMessageDTO.getMessageContent();
         }
         // 如果是发送给机器人的话让机器人回复，最后的消息也应该是机器人回复的信息
+        // 如果确实是发给机器人的话先把通知信息保存下来，等自己的消息通知发出去后在发送收到机器人的消息的通知
+        ChatNotice chatNoticeRobot = new ChatNotice();
         if (defaultSysSettingProperties.getRobotId().equals(contactId)) {
             log.info("给机器人发送了消息, 自动回复消息");
-            ChatNotice chatNotice = new ChatNotice();
             // 构建机器人回复的消息（可接入ai模型）
             ChatMessage cm = new ChatMessage();
             cm.setSessionId(sessionId);
@@ -118,17 +119,16 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             cm.setSendTime(now);
             cm.setContactId(userTokenInfo.getUserId());  // 回复自己
             cm.setContactType(UserContactTypeEnum.USER);
-            cm.setStatus(MessageStatusEnum.SENT);
+            cm.setSendStatus(MessageStatusEnum.SENT);
             // 同样要更新到数据库里
             chatMessageMapper.insert(cm);
             log.info("新增机器人发送的消息 {}", cm);
             ChatMessageVO chatMessageVO = CopyUtils.copyBean(cm, ChatMessageVO.class);
             chatMessageVO.setLastMessage(lastMessage);
             chatMessageVO.setLastReceiveTime(now);
-            chatNotice.setChatMessageVO(chatMessageVO);
-            chatNotice.setReceiveId(userTokenInfo.getUserId());  // 发回给自己
-            channelUtils.sendNotice(chatNotice);
-            log.info("发送收到消息的通知给发消息给机器人的用户 {}", chatNotice);
+            chatNoticeRobot.setChatMessageVO(chatMessageVO);
+            chatNoticeRobot.setReceiveId(userTokenInfo.getUserId());  // 发回给自己
+            // 最后再发
         }
         chatSession.setLastMessage(lastMessage);
         chatSession.setLastReceiveTime(now);
@@ -148,6 +148,11 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         channelUtils.sendNotice(chatNotice);
         log.info("发送收到消息的通知给接收者 {}", chatNotice);
 
+        // 如果是发给机器人的，发送机器人回复消息的通知
+        if (defaultSysSettingProperties.getRobotId().equals(contactId)) {
+            channelUtils.sendNotice(chatNoticeRobot);
+            log.info("发送收到消息的通知给发消息给机器人的用户 {}", chatNoticeRobot);
+        }
         return chatMessageVO;
     }
 
@@ -200,13 +205,13 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         FileUtils.saveChatFile(file, cover, chatMessage.getSendTime(), fileType, chatMessage.getMessageId());
 
         // 更新信息为已发送
-        chatMessage.setStatus(MessageStatusEnum.SENT);
+        chatMessage.setSendStatus(MessageStatusEnum.SENT);
         chatMessageMapper.updateById(chatMessage);
         log.info("更新消息状态为已发送 {}", chatMessage);
 
         // 发送通知通知接收方可以获取文件数据了
         FileUploadCompletedNotice notice = new FileUploadCompletedNotice();
-        notice.setMessageId(chatMessage.getMessageId());
+        notice.setChatMessage(chatMessage);
         notice.setReceiveId(chatMessage.getContactId());
         channelUtils.sendNotice(notice);
         log.info("发送发送方文件上传完毕，接收方可以接收文件的ws通知 {}", notice);
@@ -224,9 +229,9 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                 log.warn("获取聊天文件失败: 聊天信息不存在 messageId: {}", messageId);
                 throw new ChatMessageNotExistException(Constants.MESSAGE_CHAT_MESSAGE_NOT_EXIST);
             }
-            // 聊天的对象需要是自己的好友才行
+            // 聊天的对象需要是自己的好友/发送给的对象需要是自己才行
             List<String> contactIds = redisUtils.getContactIds(UserTokenInfoContext.getCurrentUserId());
-            if (contactIds == null || !contactIds.contains(chatMessage.getContactId())) {
+            if ((contactIds == null || !contactIds.contains(chatMessage.getContactId())) && !UserTokenInfoContext.getCurrentUserId().equals(chatMessage.getContactId())) {
                 log.warn("获取聊天文件失败: 与 {} 非好友状态", chatMessage.getContactId());
                 if (UserContactTypeEnum.USER.equals(chatMessage.getContactType())) {
                     throw new IllegalOperationException(Constants.MESSAGE_NOT_THE_FRIEND);
