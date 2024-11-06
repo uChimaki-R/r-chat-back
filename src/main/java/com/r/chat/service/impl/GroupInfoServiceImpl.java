@@ -145,7 +145,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             chatMessage.setMessageContent(Constants.MESSAGE_GROUP_CREATED);
             chatMessage.setContactId(groupInfo.getGroupId());
             chatMessage.setContactType(UserContactTypeEnum.GROUP);
-            chatMessage.setStatus(MessageStatusEnum.SENT);
+            chatMessage.setSendStatus(MessageStatusEnum.SENT);
             chatMessage.setSendTime(millis);
             chatMessageMapper.insert(chatMessage);
             log.info("新增群聊创建成功提示信息 {}", chatMessage);
@@ -282,7 +282,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         chatMessage.setSendTime(now);
         chatMessage.setContactId(groupId);
         chatMessage.setContactType(UserContactTypeEnum.GROUP);
-        chatMessage.setStatus(MessageStatusEnum.SENT);
+        chatMessage.setSendStatus(MessageStatusEnum.SENT);
         chatMessageMapper.insert(chatMessage);
         log.info("新增解散群聊的消息 {}", chatMessage);
 
@@ -398,7 +398,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         chatMessage.setSendTime(now);
         chatMessage.setContactId(groupId);
         chatMessage.setContactType(UserContactTypeEnum.GROUP);
-        chatMessage.setStatus(MessageStatusEnum.SENT);
+        chatMessage.setSendStatus(MessageStatusEnum.SENT);
         chatMessageMapper.insert(chatMessage);
         log.info("新增退出群聊的消息 {}", chatMessage);
 

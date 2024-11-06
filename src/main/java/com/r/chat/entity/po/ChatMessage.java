@@ -105,7 +105,7 @@ public class ChatMessage implements Serializable {
     /**
      * 状态 0：正在发送 1：已发送
      */
-    @TableField("status")
-    private MessageStatusEnum status;
+    @TableField("send_status")
+    private MessageStatusEnum sendStatus;
 
 }

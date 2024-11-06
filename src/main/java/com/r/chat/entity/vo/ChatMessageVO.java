@@ -80,7 +80,7 @@ public class ChatMessageVO implements Serializable {
     /**
      * 状态 0：正在发送 1：已发送
      */
-    private MessageStatusEnum status;
+    private MessageStatusEnum sendStatus;
 
     // 前端除了更新信息外，还要更新会话里的最后消息等内容，需要后端一起返回
     /**
