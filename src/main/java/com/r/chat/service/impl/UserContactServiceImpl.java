@@ -301,7 +301,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
 
         // 获取申请信息，添加好友后要发送这个申请信息
         String applyInfo;
-        if (defaultSysSettingProperties.getRobotId().equals(contactApplyAddDTO.getContactId())) {
+        if (defaultSysSettingProperties.getRobotId().equals(contactApplyAddDTO.getApplyUserId())) {
             // 注册的时候加的机器人是没有申请信息的，构造一个
             applyInfo = defaultSysSettingProperties.getRobotWelcomeMsg();  // 设置为欢迎消息
         } else {
@@ -372,7 +372,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatMessage.setSendUserNickName(applyUserInfo.getNickName());
             chatMessage.setSendTime(now);
             chatMessage.setContactType(contactApplyAddDTO.getContactType());
-            chatMessage.setStatus(MessageStatusEnum.SENT);
+            chatMessage.setSendStatus(MessageStatusEnum.SENT);
             chatMessageMapper.insert(chatMessage);
             log.info("新增聊天信息 {}", chatMessage);
 
@@ -440,7 +440,7 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             chatMessage.setMessageContent(joinMessage);
             chatMessage.setMessageType(MessageTypeEnum.NOTICE);
             chatMessage.setSendTime(now);
-            chatMessage.setStatus(MessageStatusEnum.SENT);
+            chatMessage.setSendStatus(MessageStatusEnum.SENT);
             chatMessageMapper.insert(chatMessage);
             log.info("新增聊天消息 {}", chatMessage);
 
