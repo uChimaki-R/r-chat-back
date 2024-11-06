@@ -93,8 +93,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 添加机器人为好友
         String robotId = defaultSysSettingProperties.getRobotId();
         ContactApplyAddDTO robotAdd = new ContactApplyAddDTO();
-        robotAdd.setApplyUserId(userId);
-        robotAdd.setContactId(robotId);
+        robotAdd.setApplyUserId(robotId);  // 机器人的欢迎消息等价于其他用户添加别人时的申请信息，所以申请人是机器人，接收者是新用户
+        robotAdd.setContactId(userId);
         robotAdd.setContactType(UserContactTypeEnum.USER);
         userContactService.addContact(robotAdd);
         log.info("{} 成功添加机器人为好友", userId);
