@@ -1,6 +1,7 @@
 package com.r.chat.entity.notice;
 
 import com.r.chat.entity.enums.NoticeTypeEnum;
+import com.r.chat.entity.po.ChatMessage;
 import com.r.chat.entity.result.Notice;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,5 +23,5 @@ public class FileUploadCompletedNotice extends Notice implements Serializable {
     /**
      * 文件对应的消息id
      */
-    private Long messageId;
+    private ChatMessage chatMessage;
 }
