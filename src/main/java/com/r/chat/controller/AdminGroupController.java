@@ -31,7 +31,7 @@ public class AdminGroupController {
                                                            @RequestParam(defaultValue = "15") Long pageSize) {
         log.info("获取群聊信息 pageNo: {}, pageSize: {}", pageNo, pageSize);
         // 群聊信息需要联查群主名称和群聊成员数量
-        Page<GroupDetailInfoVO> page = groupInfoService.loadGroupDetailInfo(new Page<>(pageNo, pageSize), groupInfoQueryDTO);
+        Page<GroupDetailInfoVO> page = groupInfoService.loadGroupInfo4Admin(new Page<>(pageNo, pageSize), groupInfoQueryDTO);
         PageResult<GroupDetailInfoVO> pageResult = PageResult.fromPage(page);
         log.info("获取到群聊信息 {}", pageResult);
         return Result.success(pageResult);
