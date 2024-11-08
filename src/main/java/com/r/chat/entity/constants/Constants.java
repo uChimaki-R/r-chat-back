@@ -76,6 +76,7 @@ public class Constants {
     public static final String VALIDATE_EMPTY_CONTACT_ID = "联系人id不能为空";
     public static final String VALIDATE_EMPTY_USER_ID = "用户id不能为空";
     public static final String VALIDATE_EMPTY_GROUP_ID = "群聊id不能为空";
+    public static final String VALIDATE_EMPTY_GROUP_NAME = "群聊名不能为空";
     public static final String VALIDATE_EMPTY_APPLY_ID = "申请id不能为空";
     public static final String VALIDATE_EMPTY_SESSION_ID = "会话id不能为空";
     public static final String VALIDATE_EMPTY_MESSAGE_ID = "消息id不能为空";
