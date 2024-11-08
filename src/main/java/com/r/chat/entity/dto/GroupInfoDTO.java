@@ -1,5 +1,6 @@
 package com.r.chat.entity.dto;
 
+import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.JoinTypeEnum;
 import com.r.chat.utils.AvatarOwner;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
@@ -23,6 +26,7 @@ public class GroupInfoDTO implements Serializable, AvatarOwner {
     /**
      * 群聊名
      */
+    @NotEmpty(message = Constants.VALIDATE_EMPTY_GROUP_NAME)
     private String groupName;
 
     /**
@@ -33,12 +37,15 @@ public class GroupInfoDTO implements Serializable, AvatarOwner {
     /**
      * 加群类型：0：直接加入 1：管理员同意后加入
      */
+    @NotNull(message = Constants.VALIDATE_EMPTY_STATUS)
     private JoinTypeEnum joinType;
 
     /**
      * 头像图片文件，一个压缩过一个没压缩过
      */
+    @NotNull(message = Constants.VALIDATE_EMPTY_MULTIPART_FILE)
     private MultipartFile avatarFile;
+    @NotNull(message = Constants.VALIDATE_EMPTY_MULTIPART_FILE)
     private MultipartFile coverFile;
 
     @Override
