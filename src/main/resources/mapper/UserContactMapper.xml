@@ -3,7 +3,7 @@
 <mapper namespace="com.r.chat.mapper.UserContactMapper">
 
     <select id="selectGroupMemberByGroupId" resultType="com.r.chat.entity.dto.BasicInfoDTO">
-        select uc.user_id userOrGroupId, ui.nick_name userOrGroupName
+        select uc.user_id userId, ui.nick_name userName, 0 contactType
         from r_chat.user_contact uc
                  join r_chat.user_info ui on uc.user_id = ui.user_id
         where uc.contact_id = #{groupId}
