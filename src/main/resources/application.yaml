@@ -71,6 +71,7 @@ r:
       max-image-size: ${r.chat.default-settings.max-image-size}
       max-video-size: ${r.chat.default-settings.max-video-size}
       max-file-size: ${r.chat.default-settings.max-file-size}
+      max-file-count: ${r.chat.default-settings.max-file-count}
       robot-id: ${r.chat.default-settings.robot-id}
       robot-nick-name: ${r.chat.default-settings.robot-nick-name}
       robot-welcome-msg: ${r.chat.default-settings.robot-welcome-msg}
