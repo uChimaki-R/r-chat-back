@@ -34,6 +34,11 @@ public class DefaultSysSettingProperties {
     private Integer maxFileSize;
 
     /**
+     * 发送文件的单次最多选择个数
+     */
+    private Integer maxFileCount;
+
+    /**
      * 初始机器人id
      */
     private String robotId;
