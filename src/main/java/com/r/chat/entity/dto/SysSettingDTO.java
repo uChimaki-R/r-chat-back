@@ -40,6 +40,11 @@ public class SysSettingDTO implements Serializable, AvatarOwner {
     private Integer maxFileSize;
 
     /**
+     * 发送文件的单次最多选择个数
+     */
+    private Integer maxFileCount;
+
+    /**
      * 初始机器人id
      */
     private String robotId;
@@ -53,6 +58,11 @@ public class SysSettingDTO implements Serializable, AvatarOwner {
      * 初始机器人欢迎语
      */
     private String robotWelcomeMsg;
+
+    /**
+     * 初始机器人默认回复信息
+     */
+    private String robotDefaultReply;
 
     /**
      * 机器人头像，一个压缩过一个没有
