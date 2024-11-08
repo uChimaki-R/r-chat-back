@@ -211,7 +211,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     }
 
     @Override
-    public Page<GroupDetailInfoVO> loadGroupDetailInfo(Page<GroupDetailInfoVO> page, GroupInfoQueryDTO groupInfoQueryDTO) {
+    public Page<GroupDetailInfoVO> loadGroupInfo4Admin(Page<GroupDetailInfoVO> page, GroupInfoQueryDTO groupInfoQueryDTO) {
         // 前端发送的id是不带前缀的，如果传递了id的查询条件的话需要补充前缀
         if (!StringUtils.isEmpty(groupInfoQueryDTO.getGroupId())) {
             // 补充groupId的前缀
@@ -423,5 +423,61 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         notice.setLeaveUserId(idToLeave);
         channelUtils.sendNotice(notice);
         log.info("发送离开群聊或者被移出群聊的ws通知 {}", notice);
+    }
+
+    @Override
+    public GroupDetailInfoVO getGroupDetailInfo(String groupId) {
+        GroupInfo groupInfo = groupInfoMapper.selectById(groupId);
+        if (groupInfo == null) {
+            // 群聊不存在
+            log.warn("获取群聊基本信息失败: 群聊不存在 groupId: {}", groupId);
+            throw new GroupNotExistException(Constants.MESSAGE_GROUP_NOT_EXIST);
+        }
+        if (GroupInfoStatusEnum.DISBAND.equals(groupInfo.getStatus())) {
+            // 群聊已解散
+            log.warn("获取群聊基本信息失败: 群聊已解散 groupId: {}", groupId);
+            throw new GroupDisbandException(Constants.MESSAGE_GROUP_ALREADY_DISBAND);
+        }
+        // 看该用户是否在群里
+        QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(UserContact::getUserId, UserTokenInfoContext.getCurrentUserId())
+                .eq(UserContact::getContactId, groupId);
+        UserContact userContact = userContactMapper.selectOne(queryWrapper);
+        if (userContact == null || !UserContactStatusEnum.FRIENDS.equals(userContact.getStatus())) {
+            // 不在这个群或者被移除群了，属于非法操作
+            log.warn("获取群聊基本信息失败: 不在该群聊中 groupId: {}", groupId);
+            throw new IllegalOperationException(Constants.MESSAGE_NOT_IN_THE_GROUP);
+        }
+        GroupDetailInfoVO groupDetailInfoVO = CopyUtils.copyBean(groupInfo, GroupDetailInfoVO.class);
+        // 计算群成员数
+        QueryWrapper<UserContact> countWrapper = new QueryWrapper<>();
+        countWrapper.lambda().eq(UserContact::getContactId, groupDetailInfoVO.getGroupId());
+        Long count = userContactMapper.selectCount(countWrapper);
+        groupDetailInfoVO.setMemberCount(count);
+        // 获取群主名字
+        UserInfo owner = userInfoMapper.selectById(groupInfo.getGroupOwnerId());
+        groupDetailInfoVO.setGroupOwnerNickName(owner.getNickName());
+        log.info("获取到群聊详细信息 {}", groupDetailInfoVO);
+        return groupDetailInfoVO;
+    }
+
+    @Override
+    public List<GroupDetailInfoVO> loadMyGroupInfo() {
+        // 获取自己的群聊
+        QueryWrapper<GroupInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(GroupInfo::getGroupOwnerId, UserTokenInfoContext.getCurrentUserId());
+        List<GroupInfo> list = groupInfoMapper.selectList(queryWrapper);
+        List<GroupDetailInfoVO> groupDetailInfoVOList = CopyUtils.copyList(list, GroupDetailInfoVO.class);
+        // 计算每个群聊的群成员数，补充群主名信息
+        groupDetailInfoVOList.forEach(groupDetailInfoVO -> {
+            QueryWrapper<UserContact> countWrapper = new QueryWrapper<>();
+            countWrapper.lambda().eq(UserContact::getContactId, groupDetailInfoVO.getGroupId());
+            Long count = userContactMapper.selectCount(countWrapper);
+            groupDetailInfoVO.setMemberCount(count);
+            groupDetailInfoVO.setGroupOwnerNickName(UserTokenInfoContext.getCurrentUserNickName());  // 群主名就是自己的名字
+        });
+        log.info("获取创建的群聊 {}", groupDetailInfoVOList);
+        return groupDetailInfoVOList;
     }
 }
