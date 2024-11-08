@@ -91,13 +91,6 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
                 throw new GroupCountLimitException(String.format(Constants.MESSAGE_GROUP_COUNT_LIMIT, sysSettingDTO.getMaxGroupCount()));
             }
 
-            // todo 暂时注释掉这段代码，让前端先跳过上传图片的逻辑，后续需要再放开
-//            // 没有携带群头像
-//            if (groupInfoDTO.getAvatarFile() == null) {
-//                log.warn("拒绝新增群聊: 未指定群头像");
-//                throw new ParameterErrorException(Constants.MESSAGE_MISSING_FILE);
-//            }
-
             // 添加群聊到数据库
             // 新建群号，补充内容
             groupInfo.setGroupId(StringUtils.getRandomGroupId());
@@ -201,10 +194,6 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             }
 
             log.info("修改群聊信息成功 {}", groupInfoDTO);
-        }
-        // 头像文件的操作
-        if (groupInfoDTO.getAvatarFile() == null) {
-            return;
         }
         // 头像保存到本地
         FileUtils.saveAvatarFile(groupInfoDTO);
