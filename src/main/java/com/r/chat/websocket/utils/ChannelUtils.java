@@ -270,7 +270,7 @@ public class ChannelUtils {
             return;
         }
         group.remove(channel);
-        log.info("取消从channelGroup中移除channel groupId: {}, userId: {}", groupId, userId);
+        log.info("从channelGroup中移除channel groupId: {}, userId: {}", groupId, userId);
     }
 
     /**
@@ -336,11 +336,11 @@ public class ChannelUtils {
         String receiveId = notice.getReceiveId();
         Channel channel = USER_CHANNEL_MAP.get(receiveId);
         if (channel == null) {
-            log.warn("用户 {} 对应的channel不存在, 用户可能未登录或登录在别的服务器, 取消发送通知 {}", receiveId, notice);
+            log.warn("用户对应的channel不存在, 用户可能未登录或登录在别的服务器, 取消发送通知 {}", notice);
             return;
         }
         channel.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
-        log.info("发送ws通知给用户 {} {}", receiveId, notice);
+        log.info("发送ws通知给用户 {}", notice);
         // 某些操作如强制下线，因为集群的存在，想强制下线的人不一定在自己的服务器里登陆了，所以不能在强制下线的业务代码里调用removeChannel方法来关闭ws连接
         // 所以在接收到广播的时候，每个服务器都要判断是否接收到了强制下线的通知，都尝试从自己的服务器中关闭该ws连接
         if (NoticeTypeEnum.FORCE_OFFLINE.equals(notice.getNoticeType())) {
@@ -349,7 +349,7 @@ public class ChannelUtils {
             // 尝试找到对应的channel触发close即可，close触发后在channelInactive里会触发removeChannel方法，这里直接调用removeChannel方法的话会执行两次方法，打印的日志就不是很清晰（第二次会说没有对应的channel，实际上是在第一次里移除了而不是本身没有）
             Channel chan = USER_CHANNEL_MAP.get(notice.getReceiveId());
             if (chan == null) {
-                log.warn("{} 没有对应的channel, 用户可能未登录或登录在别的服务器, 取消断开ws的操作", notice.getReceiveId());
+                log.warn("没有找到对应的channel, 用户可能未登录或登录在别的服务器, 取消断开ws的操作");
                 return;
             }
             chan.close();
@@ -369,11 +369,11 @@ public class ChannelUtils {
         String groupId = notice.getReceiveId();
         ChannelGroup group = GROUP_CHANNEL_MAP.get(groupId);
         if (group == null) {
-            log.warn("群聊 {} 对应的channelGroup不存在, 可能是本服务器没有该群聊成员登录, 取消发送通知 {}", groupId, notice);
+            log.warn("对应的channelGroup不存在, 可能是本服务器没有该群聊成员登录, 取消发送通知 {}",  notice);
             return;
         }
         group.writeAndFlush(new TextWebSocketFrame(JsonUtils.obj2Json(notice)));
-        log.info("发送ws通知给群聊 {} {}", groupId, notice);
+        log.info("发送ws通知给群聊 {}", notice);
         // 和上面sendNotice2User的强制下线同理，群聊也有一些因为集群需要特殊处理的通知
         // 如被移出群聊，被移出的人不一定在自己的服务器登录，需要所有服务器尝试在对应的群聊channelGroup里找到这个人并断开连接
         // （因为退出群聊和被移出群聊都是走的IGroupInfoService.leaveGroup逻辑，所以也统一在这里断开连接）
@@ -387,7 +387,7 @@ public class ChannelUtils {
             log.info("接收到解散群聊的通知, 尝试关闭 {} 对应的channelGroup", notice.getReceiveId());
             ChannelGroup channelGroup = GROUP_CHANNEL_MAP.get(groupId);
             if (channelGroup == null) {
-                log.warn("群聊 {} 对应的channelGroup不存在, 取消关闭channelGroup", groupId);
+                log.warn("群聊对应的channelGroup不存在, 取消关闭channelGroup");
                 return;
             }
             GROUP_CHANNEL_MAP.remove(groupId);
