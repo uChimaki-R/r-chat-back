@@ -13,7 +13,7 @@ import com.r.chat.entity.notice.ContactRenameNotice;
 import com.r.chat.entity.notice.GroupDisbandNotice;
 import com.r.chat.entity.notice.GroupMemberLeaveOrIsRemovedNotice;
 import com.r.chat.entity.po.*;
-import com.r.chat.entity.vo.ChatMessageVO;
+import com.r.chat.entity.vo.ChatDataVO;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
 import com.r.chat.exception.*;
@@ -277,10 +277,8 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
 
         // 发送群聊解散通知
         GroupDisbandNotice notice = new GroupDisbandNotice();
-        ChatMessageVO chatMessageVO = CopyUtils.copyBean(chatMessage, ChatMessageVO.class);
-        chatMessageVO.setLastReceiveTime(now);
-        chatMessageVO.setLastMessage(Constants.MESSAGE_GROUP_DISBAND);
-        notice.setChatMessageVO(chatMessageVO);
+        ChatDataVO chatDataVO = ChatDataVO.fromChatData(chatMessage, chatSession, groupId, groupInfo.getGroupName());
+        notice.setChatDataVO(chatDataVO);
         notice.setReceiveId(groupId);
         channelUtils.sendNotice(notice);
         log.info("发送群聊解散的ws通知 {}", notice);
@@ -403,11 +401,9 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
 
         // 发送ws通知给群聊成员
         GroupMemberLeaveOrIsRemovedNotice notice = new GroupMemberLeaveOrIsRemovedNotice();
-        ChatMessageVO chatMessageVO = CopyUtils.copyBean(chatMessage, ChatMessageVO.class);
-        chatMessageVO.setLastMessage(lastMessage);
-        chatMessageVO.setLastReceiveTime(now);
-        chatMessageVO.setMemberCount(cnt);
-        notice.setChatMessageVO(chatMessageVO);
+        ChatDataVO chatDataVO = ChatDataVO.fromChatData(chatMessage, chatSession, groupId, groupInfo.getGroupName());
+        chatDataVO.setMemberCount(cnt);
+        notice.setChatDataVO(chatDataVO);
         notice.setReceiveId(groupId);
         notice.setLeaveUserId(idToLeave);
         channelUtils.sendNotice(notice);
