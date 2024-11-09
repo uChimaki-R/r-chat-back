@@ -38,10 +38,19 @@ public class ChatMessageDTO implements Serializable {
     private String messageContent;
 
     /**
-     * 接收人id
+     * 联系人id
      */
     @NotEmpty(message = Constants.VALIDATE_EMPTY_CONTACT_ID)
     private String contactId;
+
+    /**
+     * 联系人名称，只在发送到群聊时有用
+     * 当contactType为群聊时使用这个名称（群聊的所有人看到的会话上的名字是群聊名）
+     * 否则则是发送给用户的，对方看到的是自己的名字，所以从上下文取自己的名字即可
+     * （让前端把群聊名发过来后端就不用根据contactId再查群聊名，降低压力，用户名字同理）
+     */
+    @NotEmpty(message = Constants.VALIDATE_EMPTY_CONTACT_NAME)
+    private String contactName;
 
     /**
      * 联系人类型
