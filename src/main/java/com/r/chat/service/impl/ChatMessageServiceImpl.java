@@ -14,7 +14,7 @@ import com.r.chat.entity.notice.ChatNotice;
 import com.r.chat.entity.notice.FileUploadCompletedNotice;
 import com.r.chat.entity.po.ChatMessage;
 import com.r.chat.entity.po.ChatSession;
-import com.r.chat.entity.vo.ChatMessageVO;
+import com.r.chat.entity.vo.ChatDataVO;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.ChatMessageMapper;
 import com.r.chat.mapper.ChatSessionMapper;
@@ -56,19 +56,19 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     private final ChannelUtils channelUtils;
 
     @Override
-    public ChatMessageVO saveMessage(ChatMessageDTO chatMessageDTO) {
+    public ChatDataVO saveMessage(ChatMessageDTO chatMessageDTO) {
         MessageTypeEnum messageType = chatMessageDTO.getMessageType();
         if (messageType == null || messageType.equals(MessageTypeEnum.NOTICE)) {
             // 为空或者想发送通知型消息（显示在消息中间的灰色消息）是不合法的
             log.warn("发送的消息类型不合法 {}", chatMessageDTO);
             throw new EnumIsNullException(Constants.MESSAGE_ENUM_ERROR);
         }
-        String contactId = chatMessageDTO.getContactId();
+        String receiveId = chatMessageDTO.getContactId();
         // 发送给的人需要在自己的好友列表中
         List<String> contactIds = redisUtils.getContactIds(UserTokenInfoContext.getCurrentUserId());
-        if (contactIds == null || !contactIds.contains(contactId)) {
+        if (contactIds == null || !contactIds.contains(receiveId)) {
             // 发送给非自己的好友
-            log.warn(Constants.MESSAGE_CAN_NOT_SEE_THE_FRIEND, contactId);
+            log.warn(Constants.MESSAGE_CAN_NOT_SEE_THE_FRIEND, receiveId);
             // 看是群聊还是好友，提示信息不一样
             if (UserContactTypeEnum.USER.equals(chatMessageDTO.getContactType())) {
                 log.warn("发送消息失败 和该用户非好友关系 userId: {}", chatMessageDTO.getContactId());
@@ -103,17 +103,33 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         } else {
             lastMessage = chatMessageDTO.getMessageContent();
         }
-        // 如果是发送给机器人的话让机器人回复，最后的消息也应该是机器人回复的信息
-        // 如果确实是发给机器人的话先把通知信息保存下来，等自己的消息通知发出去后在发送收到机器人的消息的通知
-        ChatNotice chatNoticeRobot = new ChatNotice();
-        if (defaultSysSettingProperties.getRobotId().equals(contactId)) {
+        chatSession.setLastMessage(lastMessage);
+        chatSession.setLastReceiveTime(now);
+        chatSessionMapper.updateById(chatSession);
+        log.info("更新会话消息 {}", chatSession);
+
+        // 构建对方看到的消息
+        // 如果发到群聊里，别人看到的会话名字是群聊名，如果发给用户，对方看到的是自己的名字
+        String contactName = UserContactTypeEnum.GROUP.equals(chatMessageDTO.getContactType()) ? chatMessageDTO.getContactName() : userTokenInfo.getNickName();
+        String contactId = UserContactTypeEnum.GROUP.equals(chatMessageDTO.getContactType()) ? chatMessageDTO.getContactId() : userTokenInfo.getUserId();
+        ChatDataVO chatDataVO = ChatDataVO.fromChatData(chatMessage, chatSession, contactId, contactName);
+
+        // 发送通知给接收人
+        ChatNotice chatNotice = new ChatNotice();
+        chatNotice.setReceiveId(receiveId);
+        chatNotice.setChatDataVO(chatDataVO);
+        channelUtils.sendNotice(chatNotice);
+        log.info("发送收到消息的通知给接收者 {}", chatNotice);
+
+        // 给机器人发了消息，机器人秒回
+        if (defaultSysSettingProperties.getRobotId().equals(receiveId)) {
             log.info("给机器人发送了消息, 自动回复消息");
-            // 构建机器人回复的消息（可接入ai模型）
+            ChatNotice chatNoticeRobot = new ChatNotice();
             ChatMessage cm = new ChatMessage();
+            // 构建机器人回复的消息（可接入ai模型）
             cm.setSessionId(sessionId);
             cm.setMessageType(MessageTypeEnum.TEXT);
             cm.setMessageContent(defaultSysSettingProperties.getRobotDefaultReply());
-            lastMessage = cm.getMessageContent();  // 机器人回复了的话要修改最后消息
             cm.setSendUserId(defaultSysSettingProperties.getRobotId());
             cm.setSendUserNickName(defaultSysSettingProperties.getRobotNickName());
             cm.setSendTime(now);
@@ -123,37 +139,18 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             // 同样要更新到数据库里
             chatMessageMapper.insert(cm);
             log.info("新增机器人发送的消息 {}", cm);
-            ChatMessageVO chatMessageVO = CopyUtils.copyBean(cm, ChatMessageVO.class);
-            chatMessageVO.setLastMessage(lastMessage);
-            chatMessageVO.setLastReceiveTime(now);
-            chatNoticeRobot.setChatMessageVO(chatMessageVO);
+            // 如果是发送给机器人的话让机器人回复，最后的消息也应该是机器人回复的信息
+            chatSession.setLastMessage(defaultSysSettingProperties.getRobotDefaultReply());
+            // 更新会话信息
+            chatSessionMapper.updateById(chatSession);
+            log.info("更新会话信息 {}", chatSession);
+            ChatDataVO chatDataVORobot = ChatDataVO.fromChatData(cm, chatSession, defaultSysSettingProperties.getRobotId(), defaultSysSettingProperties.getRobotNickName());
+            chatNoticeRobot.setChatDataVO(chatDataVORobot);
             chatNoticeRobot.setReceiveId(userTokenInfo.getUserId());  // 发回给自己
-            // 最后再发
-        }
-        chatSession.setLastMessage(lastMessage);
-        chatSession.setLastReceiveTime(now);
-        chatSessionMapper.updateById(chatSession);
-        log.info("更新会话消息 {}", chatSession);
-
-        // 前端除了更新信息外，还要更新会话里的最后消息等内容，需要后端一起返回
-        // 包装成了ChatMessageVO对象，比ChatMessage多了lastMessage、lastReceiveTime
-        ChatMessageVO chatMessageVO = CopyUtils.copyBean(chatMessage, ChatMessageVO.class);
-        chatMessageVO.setLastMessage(lastMessage);
-        chatMessageVO.setLastReceiveTime(now);
-
-        // 发送通知给接收人
-        ChatNotice chatNotice = new ChatNotice();
-        chatNotice.setReceiveId(contactId);
-        chatNotice.setChatMessageVO(chatMessageVO);
-        channelUtils.sendNotice(chatNotice);
-        log.info("发送收到消息的通知给接收者 {}", chatNotice);
-
-        // 如果是发给机器人的，发送机器人回复消息的通知
-        if (defaultSysSettingProperties.getRobotId().equals(contactId)) {
             channelUtils.sendNotice(chatNoticeRobot);
             log.info("发送收到消息的通知给发消息给机器人的用户 {}", chatNoticeRobot);
         }
-        return chatMessageVO;
+        return chatDataVO;  // 如果是发给机器人的，这里返回的不是机器人的消息而是用户发的消息，因为前端需要记录这个消息的id
     }
 
     @Override
