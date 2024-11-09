@@ -12,6 +12,7 @@ import com.r.chat.entity.notice.GroupAddAcceptedNotice;
 import com.r.chat.entity.notice.UserAddAcceptNotice;
 import com.r.chat.entity.notice.UserAddByOthersNotice;
 import com.r.chat.entity.po.*;
+import com.r.chat.entity.vo.ChatMessageVO;
 import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.*;
@@ -450,20 +451,19 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
 
             // 发送ws通知前端渲染加入的群聊的会话
             GroupAddAcceptedNotice groupAddAcceptedNotice = new GroupAddAcceptedNotice();
-            // 构建申请人看到的群聊会话数据，让前端渲染
-            ChatSessionUserVO chatSessionUserVO = CopyUtils.copyBean(chatSessionUser, ChatSessionUserVO.class);
-            chatSessionUserVO.setContactType(UserContactTypeEnum.GROUP);
-            chatSessionUserVO.setLastMessage(joinMessage);
-            chatSessionUserVO.setLastReceiveTime(now);
+            // 构建申请人看到的群聊会话和聊天数据，让前端渲染
+            ChatMessageVO chatMessageVO = CopyUtils.copyBean(chatMessage, ChatMessageVO.class);
+            chatMessageVO.setLastMessage(joinMessage);
+            chatMessageVO.setLastReceiveTime(now);
             // 查询群聊人数
             QueryWrapper<UserContact> queryWrapper = new QueryWrapper<>();
             queryWrapper.lambda()
                     .eq(UserContact::getContactId, contactApplyAddDTO.getContactId())
                     .eq(UserContact::getStatus, UserContactStatusEnum.FRIENDS);
             Long count = userContactMapper.selectCount(queryWrapper);
-            chatSessionUserVO.setMemberCount(count);
-            groupAddAcceptedNotice.setChatSessionUserVO(chatSessionUserVO);
-            groupAddAcceptedNotice.setReceiveId(contactApplyAddDTO.getApplyUserId());  // 发送给申请人
+            chatMessageVO.setMemberCount(count);
+            groupAddAcceptedNotice.setChatMessageVO(chatMessageVO);
+            groupAddAcceptedNotice.setReceiveId(contactApplyAddDTO.getContactId());  // 发送给接收者，即群聊
             channelUtils.sendNotice(groupAddAcceptedNotice);
             log.info("发送群聊加入申请被通过的ws通知  {}", groupAddAcceptedNotice);
 
