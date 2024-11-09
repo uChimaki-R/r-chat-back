@@ -4,18 +4,40 @@ import com.r.chat.entity.enums.FileTypeEnum;
 import com.r.chat.entity.enums.MessageStatusEnum;
 import com.r.chat.entity.enums.MessageTypeEnum;
 import com.r.chat.entity.enums.UserContactTypeEnum;
+import com.r.chat.entity.po.ChatMessage;
+import com.r.chat.entity.po.ChatSession;
+import com.r.chat.utils.CopyUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * 综合了三张表的数据的VO类
+ * 前端使用同一个类更新两个表的数据（通过判断是否表段来选择属性）
+ * （前端把chat_session和chat_session_user合为了一张表chat_session_user）
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatMessageVO implements Serializable {
+public class ChatDataVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 构造对象
+     */
+    public static ChatDataVO fromChatData(ChatMessage chatMessage, ChatSession chatSession, String contactId, String contactName) {
+        ChatDataVO chatDataVO = CopyUtils.copyBean(chatMessage, ChatDataVO.class);
+        chatDataVO.setLastMessage(chatSession.getLastMessage());
+        chatDataVO.setLastReceiveTime(chatSession.getLastReceiveTime());
+        chatDataVO.setContactId(contactId);
+        chatDataVO.setContactName(contactName);
+        return chatDataVO;
+    }
+
+    /* chat_message */
 
     /**
      * 自增id
@@ -53,7 +75,7 @@ public class ChatMessageVO implements Serializable {
     private Long sendTime;
 
     /**
-     * 接收人id
+     * 联系人id
      */
     private String contactId;
 
@@ -82,7 +104,8 @@ public class ChatMessageVO implements Serializable {
      */
     private MessageStatusEnum sendStatus;
 
-    // 前端除了更新信息外，还要更新会话里的最后消息等内容，需要后端一起返回
+    /* chat_session */
+
     /**
      * 最后接收的消息
      */
@@ -93,7 +116,15 @@ public class ChatMessageVO implements Serializable {
      */
     private Long lastReceiveTime;
 
-    // 有人退出群聊后前端还需要知道群聊的人数
+    /* chat_session_user */
+
+    /**
+     * 联系人名称
+     */
+    private String contactName;
+
+    /* 群聊还需要有成员数 */
+
     /**
      * 群聊人数
      */
