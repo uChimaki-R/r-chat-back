@@ -2,7 +2,7 @@ package com.r.chat.entity.notice;
 
 import com.r.chat.entity.enums.NoticeTypeEnum;
 import com.r.chat.entity.result.Notice;
-import com.r.chat.entity.vo.ChatMessageVO;
+import com.r.chat.entity.vo.ChatDataVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -20,8 +20,5 @@ public class GroupAddAcceptedNotice extends Notice implements Serializable {
         super(NoticeTypeEnum.GROUP_ADD_ACCEPTED);
     }
 
-    /**
-     * 用于渲染会话框的内容，lastMessage就是自己加入群聊的提示信息
-     */
-    private ChatMessageVO chatMessageVO;
+    private ChatDataVO chatDataVO;
 }

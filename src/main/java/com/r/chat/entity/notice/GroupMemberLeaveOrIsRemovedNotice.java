@@ -2,7 +2,7 @@ package com.r.chat.entity.notice;
 
 import com.r.chat.entity.enums.NoticeTypeEnum;
 import com.r.chat.entity.result.Notice;
-import com.r.chat.entity.vo.ChatMessageVO;
+import com.r.chat.entity.vo.ChatDataVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -20,10 +20,7 @@ public class GroupMemberLeaveOrIsRemovedNotice extends Notice implements Seriali
         super(NoticeTypeEnum.GROUP_MEMBER_LEAVE_OR_IS_REMOVED);
     }
 
-    /**
-     * 发送的消息内容和lastReceiveTime、lastMessage、新的群聊人数等
-     */
-    private ChatMessageVO chatMessageVO;
+    private ChatDataVO chatDataVO;
 
     /**
      * 离开群聊的用户id

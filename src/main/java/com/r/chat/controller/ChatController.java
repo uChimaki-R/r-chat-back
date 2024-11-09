@@ -5,7 +5,7 @@ import com.r.chat.entity.dto.ChatMessageDTO;
 import com.r.chat.entity.dto.FileDownloadDTO;
 import com.r.chat.entity.dto.FileUploadDTO;
 import com.r.chat.entity.result.Result;
-import com.r.chat.entity.vo.ChatMessageVO;
+import com.r.chat.entity.vo.ChatDataVO;
 import com.r.chat.exception.FileDownloadException;
 import com.r.chat.exception.FileNotExistException;
 import com.r.chat.service.IChatMessageService;
@@ -37,9 +37,9 @@ public class ChatController {
      * @return 返回增加的ChatMessage内容加上lastMessage、lastReceiveTime包装成的ChatMessageVO，让前端更新（messageId由后端产生）
      */
     @PostMapping("/sendMessage")
-    public Result<ChatMessageVO> sendMessage(@Valid ChatMessageDTO chatMessageDTO) {
+    public Result<ChatDataVO> sendMessage(@Valid ChatMessageDTO chatMessageDTO) {
         log.info("发送聊天信息 {}", chatMessageDTO);
-        ChatMessageVO chatMessage = chatMessageServiceImpl.saveMessage(chatMessageDTO);
+        ChatDataVO chatMessage = chatMessageServiceImpl.saveMessage(chatMessageDTO);
         log.info("返回发送聊天信息后更新的内容 {}", chatMessage);
         return Result.success(chatMessage);
     }

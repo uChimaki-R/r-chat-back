@@ -2,7 +2,7 @@ package com.r.chat.entity.notice;
 
 import com.r.chat.entity.enums.NoticeTypeEnum;
 import com.r.chat.entity.result.Notice;
-import com.r.chat.entity.vo.ChatMessageVO;
+import com.r.chat.entity.vo.ChatDataVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -20,8 +20,5 @@ public class GroupDisbandNotice extends Notice implements Serializable {
         super(NoticeTypeEnum.GROUP_DISBAND);
     }
 
-    /**
-     * 发送的消息内容和lastReceiveTime、lastMessage
-     */
-    private ChatMessageVO chatMessageVO;
+    private ChatDataVO chatDataVO;
 }
