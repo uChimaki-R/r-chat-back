@@ -70,7 +70,7 @@ public class GroupInfo implements Serializable {
     private JoinTypeEnum joinType;
 
     /**
-     * 状态：1：正常 0：解散
+     * 状态：0：正常 1：解散
      */
     @TableField("status")
     private GroupInfoStatusEnum status;
