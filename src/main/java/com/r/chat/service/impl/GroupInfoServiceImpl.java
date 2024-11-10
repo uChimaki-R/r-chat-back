@@ -196,6 +196,8 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             log.info("修改群聊信息成功 {}", groupInfoDTO);
         }
         // 头像保存到本地
+        // 新建的群聊不会传groupId，需要手动设置一下
+        groupInfoDTO.setGroupId(groupInfo.getGroupId());
         FileUtils.saveAvatarFile(groupInfoDTO);
     }
 
@@ -451,7 +453,9 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     public List<GroupDetailInfoVO> loadMyGroupInfo() {
         // 获取自己的群聊
         QueryWrapper<GroupInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(GroupInfo::getGroupOwnerId, UserTokenInfoContext.getCurrentUserId());
+        queryWrapper.lambda()
+                .eq(GroupInfo::getGroupOwnerId, UserTokenInfoContext.getCurrentUserId())
+                .eq(GroupInfo::getStatus, GroupInfoStatusEnum.NORMAL);
         List<GroupInfo> list = groupInfoMapper.selectList(queryWrapper);
         List<GroupDetailInfoVO> groupDetailInfoVOList = CopyUtils.copyList(list, GroupDetailInfoVO.class);
         // 计算每个群聊的群成员数，补充群主名信息
