@@ -17,7 +17,7 @@ public class UserAddAcceptNotice extends Notice implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public UserAddAcceptNotice() {
-        super(NoticeTypeEnum.USER_ADD_BY_OTHERS);
+        super(NoticeTypeEnum.USER_ADD_ACCEPT);
     }
 
     /**
