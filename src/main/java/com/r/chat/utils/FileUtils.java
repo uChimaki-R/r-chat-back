@@ -19,8 +19,8 @@ public class FileUtils {
      * 保存图片到文件夹中
      */
     public static void saveAvatarFile(AvatarOwner avatarOwner) {
-        if (avatarOwner.getAvatarFile() == null || avatarOwner.getCoverFile() == null) {
-            log.warn("尝试保存为null的文件 {}", avatarOwner);
+        if (avatarOwner.getAvatarFile() == null || avatarOwner.getCoverFile() == null || StringUtils.isEmpty(avatarOwner.getIdentityName())) {
+            log.warn("保存头像失败: 文件信息不完整 {}", avatarOwner);
             return;
         }
         saveFile(
