@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum GroupInfoStatusEnum {
-    DISBAND(0, "解散"),
-    NORMAL(1, "正常");
+    NORMAL(0, "正常"),
+    DISBAND(1, "解散");
     @EnumValue
     private final int value;
     private final String desc;
