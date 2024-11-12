@@ -23,16 +23,6 @@ public class AdminSettingController {
     private final RedisUtils redisUtils;
 
     /**
-     * 获取系统设置
-     */
-    @GetMapping("/getSysSetting")
-    public Result<SysSettingVO> getSysSetting() {
-        SysSettingVO sysSettingVO = CopyUtils.copyBean(redisUtils.getSysSetting(), SysSettingVO.class);
-        log.info("获取系统设置 {}", sysSettingVO);
-        return Result.success(sysSettingVO);
-    }
-
-    /**
      * 保存系统设置
      */
     @PutMapping("/saveSysSetting")
