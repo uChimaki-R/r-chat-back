@@ -6,9 +6,9 @@ import com.r.chat.entity.dto.FileDownloadDTO;
 import com.r.chat.entity.dto.FileUploadDTO;
 import com.r.chat.entity.result.Result;
 import com.r.chat.entity.vo.ChatDataVO;
-import com.r.chat.exception.FileDownloadException;
 import com.r.chat.exception.FileNotExistException;
 import com.r.chat.service.IChatMessageService;
+import com.r.chat.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
 
 @Slf4j
 @Validated
@@ -69,23 +67,7 @@ public class ChatController {
         }
         log.info("获取下载文件成功, 开始下载文件 {}", file);
         // 下载文件的操作
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
-        response.setContentType("application/x-msdownload;charset=UTF-8");
-        response.setHeader("Content-Length", String.valueOf(file.length()));
-        try (
-                OutputStream outputStream = response.getOutputStream();
-                FileInputStream fileInputStream = new FileInputStream(file);
-        ) {
-            byte[] buffer = new byte[1024];  // 缓冲区
-            int len;
-            while ((len = fileInputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, len);
-            }
-            outputStream.flush();
-        } catch (Exception e) {
-            log.warn("文件下载失败 失败原因: {}", e.getCause().getMessage());
-            throw new FileDownloadException(Constants.MESSAGE_INTERNAL_ERROR);
-        }
+        FileUtils.downLoadFile(response, file);
         log.info("下载文件成功 {}", downloadDTO);
     }
 }
