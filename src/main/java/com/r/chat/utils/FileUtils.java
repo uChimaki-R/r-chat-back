@@ -1,16 +1,19 @@
 package com.r.chat.utils;
 
 import cn.hutool.core.date.DateUtil;
-import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.enums.FileTypeEnum;
+import com.r.chat.exception.FileDownloadException;
 import com.r.chat.exception.FileNotExistException;
 import com.r.chat.exception.FileSaveFailedException;
 import com.r.chat.properties.AppProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.util.Date;
 
 @Slf4j
@@ -149,7 +152,7 @@ public class FileUtils {
                 Constants.FILE_FOLDER_CHAT + File.separator
                         + month + File.separator + fileType.name().toLowerCase(),
                 String.valueOf(messageId),
-                (isCover ? Constants.FILE_SUFFIX_COVER  + Constants.FILE_SUFFIX_AVATAR : fileSuffix)
+                (isCover ? Constants.FILE_SUFFIX_COVER + Constants.FILE_SUFFIX_AVATAR : fileSuffix)
         );
     }
 
@@ -196,5 +199,28 @@ public class FileUtils {
         }
         log.info("获取到文件 {}", localFile);
         return localFile;
+    }
+
+    /**
+     * 下载文件（以流的方式向客户端传输文件）
+     */
+    public static void downLoadFile(HttpServletResponse response, File file) {
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+        response.setContentType("application/x-msdownload;charset=UTF-8");
+        response.setHeader("Content-Length", String.valueOf(file.length()));
+        try (
+                OutputStream outputStream = response.getOutputStream();
+                FileInputStream fileInputStream = new FileInputStream(file);
+        ) {
+            byte[] buffer = new byte[1024];  // 缓冲区
+            int len;
+            while ((len = fileInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, len);
+            }
+            outputStream.flush();
+        } catch (Exception e) {
+            log.warn("文件下载失败 失败原因: {}", e.getCause().getMessage());
+            throw new FileDownloadException(Constants.MESSAGE_INTERNAL_ERROR);
+        }
     }
 }
