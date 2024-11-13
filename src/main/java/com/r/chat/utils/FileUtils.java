@@ -23,7 +23,7 @@ public class FileUtils {
      */
     public static void saveAvatarFile(AvatarOwner avatarOwner) {
         if (avatarOwner.getAvatarFile() == null || avatarOwner.getCoverFile() == null || StringUtils.isEmpty(avatarOwner.getIdentityName())) {
-            log.warn("保存头像失败: 文件信息不完整 {}", avatarOwner);
+            log.warn("取消保存头像文件: 文件信息不完整 {}", avatarOwner);
             return;
         }
         saveFile(
