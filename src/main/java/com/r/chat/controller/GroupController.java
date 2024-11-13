@@ -34,7 +34,7 @@ public class GroupController {
      * 新增或修改群聊信息
      */
     @PostMapping("/saveGroup")
-    public Result<String> saveGroup(GroupInfoDTO groupInfoDTO) {
+    public Result<String> saveGroup(@Valid GroupInfoDTO groupInfoDTO) {
         log.info("新增或修改群聊信息 {}", groupInfoDTO);
         groupInfoService.saveOrUpdateGroupInfo(groupInfoDTO);
         return Result.success();
