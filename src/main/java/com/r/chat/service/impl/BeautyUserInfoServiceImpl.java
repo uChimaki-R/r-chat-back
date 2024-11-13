@@ -3,7 +3,7 @@ package com.r.chat.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.BeautyUserInfoDTO;
-import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
+import com.r.chat.entity.enums.BeautyUserInfoStatusEnum;
 import com.r.chat.entity.po.UserInfo;
 import com.r.chat.entity.po.BeautyUserInfo;
 import com.r.chat.exception.BeautyUserIdAlreadyExistedException;
@@ -75,7 +75,7 @@ public class BeautyUserInfoServiceImpl extends ServiceImpl<BeautyUserInfoMapper,
         beautyUserInfo = CopyUtils.copyBean(beautyUserInfoDTO, BeautyUserInfo.class);
         if (beautyUserInfoDTO.getId() == null) {
             // 新增
-            beautyUserInfo.setStatus(UserInfoBeautyStatusEnum.NOT_USED);
+            beautyUserInfo.setStatus(BeautyUserInfoStatusEnum.NOT_USED);
             save(beautyUserInfo);
             log.info("新增靓号信息成功 {}", beautyUserInfo);
         }

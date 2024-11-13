@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
-import com.r.chat.entity.enums.UserInfoBeautyStatusEnum;
+import com.r.chat.entity.enums.BeautyUserInfoStatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -49,5 +49,5 @@ public class BeautyUserInfo implements Serializable {
      * 靓号使用状态 0：未使用 1：已使用
      */
     @TableField("status")
-    private UserInfoBeautyStatusEnum status; // 使用枚举类型接收
+    private BeautyUserInfoStatusEnum status; // 使用枚举类型接收
 }

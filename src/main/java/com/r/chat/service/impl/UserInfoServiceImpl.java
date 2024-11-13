@@ -71,12 +71,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 判断是否可以使用靓号注册，可以的话需要替换为靓号
         BeautyUserInfo beautyUserInfo = beautyUserInfoMapper.selectOne(new QueryWrapper<BeautyUserInfo>().lambda()
                 .eq(BeautyUserInfo::getEmail, registerDTO.getEmail()));
-        if (null != beautyUserInfo && beautyUserInfo.getStatus() != UserInfoBeautyStatusEnum.USED) {
+        if (null != beautyUserInfo && beautyUserInfo.getStatus() != BeautyUserInfoStatusEnum.USED) {
             // 换成靓号
             userId = beautyUserInfo.getUserId();
             log.info("该注册邮箱可以获得靓号: {}", userId);
             // 修改靓号为已使用
-            beautyUserInfo.setStatus(UserInfoBeautyStatusEnum.USED);
+            beautyUserInfo.setStatus(BeautyUserInfoStatusEnum.USED);
             beautyUserInfoMapper.updateById(beautyUserInfo);
         }
         LocalDateTime now = LocalDateTime.now();
