@@ -47,8 +47,8 @@ public class AdminBeautyController {
     /**
      * 新增或更新靓号信息
      */
-    @PostMapping("/saveBeautyUserInfo")
-    public Result<String> saveBeautyUserInfo(@Valid BeautyUserInfoDTO beautyUserInfoDTO) {
+    @PostMapping("/saveBeauty")
+    public Result<String> saveBeauty(@Valid BeautyUserInfoDTO beautyUserInfoDTO) {
         log.info("新增或更新靓号信息 {}", beautyUserInfoDTO);
         beautyUserInfoService.saveOrUpdateBeautyAccount(beautyUserInfoDTO);
         return Result.success();
@@ -57,8 +57,8 @@ public class AdminBeautyController {
     /**
      * 删除靓号信息
      */
-    @DeleteMapping("/delBeautyUserInfo")
-    public Result<String> delBeautyUserInfo(@NotNull(message = Constants.VALIDATE_EMPTY_BEAUTY_USER_INFO_ID) Integer id) {
+    @DeleteMapping("/delBeauty")
+    public Result<String> delBeauty(@NotNull(message = Constants.VALIDATE_EMPTY_BEAUTY_USER_INFO_ID) Integer id) {
         log.info("删除靓号信息 id: {}", id);
         if (beautyUserInfoService.removeById(id)) {
             log.info("成功删除靓号信息 id: {}", id);
