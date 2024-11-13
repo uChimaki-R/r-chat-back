@@ -1,11 +1,15 @@
 package com.r.chat.entity.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.r.chat.entity.enums.GroupInfoStatusEnum;
 import com.r.chat.entity.enums.JoinTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -55,4 +59,16 @@ public class GroupDetailInfoVO implements Serializable {
      * 群成员数
      */
     private Long memberCount;
+
+    /**
+     * 状态
+     */
+    private GroupInfoStatusEnum status;
+
+    /**
+     * 创建时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
 }
