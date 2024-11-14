@@ -11,7 +11,6 @@ import com.r.chat.entity.po.AppUpdate;
 import com.r.chat.entity.vo.AppUpdateVO;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.AppUpdateMapper;
-import com.r.chat.properties.AppProperties;
 import com.r.chat.service.IAppUpdateService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.r.chat.utils.CopyUtils;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 /**
  * <p>
@@ -36,8 +36,6 @@ import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
 public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate> implements IAppUpdateService {
-    private final AppProperties appProperties;
-
     private final AppUpdateMapper appUpdateMapper;
 
     @Override
@@ -94,7 +92,7 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
                 throw new AppUpdateNotExistException(Constants.MESSAGE_APP_UPDATE_NOT_EXIST);
             }
             // 不允许修改版本号，否则无法保证id越大版本越高（理论上也可以保证，不过要加很多判断逻辑，且会有隐患），整个更新系统会乱套
-            if (appUpdateDTO.getVersion() != null) {
+            if (appUpdateDTO.getVersion() != null && !origin.getVersion().equals(appUpdateDTO.getVersion())) {
                 log.warn("修改app更新信息失败: 不允许修改版本号 {}", appUpdateDTO);
                 throw new IllegalOperationException(Constants.MESSAGE_CANNOT_CHANGE_VERSION);
             }
@@ -132,10 +130,22 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             // 除了灰度发布，取消发布和全网发布都不需要保存灰度用户列表
             // 已设置不检查grayscaleIds字段的值，直接更新，所以置为null就可以。
             // 在灰度更新改为全网更新的时候也可以将该字段置为null
-            appUpdateReleaseDTO.setGrayscaleIds(null);
+            dbInfo.setGrayscaleIds(null);
+        } else {
+            // 否则更新灰度名单
+            dbInfo.setGrayscaleIds(appUpdateReleaseDTO.getGrayscaleIds());
         }
-        AppUpdate appUpdate = CopyUtils.copyBean(appUpdateReleaseDTO, AppUpdate.class);
-        updateById(appUpdate);
+        if (AppUpdateStatusEnum.UNPUBLISHED.equals(status)) {
+            // 改为未发布，发布时间置为null
+            dbInfo.setReleaseTime(null);
+        } else {
+            // 否则更新发布时间
+            dbInfo.setReleaseTime(LocalDateTime.now());
+        }
+        // 更新发布状态
+        dbInfo.setStatus(status);
+        // 更新数据
+        updateById(dbInfo);
         switch (status) {
             case UNPUBLISHED:
                 log.info("取消发布app更新 {}", appUpdateReleaseDTO);
@@ -178,6 +188,10 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             return null;
         }
         AppUpdateVO appUpdateVO = CopyUtils.copyBean(latest, AppUpdateVO.class);
+        // 将描述信息划分成列表
+        if (!StringUtils.isEmpty(appUpdateVO.getDescription())) {
+            appUpdateVO.setDescriptionList(Arrays.asList(appUpdateVO.getDescription().split("\\|")));
+        }
         // 外链直接返回
         if (AppUpdateMethodTypeEnum.OUTER_LINK.equals(appUpdateVO.getMethodType())) {
             log.info("获取到最新版本 {}", appUpdateVO);
@@ -189,7 +203,7 @@ public class AppUpdateServiceImpl extends ServiceImpl<AppUpdateMapper, AppUpdate
             log.warn("版本对应的文件不存在 version: {}", latest);
             return null;
         }
-        appUpdateVO.setFileName(appProperties.getAppName() + "_" + file.getName());
+        appUpdateVO.setFileName(file.getName());
         appUpdateVO.setSize(file.length());
         log.info("获取到最新版本 {}", appUpdateVO);
         return appUpdateVO;
