@@ -53,7 +53,7 @@ public class FileUtils {
         saveFile(
                 AppProperties.projectFolder,
                 Constants.FILE_FOLDER_EXE,
-                version.replace(".", "_"),
+                AppProperties.appName + version,
                 Constants.FILE_SUFFIX_EXE,
                 file
         );
@@ -109,7 +109,7 @@ public class FileUtils {
         return getFile(
                 AppProperties.projectFolder,
                 Constants.FILE_FOLDER_EXE,
-                version.replace(".", "_"),
+                AppProperties.appName + version,
                 Constants.FILE_SUFFIX_EXE
         );
     }
