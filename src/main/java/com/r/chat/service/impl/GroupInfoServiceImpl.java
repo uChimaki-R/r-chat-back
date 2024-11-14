@@ -255,12 +255,15 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         }
         log.info("从缓存的群聊成员的id列表中移除群聊 群成员: {}", contacts);
 
+        // 信息提示是群主解散的还是管理员解散的
+        String disbandMessage = AdminContext.isAdmin() ? Constants.MESSAGE_GROUP_DISBAND_BY_ADMIN : Constants.MESSAGE_GROUP_DISBAND_BY_OWNER;
+
         // 更新会话
         String sessionId = StringUtils.getSessionId(new String[]{groupId});
         Long now = System.currentTimeMillis();
         ChatSession chatSession = new ChatSession();
         chatSession.setSessionId(sessionId);
-        chatSession.setLastMessage(Constants.MESSAGE_GROUP_DISBAND);
+        chatSession.setLastMessage(disbandMessage);
         chatSession.setLastReceiveTime(now);
         chatSessionServiceImpl.saveOrUpdate(chatSession);
         log.info("更新群聊会话 {}", chatSession);
@@ -269,7 +272,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setSessionId(sessionId);
         chatMessage.setMessageType(MessageTypeEnum.NOTICE);
-        chatMessage.setMessageContent(Constants.MESSAGE_GROUP_DISBAND);
+        chatMessage.setMessageContent(disbandMessage);
         chatMessage.setSendTime(now);
         chatMessage.setContactId(groupId);
         chatMessage.setContactType(UserContactTypeEnum.GROUP);
