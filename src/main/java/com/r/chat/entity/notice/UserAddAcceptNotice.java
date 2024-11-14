@@ -2,7 +2,7 @@ package com.r.chat.entity.notice;
 
 import com.r.chat.entity.enums.NoticeTypeEnum;
 import com.r.chat.entity.result.Notice;
-import com.r.chat.entity.vo.ChatSessionUserVO;
+import com.r.chat.entity.vo.ChatDataVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -20,8 +20,5 @@ public class UserAddAcceptNotice extends Notice implements Serializable {
         super(NoticeTypeEnum.USER_ADD_ACCEPT);
     }
 
-    /**
-     * 用于渲染会话框的内容，lastMessage就是申请信息
-     */
-    private ChatSessionUserVO chatSessionUserVO;
+    private ChatDataVO chatDataVO;
 }
