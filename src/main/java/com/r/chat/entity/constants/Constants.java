@@ -63,7 +63,8 @@ public class Constants {
     public static final String MESSAGE_GROUP_CREATED = "群聊已创建，可以和好友一起畅聊了";
     public static final String MESSAGE_FRIEND_ADD = "一起聊天吧";
     public static final String MESSAGE_JOIN_GROUP = "%s 加入了群聊";
-    public static final String MESSAGE_GROUP_DISBAND = "群聊已解散";
+    public static final String MESSAGE_GROUP_DISBAND_BY_OWNER = "群聊被群主解散";
+    public static final String MESSAGE_GROUP_DISBAND_BY_ADMIN = "群聊被管理员解散";
     public static final String MESSAGE_LEAVE_GROUP = "%s 退出了群聊";
     public static final String MESSAGE_REMOVED_FROM_GROUP = "%s 被移出了群聊";
 
