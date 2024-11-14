@@ -14,7 +14,6 @@ import com.r.chat.entity.notice.GroupDisbandNotice;
 import com.r.chat.entity.notice.GroupMemberLeaveOrIsRemovedNotice;
 import com.r.chat.entity.po.*;
 import com.r.chat.entity.vo.ChatDataVO;
-import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.entity.vo.GroupDetailInfoVO;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.ChatMessageMapper;
@@ -155,12 +154,9 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
             GroupCreatedNotice groupCreatedNotice = new GroupCreatedNotice();
             groupCreatedNotice.setReceiveId(UserTokenInfoContext.getCurrentUserId());
             // 构建用于渲染会话的数据
-            ChatSessionUserVO chatSessionUserVO = CopyUtils.copyBean(chatSessionUser, ChatSessionUserVO.class);
-            chatSessionUserVO.setLastMessage(Constants.MESSAGE_GROUP_CREATED);
-            chatSessionUserVO.setLastReceiveTime(millis);
-            chatSessionUserVO.setContactType(UserContactTypeEnum.GROUP);
-            chatSessionUserVO.setMemberCount(1L);  // 初始只有自己一个人
-            groupCreatedNotice.setChatSessionUserVO(chatSessionUserVO);
+            ChatDataVO chatDataVO = ChatDataVO.fromChatData(chatMessage, chatSession, groupInfo.getGroupId(), groupInfo.getGroupName());
+            chatDataVO.setMemberCount(1L);  // 初始只有自己一个人
+            groupCreatedNotice.setChatDataVO(chatDataVO);
             channelUtils.sendNotice(groupCreatedNotice);
             log.info("发送群聊创建成功的ws通知 {}", groupCreatedNotice);
 
