@@ -11,11 +11,6 @@ import java.util.List;
 @Data
 public class AppProperties {
     /**
-     * 应用名
-     */
-    private String appName;
-
-    /**
      * ws端口
      */
     private Integer wsPort;
@@ -36,6 +31,15 @@ public class AppProperties {
     private List<String> adminUserIds;
 
     // 下面的属性需要在工具类中使用, 所以改为静态属性, 需要使用set方法初始化
+
+    /**
+     * 应用名
+     */
+    public static String appName;
+
+    public void setAppName(String appName) {
+        AppProperties.appName = appName;
+    }
 
     /**
      * 项目文件夹
