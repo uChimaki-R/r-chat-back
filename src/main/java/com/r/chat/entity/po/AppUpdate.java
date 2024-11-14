@@ -79,4 +79,12 @@ public class AppUpdate implements Serializable {
     @TableField(value = "outer_link", updateStrategy = FieldStrategy.IGNORED)  // null也可以更新覆盖，外链发布改文件发布的时候会置为null
     private String outerLink;
 
+    /**
+     * 发布时间
+     */
+    @TableField(value = "release_time", updateStrategy = FieldStrategy.IGNORED)  // null也可以更新覆盖，发布了改为未发布会置为null
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime releaseTime;
+
 }
