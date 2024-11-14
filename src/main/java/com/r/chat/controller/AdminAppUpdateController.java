@@ -8,7 +8,9 @@ import com.r.chat.entity.dto.AppUpdateReleaseDTO;
 import com.r.chat.entity.po.AppUpdate;
 import com.r.chat.entity.result.PageResult;
 import com.r.chat.entity.result.Result;
+import com.r.chat.entity.vo.AppUpdateVO;
 import com.r.chat.service.IAppUpdateService;
+import com.r.chat.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -36,17 +40,26 @@ public class AdminAppUpdateController {
     /**
      * 加载app更新信息列表
      */
-    @GetMapping("/loadUpdateList")
-    public Result<PageResult<AppUpdate>> loadUpdateList(AppUpdateQueryDTO appUpdateQueryDTO,
-                                                        @RequestParam(defaultValue = "1") Long pageNo,
-                                                        @RequestParam(defaultValue = "15") Long pageSize) {
+    @GetMapping("/loadUpdate")
+    public Result<PageResult<AppUpdateVO>> loadUpdate(AppUpdateQueryDTO appUpdateQueryDTO,
+                                                      @RequestParam(defaultValue = "1") Long pageNo,
+                                                      @RequestParam(defaultValue = "15") Long pageSize) {
         log.info("获取app版本信息 pageNo: {}, pageSize: {}, {}", pageNo, pageSize, appUpdateQueryDTO);
         Page<AppUpdate> page = appUpdateService.lambdaQuery()
                 .ge(appUpdateQueryDTO.getStartTime() != null, AppUpdate::getCreateTime, appUpdateQueryDTO.getStartTime())
                 .le(appUpdateQueryDTO.getEndTime() != null, AppUpdate::getCreateTime, appUpdateQueryDTO.getEndTime())
                 .orderByDesc(AppUpdate::getCreateTime)
                 .page(new Page<>(pageNo, pageSize));
-        PageResult<AppUpdate> pageResult = PageResult.fromPage(page);
+        PageResult<AppUpdateVO> pageResult = PageResult.fromPage(page, AppUpdateVO.class);
+        // 将描述信息和灰度id信息划分成列表
+        pageResult.setData(pageResult.getData().stream().peek(update -> {
+            if (!StringUtils.isEmpty(update.getDescription())) {
+                update.setDescriptionList(Arrays.asList(update.getDescription().split("\\|")));
+            }
+            if (!StringUtils.isEmpty(update.getGrayscaleIds())) {
+                update.setGrayscaleIdList(Arrays.asList(update.getGrayscaleIds().split(",")));
+            }
+        }).collect(Collectors.toList()));
         log.info("获取到app版本信息 {}", pageResult);
         return Result.success(pageResult);
     }
