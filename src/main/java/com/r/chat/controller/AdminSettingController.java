@@ -30,6 +30,9 @@ public class AdminSettingController {
         log.info("保存系统设置 {}", sysSettingDTO);
         // 保存机器人头像文件
         FileUtils.saveAvatarFile(sysSettingDTO);
+        // redis不存头像文件
+        sysSettingDTO.setAvatarFile(null);
+        sysSettingDTO.setCoverFile(null);
         // 保存配置缓存
         redisUtils.setSysSetting(sysSettingDTO);
         return Result.success();
