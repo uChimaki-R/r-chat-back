@@ -74,6 +74,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         if (null != beautyUserInfo && beautyUserInfo.getStatus() != BeautyUserInfoStatusEnum.USED) {
             // 换成靓号
             userId = beautyUserInfo.getUserId();
+            // 数据库中的靓号是没有前缀的，补充前缀
+            userId = IdPrefixEnum.USER.getPrefix() + userId;
             log.info("该注册邮箱可以获得靓号: {}", userId);
             // 修改靓号为已使用
             beautyUserInfo.setStatus(BeautyUserInfoStatusEnum.USED);
