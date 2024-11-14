@@ -13,7 +13,6 @@ import com.r.chat.entity.notice.UserAddAcceptNotice;
 import com.r.chat.entity.notice.UserAddByOthersNotice;
 import com.r.chat.entity.po.*;
 import com.r.chat.entity.vo.ChatDataVO;
-import com.r.chat.entity.vo.ChatSessionUserVO;
 import com.r.chat.exception.*;
 import com.r.chat.mapper.*;
 import com.r.chat.properties.DefaultSysSettingProperties;
@@ -381,15 +380,8 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             UserAddAcceptNotice userAddAcceptMessage = new UserAddAcceptNotice();
             userAddAcceptMessage.setReceiveId(contactApplyAddDTO.getContactId());
             // 构造前端需要的会话信息
-            ChatSessionUserVO chatSessionUserVO = new ChatSessionUserVO();
-            chatSessionUserVO.setUserId(contactApplyAddDTO.getApplyUserId());
-            chatSessionUserVO.setContactId(contactApplyAddDTO.getContactId());
-            chatSessionUserVO.setContactName(contactUserInfo.getNickName());
-            chatSessionUserVO.setContactType(contactApplyAddDTO.getContactType());
-            chatSessionUserVO.setSessionId(sessionId);
-            chatSessionUserVO.setLastMessage(applyInfo);
-            chatSessionUserVO.setLastReceiveTime(now);
-            userAddAcceptMessage.setChatSessionUserVO(chatSessionUserVO);
+            ChatDataVO chatDataVOForContactUser = ChatDataVO.fromChatData(chatMessage, chatSession, applyUserInfo.getUserId(), applyUserInfo.getNickName());
+            userAddAcceptMessage.setChatDataVO(chatDataVOForContactUser);
             channelUtils.sendNotice(userAddAcceptMessage);
             log.info("向被申请人发送同意了申请的ws通知  {}", userAddAcceptMessage);
 
@@ -397,10 +389,8 @@ public class UserContactServiceImpl extends ServiceImpl<UserContactMapper, UserC
             UserAddByOthersNotice userAddByOthersNotice = new UserAddByOthersNotice();
             userAddByOthersNotice.setReceiveId(contactApplyAddDTO.getApplyUserId());
             // 更换下会话框显示内容
-            chatSessionUserVO.setUserId(contactApplyAddDTO.getContactId());
-            chatSessionUserVO.setContactId(contactApplyAddDTO.getApplyUserId());
-            chatSessionUserVO.setContactName(applyUserInfo.getNickName());
-            userAddByOthersNotice.setChatSessionUserVO(chatSessionUserVO);
+            ChatDataVO chatDataVOForApplyUser = ChatDataVO.fromChatData(chatMessage, chatSession, contactUserInfo.getUserId(), contactUserInfo.getNickName());
+            userAddByOthersNotice.setChatDataVO(chatDataVOForApplyUser);
             channelUtils.sendNotice(userAddByOthersNotice);
             log.info("向申请人发送申请被同意的ws通知  {}", userAddByOthersNotice);
 
