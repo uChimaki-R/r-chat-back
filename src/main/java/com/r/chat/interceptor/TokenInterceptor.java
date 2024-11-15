@@ -1,6 +1,7 @@
 package com.r.chat.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
+import com.r.chat.context.AdminContext;
 import com.r.chat.context.UserTokenInfoContext;
 import com.r.chat.entity.constants.Constants;
 import com.r.chat.entity.dto.UserTokenInfoDTO;
@@ -60,6 +61,8 @@ public class TokenInterceptor implements HandlerInterceptor {
             }
             log.info("获取用户信息: {}", userTokenInfo);
             UserTokenInfoContext.setCurrentUserTokenInfo(userTokenInfo);
+            // 默认不是管理员，这里要set一下，不然后面业务逻辑里使用AdminContext可能空指针
+            AdminContext.setAdmin(false);
             // 保存自定义的日志输出标识
             MDC.put("userId", " " + userTokenInfo.getUserId());
             // 放行
