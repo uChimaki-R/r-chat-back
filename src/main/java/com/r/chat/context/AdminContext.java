@@ -4,10 +4,6 @@ public class AdminContext {
 
     public static ThreadLocal<Boolean> threadLocal = new ThreadLocal<>();
 
-    static {
-        threadLocal.set(false);  // 默认不是管理员
-    }
-
     public static void setAdmin(Boolean isAdmin) {
         threadLocal.set(isAdmin);
     }
