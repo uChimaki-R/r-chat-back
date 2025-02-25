@@ -42,12 +42,14 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         log.info("注册自定义拦截器 TokenInterceptor");
         registry.addInterceptor(tokenInterceptor)
                 .addPathPatterns("/**")
+                .excludePathPatterns("/chatRobot/sendMessage")
                 .excludePathPatterns("/user/checkCode")  // 验证码
                 .excludePathPatterns("/user/register")  // 注册
                 .excludePathPatterns("/user/login");  // 登录
         log.info("注册自定义拦截器 AdminInterceptor");
         registry.addInterceptor(adminInterceptor)
-                .addPathPatterns("/admin/**");
+                .addPathPatterns("/admin/**")
+                .excludePathPatterns("/chatRobot/sendMessage");
     }
 
     /**
