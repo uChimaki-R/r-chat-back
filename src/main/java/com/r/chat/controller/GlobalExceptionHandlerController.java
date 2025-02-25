@@ -34,7 +34,7 @@ public class GlobalExceptionHandlerController {
             log.warn("BusinessException | {}", result);
             return result;
         } else if (e.getClass().getPackage().getName().startsWith("org.springframework.validation") ||
-                e.getClass().getPackage().getName().startsWith("javax.validation")) {
+                e.getClass().getPackage().getName().startsWith("jakarta.validation")) {
             // 验证数据格式错误
             String[] ms = e.getMessage().split(" ");
             String message = ms[ms.length - 1];
