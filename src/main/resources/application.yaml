@@ -80,3 +80,4 @@ r:
       robot-nick-name: ${r.chat.default-settings.robot-nick-name}
       robot-welcome-msg: ${r.chat.default-settings.robot-welcome-msg}
       robot-default-reply: ${r.chat.default-settings.robot-default-reply}
+      system-prompts: ${r.chat.default-settings.system-prompts}
