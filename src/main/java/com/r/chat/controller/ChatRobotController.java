@@ -1,6 +1,8 @@
 package com.r.chat.controller;
 
+import com.r.chat.properties.DefaultSysSettingProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -25,16 +28,21 @@ import java.util.List;
 public class ChatRobotController {
     @Resource
     private OllamaChatClient ollamaChatClient;
+    @Resource
+    private DefaultSysSettingProperties defaultSysSettingProperties;
 
     @GetMapping(value = "/sendMessage", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> sendMessage(String question) {
         // 创建线程安全的字符串容器
         StringBuilder fullResponse = new StringBuilder();
 
-        // 定义系统角色prompt
-        String systemPrompt1 = "你是一个幽默风趣的聊天助手，你的名字叫Robot-Chat，是R-Chat软件开发者基于deepseek-r1模型开发的，可以回答用户的提问，注意，你的回答风格应是幽默风趣的。";
-        String systemPrompt2 = "注意！你回答的内容不要是markdown语法的！而是像聊天记录的形式，可以更多的使用表情。";
-        Prompt prompt = new Prompt(List.of(new SystemMessage(systemPrompt1), new SystemMessage(systemPrompt2), new UserMessage(question)));
+        // prompt
+        // 系统prompt
+        List<Message> messages = new ArrayList<>();
+        defaultSysSettingProperties.getSystemPrompts().stream().map(SystemMessage::new).forEach(messages::add);
+        // 用户prompt
+        messages.add(new UserMessage(question));
+        Prompt prompt = new Prompt(messages);
 
         // 获取原始响应流
         Flux<String> originalResponse = ollamaChatClient.stream(prompt)
