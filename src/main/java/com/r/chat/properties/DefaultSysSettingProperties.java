@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @ConfigurationProperties(prefix = "r.chat.default-settings")
 @Data
@@ -57,4 +59,9 @@ public class DefaultSysSettingProperties {
      * 初始机器人默认回复信息
      */
     private String robotDefaultReply;
+
+    /**
+     * 大模型系统prompt
+     */
+    private List<String> systemPrompts;
 }
