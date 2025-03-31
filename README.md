@@ -52,6 +52,7 @@ R-Chat是一款跨平台的即时通讯工具，支持单人、多人参与，�
 │              ├─config                                 # 配置类
 │              │      MybatisConfig.java
 │              │      RedisConfig.java
+|              |      SwaggerConfig.java
 │              │      WebMvcConfig.java
 │              ├─context                                # ThreadLocal上下文
 │              │      AdminContext.java
@@ -72,6 +73,7 @@ R-Chat是一款跨平台的即时通讯工具，支持单人、多人参与，�
 │              ├─mapper
 │              ├─properties
 │              │      AppProperties.java                # 项目配置属性
+|              |      ChatAiProperties.java             # AnythingLLM 配置属性
 │              │      DefaultSysSettingProperties.java  # 应用系统默认设置
 │              ├─redis
 │              │      RedisOperation.java
@@ -80,6 +82,7 @@ R-Chat是一款跨平台的即时通讯工具，支持单人、多人参与，�
 │              ├─utils
 │              │      AvatarOwner.java
 │              │      CastUtils.java
+|              |      ChatAiUtils.java
 │              │      CollUtils.java
 │              │      Convert.java
 │              │      CopyUtils.java
