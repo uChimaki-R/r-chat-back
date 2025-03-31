@@ -1,5 +1,6 @@
 package com.r.chat.utils;
 
+import com.r.chat.entity.enums.AiModeEnum;
 import com.r.chat.properties.ChatAiProperties;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -28,14 +29,16 @@ import java.util.Map;
 @Component
 @EnableConfigurationProperties(ChatAiProperties.class)
 public class ChatAiUtils {
+    public static final String ANYTHING_LLM_URI_FORMAT = "http://%s/api/v1/workspace/%s/stream-chat";
+
     @Resource
     private ChatAiProperties chatAiProperties;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void configEmitterAndGetAnswer(SseEmitter emitter, String sessionId, String message) {
+    public void configEmitterAndGetAnswer(SseEmitter emitter, String sessionId, String message, AiModeEnum mode) {
         // 拼接uri
-        String uri = "http://" + chatAiProperties.getServer() + "/api/v1/workspace/" + chatAiProperties.getWorkplaceSlug() + "/stream-chat";
+        String uri = String.format(ANYTHING_LLM_URI_FORMAT, chatAiProperties.getServer(), chatAiProperties.getWorkplaceSlug());
         HttpPost httpPost = new HttpPost(uri);
         // 设置api-key
         httpPost.setHeader("Content-Type", "application/json");
@@ -43,7 +46,7 @@ public class ChatAiUtils {
         // 构建请求体
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("message", message);
-        requestBody.put("mode", "chat");
+        requestBody.put("mode", mode);
         requestBody.put("sessionId", sessionId);
         try {
             // sse需要新建线程处理
