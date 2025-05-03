@@ -105,3 +105,42 @@ R-Chat是一款跨平台的即时通讯工具，支持单人、多人参与，�
 ```
 
 
+
+## 部分功能演示
+
+### 注册
+
+![recording](README.assets/recording.gif)
+
+
+
+### 登录
+
+![recording](README.assets/recording-1746253282161-2.gif)
+
+
+
+### 好友
+
+![recording](README.assets/recording-1746256557568-4.gif)
+
+
+
+### 聊天
+
+![recording](README.assets/recording-1746257353080-12.gif)
+
+
+
+### 群聊
+
+![recording](README.assets/recording-1746256868916-6.gif)
+
+
+
+### 设置
+
+![recording](README.assets/recording-1746257068664-8.gif)
+
+![recording](README.assets/recording-1746257119036-10.gif)
+
